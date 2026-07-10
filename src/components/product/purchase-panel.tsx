@@ -1,0 +1,86 @@
+import { Clock, Download, ShieldCheck, Truck, Package } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { QuoteDialog } from "@/components/common/quote-dialog";
+import { ProductPrice } from "@/components/catalog/product-price";
+import { AvailabilityBadge } from "@/components/catalog/availability-badge";
+import { WhatsAppButton } from "@/components/product/whatsapp-button";
+import type { ProductDetail } from "@/types/product-detail";
+
+/** Right-hand purchase panel: price, availability, lead time, and 3 CTAs. */
+export function PurchasePanel({ product }: { product: ProductDetail }) {
+  const primaryDoc = product.documents[0];
+
+  const facts = [
+    { icon: Clock, label: "Срок поставки", value: product.leadTime },
+    { icon: Truck, label: "Доставка", value: "По всему Казахстану" },
+    { icon: ShieldCheck, label: "Гарантия", value: product.warranty },
+    product.packaging
+      ? { icon: Package, label: "Отгрузка", value: product.packaging }
+      : null,
+  ].filter(Boolean) as { icon: typeof Clock; label: string; value: string }[];
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+      <div className="flex items-center justify-between gap-3">
+        <AvailabilityBadge status={product.availability} />
+        <span className="font-mono text-xs text-muted-foreground">
+          Арт. {product.sku}
+        </span>
+      </div>
+
+      <div className="mt-4">
+        <ProductPrice
+          price={product.price}
+          unit={product.unit}
+          className="text-3xl"
+        />
+        {product.price !== null && (
+          <p className="mt-1 text-xs text-muted-foreground">
+            Цена указана без НДС. Точную стоимость под объём — в КП.
+          </p>
+        )}
+      </div>
+
+      <Separator className="my-5" />
+
+      <dl className="space-y-3">
+        {facts.map((fact) => {
+          const Icon = fact.icon;
+          return (
+            <div key={fact.label} className="flex items-start gap-3">
+              <span className="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-lg bg-secondary text-signal-700">
+                <Icon className="size-4" />
+              </span>
+              <div>
+                <dt className="text-xs text-muted-foreground">{fact.label}</dt>
+                <dd className="text-sm font-medium text-primary">{fact.value}</dd>
+              </div>
+            </div>
+          );
+        })}
+      </dl>
+
+      <Separator className="my-5" />
+
+      {/* Actions */}
+      <div className="flex flex-col gap-2.5">
+        <QuoteDialog size="lg" triggerLabel="Получить КП" className="w-full" />
+        <WhatsAppButton title={product.title} sku={product.sku} className="w-full" />
+        {primaryDoc && (
+          <Button asChild variant="outline" size="lg" className="w-full">
+            <a href={primaryDoc.href} download>
+              <Download />
+              Скачать PDF
+            </a>
+          </Button>
+        )}
+      </div>
+
+      <p className="mt-4 text-center text-xs text-muted-foreground">
+        Работаем с ТОО, ИП и квазигосударственным сектором
+      </p>
+    </div>
+  );
+}

@@ -1,0 +1,182 @@
+"use client";
+
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import { handleFormResult } from "@/lib/admin/form-submit";
+
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Field, Input, Textarea, NativeSelect } from "@/components/admin/form-fields";
+import { Label } from "@/components/ui/label";
+import { productFormSchema, type ProductFormInput } from "@/lib/validations/admin";
+import { createProduct, updateProduct } from "@/server/actions/admin";
+
+export interface ProductRow {
+  id: string;
+  slug: string;
+  sku: string;
+  title: string;
+  description: string | null;
+  unit: string;
+  packaging: string | null;
+  warranty: string | null;
+  leadTime: string | null;
+  badge: string | null;
+  popularity: number;
+  published: boolean;
+  categoryId: string;
+  brandId: string;
+}
+
+interface Ref {
+  id: string;
+  label: string;
+}
+
+export function ProductForm({
+  initial,
+  categories,
+  brands,
+  onDone,
+}: {
+  initial?: ProductRow;
+  categories: Ref[];
+  brands: Ref[];
+  onDone: () => void;
+}) {
+  const isEdit = Boolean(initial);
+  const {
+    register,
+    handleSubmit,
+    control,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<ProductFormInput>({
+    resolver: zodResolver(productFormSchema),
+    defaultValues: {
+      slug: initial?.slug ?? "",
+      sku: initial?.sku ?? "",
+      title: initial?.title ?? "",
+      description: initial?.description ?? "",
+      unit: initial?.unit ?? "шт",
+      packaging: initial?.packaging ?? "",
+      warranty: initial?.warranty ?? "",
+      leadTime: initial?.leadTime ?? "",
+      badge: (initial?.badge as ProductFormInput["badge"]) ?? "",
+      popularity: initial?.popularity ?? 0,
+      published: initial?.published ?? true,
+      categoryId: initial?.categoryId ?? "",
+      brandId: initial?.brandId ?? "",
+    },
+  });
+
+  async function onSubmit(values: ProductFormInput) {
+    const result = isEdit ? await updateProduct(initial!.id, values) : await createProduct(values);
+    handleFormResult<ProductFormInput>(result, {
+      setError,
+      onDone,
+      successMessage: isEdit ? "Товар обновлён" : "Товар создан",
+    });
+  }
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+      <Field label="Название" htmlFor="title" error={errors.title}>
+        <Input id="title" {...register("title")} />
+      </Field>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Артикул (SKU)" htmlFor="sku" error={errors.sku}>
+          <Input id="sku" {...register("sku")} />
+        </Field>
+        <Field label="Slug" htmlFor="slug" error={errors.slug} hint="латиница, для URL">
+          <Input id="slug" {...register("slug")} />
+        </Field>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Категория" htmlFor="categoryId" error={errors.categoryId}>
+          <NativeSelect id="categoryId" {...register("categoryId")}>
+            <option value="">— выберите —</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>{c.label}</option>
+            ))}
+          </NativeSelect>
+        </Field>
+        <Field label="Производитель" htmlFor="brandId" error={errors.brandId}>
+          <NativeSelect id="brandId" {...register("brandId")}>
+            <option value="">— выберите —</option>
+            {brands.map((b) => (
+              <option key={b.id} value={b.id}>{b.label}</option>
+            ))}
+          </NativeSelect>
+        </Field>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Field label="Единица" htmlFor="unit" error={errors.unit} hint="м / шт / компл">
+          <Input id="unit" {...register("unit")} />
+        </Field>
+        <Field label="Бейдж" htmlFor="badge" error={errors.badge}>
+          <NativeSelect id="badge" {...register("badge")}>
+            <option value="">— нет —</option>
+            <option value="HIT">Хит</option>
+            <option value="NEW">Новинка</option>
+            <option value="IN_STOCK">Со склада</option>
+          </NativeSelect>
+        </Field>
+        <Field label="Популярность" htmlFor="popularity" error={errors.popularity}>
+          <Input id="popularity" type="number" {...register("popularity")} />
+        </Field>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Срок поставки" htmlFor="leadTime" error={errors.leadTime}>
+          <Input id="leadTime" {...register("leadTime")} />
+        </Field>
+        <Field label="Гарантия" htmlFor="warranty" error={errors.warranty}>
+          <Input id="warranty" {...register("warranty")} />
+        </Field>
+      </div>
+
+      <Field label="Упаковка / кратность" htmlFor="packaging" error={errors.packaging}>
+        <Input id="packaging" {...register("packaging")} />
+      </Field>
+
+      <Field label="Описание" htmlFor="description" error={errors.description}>
+        <Textarea id="description" rows={4} {...register("description")} />
+      </Field>
+
+      <div className="flex items-center justify-between rounded-lg border border-border bg-secondary/40 px-4 py-3">
+        <div>
+          <Label htmlFor="published">Опубликован</Label>
+          <p className="text-xs text-muted-foreground">
+            Скрытые товары не показываются в каталоге.
+          </p>
+        </div>
+        <Controller
+          control={control}
+          name="published"
+          render={({ field }) => (
+            <Switch
+              id="published"
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+          )}
+        />
+      </div>
+
+      <div className="flex justify-end gap-2 pt-2">
+        <Button type="button" variant="outline" onClick={onDone}>
+          Отмена
+        </Button>
+        <Button type="submit" variant="signal" disabled={isSubmitting}>
+          {isSubmitting && <Loader2 className="size-4 animate-spin" />}
+          {isEdit ? "Сохранить" : "Создать"}
+        </Button>
+      </div>
+    </form>
+  );
+}

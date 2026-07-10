@@ -1,0 +1,10 @@
+export { Hero } from "./hero";
+export { CatalogSearch } from "./catalog-search";
+export { Categories } from "./categories";
+export { PopularProducts } from "./popular-products";
+export { Manufacturers } from "./manufacturers";
+export { Features } from "./features";
+export { Process } from "./process";
+export { Projects } from "./projects";
+export { Articles } from "./articles";
+export { Cta } from "./cta";

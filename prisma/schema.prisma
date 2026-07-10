@@ -1,0 +1,448 @@
+// AIMAG ELECTRIC — production data model.
+// Normalized B2B catalog: reference data (Category, Brand), core Product with
+// media (ProductImage, ProductDocument), flexible EAV specs (Attribute,
+// AttributeValue), inventory (Warehouse, Stock) and pricing (Price), plus the
+// existing auth + quotes domain.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  CUSTOMER
+}
+
+enum QuoteStatus {
+  NEW
+  IN_PROGRESS
+  SENT
+  WON
+  LOST
+}
+
+enum DealStage {
+  NEW
+  QUALIFIED
+  PROPOSAL
+  NEGOTIATION
+  WON
+  LOST
+}
+
+enum ActivityType {
+  NOTE
+  CALL
+  EMAIL
+  MEETING
+  TASK
+}
+
+enum CustomerStatus {
+  LEAD
+  ACTIVE
+  INACTIVE
+}
+
+enum AuditAction {
+  LOGIN
+  LOGOUT
+  CREATE
+  UPDATE
+  DELETE
+  IMPORT
+  EXPORT
+}
+
+/** Immutable audit trail of significant admin/security actions. */
+model AuditLog {
+  id        String      @id @default(cuid())
+  action    AuditAction
+  entity    String // e.g. "Product", "Quote", "Auth"
+  entityId  String?
+  summary   String
+  meta      Json?
+  actorId   String?
+  actorEmail String?
+  ip        String?
+  createdAt DateTime    @default(now())
+
+  @@index([entity])
+  @@index([action])
+  @@index([actorId])
+  @@index([createdAt])
+}
+
+enum ProductBadge {
+  HIT
+  NEW
+  IN_STOCK
+}
+
+enum AttributeType {
+  STRING
+  NUMBER
+  BOOLEAN
+}
+
+enum DocumentKind {
+  CERTIFICATE
+  DATASHEET
+  MANUAL
+  DRAWING
+}
+
+enum PriceKind {
+  BASE
+  WHOLESALE
+  PROMO
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  description String?
+  spec        String?
+  icon        String?
+  order       Int       @default(0)
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([order])
+}
+
+model Brand {
+  id        String    @id @default(cuid())
+  slug      String    @unique
+  name      String
+  origin    String?
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Product {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  sku         String        @unique
+  title       String
+  description String?       @db.Text
+  unit        String        @default("шт")
+  packaging   String?
+  warranty    String?
+  leadTime    String?
+  badge       ProductBadge?
+  popularity  Int           @default(0)
+  published   Boolean       @default(true)
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  brandId    String
+  brand      Brand    @relation(fields: [brandId], references: [id], onDelete: Restrict)
+
+  images    ProductImage[]
+  documents ProductDocument[]
+  values    AttributeValue[]
+  stock     Stock[]
+  prices    Price[]
+  reviews   Review[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([brandId])
+  @@index([popularity])
+  @@index([createdAt])
+  // Composite indexes for the catalog's hot paths: published lists filtered by
+  // category/brand and ordered by popularity or recency. Cover ~100k rows.
+  @@index([published, categoryId, popularity])
+  @@index([published, brandId, popularity])
+  @@index([published, popularity])
+  @@index([published, createdAt])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String?
+  alt       String?
+  order     Int     @default(0)
+
+  @@index([productId])
+}
+
+model ProductDocument {
+  id        String       @id @default(cuid())
+  productId String
+  product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  title     String
+  kind      DocumentKind
+  url       String
+  size      String?
+  order     Int          @default(0)
+
+  @@index([productId])
+}
+
+model Attribute {
+  id         String           @id @default(cuid())
+  key        String           @unique
+  name       String
+  type       AttributeType    @default(STRING)
+  unit       String?
+  filterable Boolean          @default(true)
+  order      Int              @default(0)
+  values     AttributeValue[]
+
+  @@index([order])
+}
+
+model AttributeValue {
+  id          String    @id @default(cuid())
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  attributeId String
+  attribute   Attribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+
+  valueString String?
+  valueNumber Float?
+  valueBool   Boolean?
+
+  @@unique([productId, attributeId])
+  @@index([attributeId])
+  @@index([attributeId, valueNumber])
+  @@index([attributeId, valueString])
+}
+
+model Warehouse {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  city      String
+  stock     Stock[]
+  createdAt DateTime @default(now())
+}
+
+model Stock {
+  id          String    @id @default(cuid())
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  warehouseId String
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  quantity    Float     @default(0)
+  restockAt   DateTime?
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([productId, warehouseId])
+  @@index([productId])
+  @@index([warehouseId])
+}
+
+model Price {
+  id        String    @id @default(cuid())
+  productId String
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  kind      PriceKind @default(BASE)
+  amount    Int?
+  currency  String    @default("KZT")
+  minQty    Float     @default(1)
+  validFrom DateTime  @default(now())
+  validTo   DateTime?
+
+  @@unique([productId, kind])
+  @@index([productId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  author    String
+  company   String?
+  rating    Int
+  text      String   @db.Text
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+}
+
+model Quote {
+  id        String      @id @default(cuid())
+  company   String
+  name      String
+  phone     String
+  email     String?
+  message   String      @db.Text
+  status    QuoteStatus @default(NEW)
+  userId    String?
+  user      User?       @relation(fields: [userId], references: [id])
+  customerId String?
+  customer  Customer?   @relation(fields: [customerId], references: [id])
+  deal      Deal?
+  items     QuoteItem[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([customerId])
+}
+
+model QuoteItem {
+  id        String  @id @default(cuid())
+  quoteId   String
+  quote     Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  productId String?
+  title     String
+  qty       Float   @default(1)
+  unit      String  @default("шт")
+  note      String?
+
+  @@index([quoteId])
+}
+
+// ---------------------------------------------------------------------------
+// CRM
+// ---------------------------------------------------------------------------
+
+/** Company-level CRM record. Aggregates quotes, deals and activity history. */
+model Customer {
+  id        String         @id @default(cuid())
+  company   String
+  contact   String?
+  phone     String?
+  email     String?
+  city      String?
+  bin       String? // БИН/ИИН для юрлиц
+  notes     String?        @db.Text
+  status    CustomerStatus @default(LEAD)
+  /** Optional link to a portal account (личный кабинет). */
+  userId    String?
+  user      User?          @relation(fields: [userId], references: [id])
+  deals     Deal[]
+  quotes    Quote[]
+  activities Activity[]
+  ownerId   String? // ответственный менеджер
+  owner     User?          @relation("CustomerOwner", fields: [ownerId], references: [id])
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([status])
+  @@index([company])
+  @@index([ownerId])
+}
+
+/** A pipeline opportunity. May originate from a Quote. */
+model Deal {
+  id          String     @id @default(cuid())
+  title       String
+  stage       DealStage  @default(NEW)
+  /** Оценочная сумма сделки в тиынах (₸ ×100). */
+  amount      Int?
+  currency    String     @default("KZT")
+  probability Int        @default(0) // 0..100
+  expectedAt  DateTime?
+  customerId  String
+  customer    Customer   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  quoteId     String?    @unique
+  quote       Quote?     @relation(fields: [quoteId], references: [id])
+  ownerId     String?
+  owner       User?      @relation("DealOwner", fields: [ownerId], references: [id])
+  activities  Activity[]
+  lostReason  String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([stage])
+  @@index([customerId])
+  @@index([ownerId])
+  @@index([createdAt])
+}
+
+/** Timeline entry: note, call, email, meeting or task, attached to a customer/deal. */
+model Activity {
+  id         String       @id @default(cuid())
+  type       ActivityType @default(NOTE)
+  subject    String
+  body       String?      @db.Text
+  /** For TASK: due date and completion flag. */
+  dueAt      DateTime?
+  done       Boolean      @default(false)
+  customerId String?
+  customer   Customer?    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  dealId     String?
+  deal       Deal?        @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  authorId   String?
+  author     User?        @relation(fields: [authorId], references: [id])
+  createdAt  DateTime     @default(now())
+
+  @@index([customerId])
+  @@index([dealId])
+  @@index([type])
+  @@index([dueAt])
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  passwordHash  String?
+  role          UserRole  @default(CUSTOMER)
+  company       String?
+  phone         String?
+  accounts      Account[]
+  sessions      Session[]
+  quotes        Quote[]
+  customerProfile Customer[]
+  ownedCustomers  Customer[] @relation("CustomerOwner")
+  ownedDeals      Deal[]     @relation("DealOwner")
+  activities      Activity[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
