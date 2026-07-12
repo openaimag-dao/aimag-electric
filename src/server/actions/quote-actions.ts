@@ -51,6 +51,7 @@ export async function submitQuote(
     });
     logger.info("quote.created", { quoteId: quote.id, company: parsed.data.company });
     revalidatePath("/admin/quotes");
+    revalidatePath("/admin");
     return { ok: true };
   } catch (e) {
     logger.error("quote.create_failed", { error: String(e) });
