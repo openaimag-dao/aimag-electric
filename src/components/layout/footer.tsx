@@ -3,7 +3,7 @@ import { Mail, MapPin, Phone } from "lucide-react";
 
 import { Logo } from "@/components/common/logo";
 import { QuoteDialog } from "@/components/common/quote-dialog";
-import { footerNav } from "@/config/navigation";
+import { footerNav, legalNav } from "@/config/navigation";
 import { siteConfig } from "@/config/site";
 
 export function Footer() {
@@ -77,6 +77,13 @@ export function Footer() {
       <div className="border-t border-steel-800">
         <div className="container flex flex-col items-center justify-between gap-2 py-6 text-xs text-steel-500 sm:flex-row">
           <p>© {year} {siteConfig.name}. Все права защищены.</p>
+          <div className="flex flex-wrap justify-center gap-4">
+            {legalNav.map((item) => (
+              <Link key={item.href} href={item.href} className="hover:text-white">
+                {item.label}
+              </Link>
+            ))}
+          </div>
           <p className="font-mono uppercase tracking-wider">
             Электротехника для бизнеса и промышленности
           </p>

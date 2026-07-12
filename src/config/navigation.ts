@@ -6,9 +6,9 @@ export interface NavItem {
 export const mainNav: NavItem[] = [
   { label: "Каталог", href: "/catalog" },
   { label: "Категории", href: "/#categories" },
-  { label: "О компании", href: "/about" },
-  { label: "Доставка", href: "/delivery" },
-  { label: "Контакты", href: "/contacts" },
+  { label: "О компании", href: "/o-kompanii" },
+  { label: "Доставка", href: "/dostavka" },
+  { label: "Контакты", href: "/kontakty" },
 ];
 
 export const footerNav: { title: string; items: NavItem[] }[] = [
@@ -22,21 +22,26 @@ export const footerNav: { title: string; items: NavItem[] }[] = [
     ],
   },
   {
-    title: "Компания",
+    title: "Покупателям",
     items: [
-      { label: "О нас", href: "/about" },
-      { label: "Сертификаты", href: "/certificates" },
-      { label: "Доставка и оплата", href: "/delivery" },
-      { label: "Контакты", href: "/contacts" },
+      { label: "Доставка", href: "/dostavka" },
+      { label: "Оплата и реквизиты", href: "/oplata" },
+      { label: "Гарантия", href: "/garantiya" },
+      { label: "Возврат товара", href: "/vozvrat" },
+      { label: "Вопросы и ответы", href: "/faq" },
     ],
   },
   {
-    title: "Клиентам",
+    title: "Компания",
     items: [
-      { label: "Получить КП", href: "/quote" },
-      { label: "Реквизиты", href: "/requisites" },
-      { label: "Работа с юрлицами", href: "/b2b" },
-      { label: "Публичная оферта", href: "/offer" },
+      { label: "О компании", href: "/o-kompanii" },
+      { label: "Контакты", href: "/kontakty" },
     ],
   },
+];
+
+/** Правовые ссылки — выводятся мелкой строкой в нижней полосе футера. */
+export const legalNav: NavItem[] = [
+  { label: "Политика конфиденциальности", href: "/privacy" },
+  { label: "Пользовательское соглашение", href: "/terms" },
 ];
