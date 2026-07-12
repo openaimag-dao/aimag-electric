@@ -16,14 +16,15 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  parseSheet,
-  buildTemplateWorkbook,
-  rowsToWorkbook,
-} from "@/lib/import/parse-sheet";
+import { parseSheet, buildTemplateWorkbook, rowsToWorkbook } from "@/lib/import/parse-sheet";
 import { buildPreview, type ImportContext } from "@/lib/import/validators";
 import { IMPORT_COLUMNS, importTemplate } from "@/config/import-columns";
-import { IMPORT_KIND_LABELS, type ImportKind, type ImportPreview, type ImportResult } from "@/types/import";
+import {
+  IMPORT_KIND_LABELS,
+  type ImportKind,
+  type ImportPreview,
+  type ImportResult,
+} from "@/types/import";
 import { applyImport, getImportContext } from "@/server/actions/admin";
 import { ImportKindPicker } from "@/components/admin/import/import-kind-picker";
 import { ImportPreviewTable } from "@/components/admin/import/import-preview-table";
@@ -99,7 +100,7 @@ export function ImportClient() {
       setPreview(pv);
       setFileName(file.name);
       toast.success(`Разобрано строк: ${pv.totalRows}`);
-    } catch (e) {
+    } catch {
       toast.error("Не удалось прочитать файл. Проверьте формат (xlsx/xls/csv).");
     } finally {
       setParsing(false);
@@ -128,15 +129,14 @@ export function ImportClient() {
 
   function downloadErrorLog() {
     if (!preview) return;
-    const rows = preview.rows
-      .flatMap((r) =>
-        r.issues.map((i) => ({
-          Строка: r.row,
-          Уровень: i.level === "error" ? "Ошибка" : "Предупреждение",
-          Колонка: i.column ?? "",
-          Сообщение: i.message,
-        }))
-      );
+    const rows = preview.rows.flatMap((r) =>
+      r.issues.map((i) => ({
+        Строка: r.row,
+        Уровень: i.level === "error" ? "Ошибка" : "Предупреждение",
+        Колонка: i.column ?? "",
+        Сообщение: i.message,
+      }))
+    );
     if (rows.length === 0) {
       toast.info("Ошибок и предупреждений нет");
       return;
@@ -220,7 +220,8 @@ export function ImportClient() {
           ))}
         </div>
         <p className="mt-2 text-xs text-muted-foreground">
-          Заголовки распознаются на русском и английском. Поля со «*» обязательны. Поддержка .xlsx, .xls, .csv.
+          Заголовки распознаются на русском и английском. Поля со «*» обязательны. Поддержка .xlsx,
+          .xls, .csv.
         </p>
       </div>
 
@@ -322,7 +323,10 @@ function ResultPanel({ result, onReset }: { result: ImportResult; onReset: () =>
           <p className="mb-2 text-sm font-medium text-primary">Журнал ошибок</p>
           <div className="max-h-48 overflow-y-auto rounded-lg border border-border">
             {result.errors.map((e, i) => (
-              <div key={i} className="flex items-start gap-2 border-b border-border px-3 py-2 text-sm last:border-0">
+              <div
+                key={i}
+                className="flex items-start gap-2 border-b border-border px-3 py-2 text-sm last:border-0"
+              >
                 <span className="font-mono text-xs text-muted-foreground">стр. {e.row}</span>
                 <span className="text-red-600">{e.message}</span>
               </div>
@@ -340,10 +344,20 @@ function ResultPanel({ result, onReset }: { result: ImportResult; onReset: () =>
   );
 }
 
-function ResultStat({ label, value, className }: { label: string; value: number; className?: string }) {
+function ResultStat({
+  label,
+  value,
+  className,
+}: {
+  label: string;
+  value: number;
+  className?: string;
+}) {
   return (
     <div className="rounded-lg border border-border bg-secondary/30 p-3 text-center">
-      <div className={`font-display text-2xl font-bold ${className ?? "text-primary"}`}>{value}</div>
+      <div className={`font-display text-2xl font-bold ${className ?? "text-primary"}`}>
+        {value}
+      </div>
       <div className="text-xs text-muted-foreground">{label}</div>
     </div>
   );
