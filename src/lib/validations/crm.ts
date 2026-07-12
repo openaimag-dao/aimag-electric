@@ -28,7 +28,7 @@ export const dealFormSchema = z.object({
   title: z.string().min(2, "Укажите название сделки"),
   customerId: z.string().min(1, "Выберите клиента"),
   stage: dealStage.default("NEW"),
-  amountTenge: z.union([z.coerce.number().min(0), z.literal("")]).optional(),
+  amountTenge: z.union([z.literal(""), z.coerce.number().min(0)]).optional(),
   probability: z.coerce.number().int().min(0).max(100).default(0),
   expectedAt: z.string().optional().or(z.literal("")),
   ownerId: z.string().optional().or(z.literal("")),

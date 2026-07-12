@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Field, Input, Textarea, NativeSelect } from "@/components/admin/form-fields";
@@ -76,11 +77,14 @@ export function DealForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+    <form
+      onSubmit={handleSubmit(onSubmit, () => toast.error("Заполните обязательные поля"))}
+      className="grid gap-4"
+    >
       <Field label="Название сделки" htmlFor="title" error={errors.title}>
         <Input id="title" {...register("title")} />
       </Field>
-      <Field label="Клиент" htmlFor="customerId" error={errors.customerId}>
+      <Field label="Клиент *" htmlFor="customerId" error={errors.customerId}>
         <NativeSelect id="customerId" {...register("customerId")} disabled={Boolean(defaultCustomerId)}>
           <option value="">— выберите —</option>
           {customers.map((c) => (
