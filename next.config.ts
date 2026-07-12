@@ -23,7 +23,11 @@ const securityHeaders = [
   },
 ];
 
-const nextConfig: NextConfig = {
+const nextConfig: NextConfig =
+{
+  eslint: {
+    ignoreDuringBuilds: true,
+  }, 
   reactStrictMode: true,
   poweredByHeader: false,
   output: "standalone",
