@@ -33,7 +33,7 @@ const nextConfig: NextConfig =
   output: "standalone",
   images: {
     formats: ["image/avif", "image/webp"],
-    remotePatterns: [{ protocol: "https", hostname: "images.unsplash.com" }],
+    remotePatterns: [{ protocol: "https", hostname: "**" }],
   },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
