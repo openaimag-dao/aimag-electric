@@ -42,18 +42,27 @@ const faq: { q: string; a: string }[] = [
   },
 ];
 
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faq.map((item) => ({
+    "@type": "Question",
+    name: item.q,
+    acceptedAnswer: { "@type": "Answer", text: item.a },
+  })),
+};
+
 export default function FaqPage() {
   return (
     <StaticPage title="Вопросы и ответы" subtitle="Частые вопросы о заказе, оплате и доставке">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <div className="space-y-4">
         {faq.map((item) => (
-          <details
-            key={item.q}
-            className="group rounded-lg border p-4 open:bg-gray-50"
-          >
-            <summary className="cursor-pointer font-medium marker:content-none">
-              {item.q}
-            </summary>
+          <details key={item.q} className="group rounded-lg border p-4 open:bg-gray-50">
+            <summary className="cursor-pointer font-medium marker:content-none">{item.q}</summary>
             <p className="mt-2 text-gray-600">{item.a}</p>
           </details>
         ))}

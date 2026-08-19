@@ -32,12 +32,15 @@ export function ProductThumbnail({
   alt,
   className,
   size = "grid",
+  priority = false,
 }: {
   categorySlug: string;
   imageUrl?: string | null;
   alt?: string;
   className?: string;
   size?: "grid" | "sm";
+  /** Mark true only for the single largest above-the-fold image per page (LCP). */
+  priority?: boolean;
 }) {
   if (imageUrl) {
     return (
@@ -48,6 +51,7 @@ export function ProductThumbnail({
           fill
           className="object-contain p-2"
           sizes="(max-width: 768px) 50vw, 300px"
+          priority={priority}
         />
       </div>
     );

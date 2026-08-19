@@ -1,4 +1,4 @@
-import type { ProductBadge } from "@prisma/client";
+import type { PriceKind, ProductBadge } from "@prisma/client";
 
 import { tiynToTenge } from "@/lib/money";
 import { deriveAvailabilityFromStock, leadTimeForAvailability } from "@/lib/availability";
@@ -21,9 +21,36 @@ const docKindMap: Record<string, ProductDocument["kind"]> = {
   DRAWING: "drawing",
 };
 
+/**
+ * Minimal product shape toCatalogDTO needs. `ProductWithRelations` (full
+ * detail include) and `ProductForListing` (lean listing select) both
+ * structurally satisfy this, so one mapper serves both call sites.
+ */
+interface ProductForCatalog {
+  id: string;
+  slug: string;
+  title: string;
+  sku: string;
+  unit: string;
+  createdAt: Date;
+  popularity: number;
+  badge: ProductBadge | null;
+  category: { slug: string; title: string };
+  brand: { name: string };
+  images: { url: string | null }[];
+  prices: { kind: PriceKind; amount: number | null; validFrom: Date; validTo: Date | null }[];
+  stock: { quantity: number; restockAt: Date | null }[];
+  values: {
+    valueString: string | null;
+    valueNumber: number | null;
+    valueBool: boolean | null;
+    attribute: { key: string };
+  }[];
+}
+
 /** Read a typed attribute value by attribute key. */
 /** Build a key→typed-value map from a product's attribute values (one pass). */
-function attrMap(p: ProductWithRelations): Map<string, string | number | boolean> {
+function attrMap(p: ProductForCatalog): Map<string, string | number | boolean> {
   const map = new Map<string, string | number | boolean>();
   for (const v of p.values) {
     const value =
@@ -34,12 +61,12 @@ function attrMap(p: ProductWithRelations): Map<string, string | number | boolean
 }
 
 /** Availability is derived from live stock across warehouses. */
-function deriveAvailability(p: ProductWithRelations): Availability {
+function deriveAvailability(p: ProductForCatalog): Availability {
   return deriveAvailabilityFromStock(p.stock);
 }
 
 /** Effective base price: lowest currently-valid BASE price, in tenge. */
-function derivePrice(p: ProductWithRelations): number | null {
+function derivePrice(p: ProductForCatalog): number | null {
   const now = Date.now();
   const active = p.prices.filter(
     (pr) =>
@@ -56,11 +83,11 @@ function derivePrice(p: ProductWithRelations): number | null {
 }
 
 /** Ordered, non-empty image URLs for a product. */
-function productImages(p: ProductWithRelations): string[] {
+function productImages(p: ProductForCatalog): string[] {
   return p.images.map((i) => i.url).filter((u): u is string => Boolean(u));
 }
 
-export function toCatalogDTO(p: ProductWithRelations): CatalogProductDTO {
+export function toCatalogDTO(p: ProductForCatalog): CatalogProductDTO {
   const attrs = attrMap(p);
   return {
     id: p.id,
