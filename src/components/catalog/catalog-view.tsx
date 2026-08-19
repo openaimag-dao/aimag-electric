@@ -2,11 +2,7 @@
 
 import * as React from "react";
 
-import {
-  buildFacets,
-  queryCatalog,
-  activeFilterCount,
-} from "@/lib/catalog";
+import { buildFacets, queryCatalog, activeFilterCount } from "@/lib/catalog";
 import { useCatalogFilters } from "@/hooks/use-catalog-filters";
 import { FilterSidebar } from "@/components/catalog/filter-sidebar";
 import { MobileFilterDrawer } from "@/components/catalog/mobile-filter-drawer";
@@ -62,8 +58,7 @@ export function CatalogView({ products, categoryNames }: CatalogViewProps) {
                   <span className="font-semibold text-primary">
                     {from}–{to}
                   </span>{" "}
-                  из{" "}
-                  <span className="font-semibold text-primary">{total}</span>
+                  из <span className="font-semibold text-primary">{total}</span>
                 </>
               ) : (
                 "Нет позиций"
@@ -86,8 +81,8 @@ export function CatalogView({ products, categoryNames }: CatalogViewProps) {
         ) : (
           <>
             <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-              {items.map((product) => (
-                <ProductCard key={product.id} product={product} />
+              {items.map((product, i) => (
+                <ProductCard key={product.id} product={product} priority={i === 0} />
               ))}
             </div>
 

@@ -18,11 +18,8 @@ export const productService = {
   },
 
   /** Related = same category, nearest by voltage/section, excluding self. */
-  async getRelated(
-    product: CatalogProductDTO,
-    limit = 4
-  ): Promise<CatalogProductDTO[]> {
-    const rows = await productRepository.findByCategory(product.categorySlug);
+  async getRelated(product: CatalogProductDTO, limit = 4): Promise<CatalogProductDTO[]> {
+    const rows = await productRepository.findByCategory(product.categorySlug, 50);
     return rows
       .map(toCatalogDTO)
       .filter((p) => p.slug !== product.slug)

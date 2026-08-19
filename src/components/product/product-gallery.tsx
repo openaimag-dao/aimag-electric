@@ -38,6 +38,7 @@ export function ProductGallery({
           alt={title}
           className="h-full w-full"
           size="grid"
+          priority
         />
         {badge && (
           <Badge variant="signal" className="absolute left-4 top-4 shadow-sm">

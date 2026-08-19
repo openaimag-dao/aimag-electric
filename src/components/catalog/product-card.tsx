@@ -12,7 +12,14 @@ import type { CatalogProduct } from "@/types/catalog";
  * Catalog product card. Contains every required element: visual, title,
  * manufacturer, SKU, price, availability, and both CTAs (Подробнее / КП).
  */
-export function ProductCard({ product }: { product: CatalogProduct }) {
+export function ProductCard({
+  product,
+  priority = false,
+}: {
+  product: CatalogProduct;
+  /** Mark true only for the first card above the fold (LCP). */
+  priority?: boolean;
+}) {
   const href = `/catalog/${product.slug}`;
 
   const specs = [
@@ -34,6 +41,7 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
             imageUrl={product.image}
             alt={product.title}
             className="h-40 w-full"
+            priority={priority}
           />
         </Link>
         {product.badge && (
