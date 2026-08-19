@@ -29,7 +29,12 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
     <article className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-all hover:-translate-y-0.5 hover:border-signal/60 hover:shadow-lg">
       <div className="relative">
         <Link href={href} aria-label={product.title}>
-          <ProductThumbnail categorySlug={product.categorySlug} className="h-40 w-full" />
+          <ProductThumbnail
+            categorySlug={product.categorySlug}
+            imageUrl={product.image}
+            alt={product.title}
+            className="h-40 w-full"
+          />
         </Link>
         {product.badge && (
           <Badge variant="signal" className="absolute left-3 top-3 shadow-sm">

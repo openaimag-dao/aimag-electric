@@ -29,15 +29,13 @@ export async function generateStaticParams() {
   return [] as { slug: string }[];
 }
 
-
 /** Per-product SEO metadata. */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const product = await productService.getBySlug(slug);
   if (!product) return { title: "Товар не найден" };
 
-  const priceText =
-    product.price !== null ? `от ${formatTenge(product.price)}` : "цена по запросу";
+  const priceText = product.price !== null ? `от ${formatTenge(product.price)}` : "цена по запросу";
   const title = `${product.title} — купить в Казахстане`;
   const description = `${product.title}, ${product.manufacturer}. ${priceText}, ${availabilityLabels[
     product.availability
@@ -101,10 +99,7 @@ export default async function ProductPage({ params }: PageProps) {
             Каталог
           </Link>
           <ChevronRight className="size-4" />
-          <Link
-            href={`/catalog?cat=${product.categorySlug}`}
-            className="hover:text-primary"
-          >
+          <Link href={`/catalog?cat=${product.categorySlug}`} className="hover:text-primary">
             {product.category}
           </Link>
           <ChevronRight className="size-4" />
@@ -116,6 +111,7 @@ export default async function ProductPage({ params }: PageProps) {
           <div>
             <ProductGallery
               categorySlug={product.categorySlug}
+              images={product.images}
               count={product.galleryCount}
               badge={product.badge}
               title={product.title}
@@ -125,9 +121,7 @@ export default async function ProductPage({ params }: PageProps) {
           <div className="lg:row-span-2">
             <div className="lg:sticky lg:top-24">
               <div className="mb-4">
-                <span className="text-sm font-medium text-signal-700">
-                  {product.manufacturer}
-                </span>
+                <span className="text-sm font-medium text-signal-700">{product.manufacturer}</span>
                 <h1 className="mt-1 font-display text-2xl font-bold leading-tight tracking-tight text-primary sm:text-3xl">
                   {product.title}
                 </h1>
@@ -172,9 +166,7 @@ export default async function ProductPage({ params }: PageProps) {
           </section>
 
           <section id="documents" className="scroll-mt-32">
-            <h2 className="font-display text-xl font-bold text-primary">
-              Документы и сертификаты
-            </h2>
+            <h2 className="font-display text-xl font-bold text-primary">Документы и сертификаты</h2>
             <p className="mt-2 text-sm text-muted-foreground">
               Паспорта, сертификаты соответствия и инструкции в формате PDF.
             </p>

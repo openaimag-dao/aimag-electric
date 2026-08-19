@@ -35,7 +35,9 @@ export interface ProductReview {
 export interface ProductDetail extends CatalogProduct {
   /** Расширенное описание (абзацы). */
   description: string[];
-  /** Кол-во изображений галереи (рендерятся как SVG-плейсхолдеры-шильды). */
+  /** URL реальных фото товара (если есть). */
+  images?: string[];
+  /** Кол-во изображений галереи; используется как fallback, если фото нет. */
   galleryCount: number;
   specGroups: SpecGroup[];
   documents: ProductDocument[];

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import {
   Cable,
   Zap,
@@ -22,18 +23,36 @@ const iconByCategory: Record<string, LucideIcon> = {
 };
 
 /**
- * Product visual. Instead of low-quality stock photography we render a clean,
- * category-coded "nameplate" — crisp at any density and on-brand for B2B.
+ * Product visual. Renders the product's photo when available; falls back to
+ * a clean, category-coded "nameplate" for products without one yet.
  */
 export function ProductThumbnail({
   categorySlug,
+  imageUrl,
+  alt,
   className,
   size = "grid",
 }: {
   categorySlug: string;
+  imageUrl?: string | null;
+  alt?: string;
   className?: string;
   size?: "grid" | "sm";
 }) {
+  if (imageUrl) {
+    return (
+      <div className={cn("relative overflow-hidden bg-white", className)}>
+        <Image
+          src={imageUrl}
+          alt={alt ?? ""}
+          fill
+          className="object-contain p-2"
+          sizes="(max-width: 768px) 50vw, 300px"
+        />
+      </div>
+    );
+  }
+
   const Icon = iconByCategory[categorySlug] ?? Cable;
   return (
     <div
@@ -42,7 +61,7 @@ export function ProductThumbnail({
         className
       )}
     >
-      <div className="absolute inset-0 conductor-grid opacity-30" aria-hidden />
+      <div className="conductor-grid absolute inset-0 opacity-30" aria-hidden />
       <div
         className="absolute -right-8 -top-8 size-24 rounded-full bg-signal/15 blur-2xl"
         aria-hidden

@@ -26,6 +26,7 @@ export interface CatalogProduct {
   /** Индекс популярности (продажи/просмотры) для сортировки. */
   popularity: number;
   badge?: "Хит" | "Новинка" | "Со склада";
+  image?: string | null;
 }
 
 export type SortKey = "popular" | "price_asc" | "price_desc" | "new" | "title";
