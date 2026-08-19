@@ -5,11 +5,7 @@ import { deriveAvailabilityFromStock, leadTimeForAvailability } from "@/lib/avai
 
 import type { CatalogProductDTO, ProductDetailDTO } from "@/server/dto";
 import type { Availability } from "@/types/catalog";
-import type {
-  ProductDocument,
-  ProductReview,
-  SpecGroup,
-} from "@/types/product-detail";
+import type { ProductDocument, ProductReview, SpecGroup } from "@/types/product-detail";
 import type { ProductWithRelations } from "@/server/repositories/types";
 
 const badgeLabels: Record<ProductBadge, "Хит" | "Новинка" | "Со склада"> = {
@@ -31,11 +27,7 @@ function attrMap(p: ProductWithRelations): Map<string, string | number | boolean
   const map = new Map<string, string | number | boolean>();
   for (const v of p.values) {
     const value =
-      v.valueNumber !== null
-        ? v.valueNumber
-        : v.valueBool !== null
-          ? v.valueBool
-          : v.valueString;
+      v.valueNumber !== null ? v.valueNumber : v.valueBool !== null ? v.valueBool : v.valueString;
     if (value !== null && value !== undefined) map.set(v.attribute.key, value);
   }
   return map;
@@ -63,6 +55,11 @@ function derivePrice(p: ProductWithRelations): number | null {
   return tiynToTenge(minTiyn);
 }
 
+/** Ordered, non-empty image URLs for a product. */
+function productImages(p: ProductWithRelations): string[] {
+  return p.images.map((i) => i.url).filter((u): u is string => Boolean(u));
+}
+
 export function toCatalogDTO(p: ProductWithRelations): CatalogProductDTO {
   const attrs = attrMap(p);
   return {
@@ -83,6 +80,7 @@ export function toCatalogDTO(p: ProductWithRelations): CatalogProductDTO {
     createdAt: p.createdAt.toISOString().slice(0, 10),
     popularity: p.popularity,
     badge: p.badge ? badgeLabels[p.badge] : undefined,
+    image: productImages(p)[0] ?? null,
   };
 }
 
@@ -100,7 +98,8 @@ function buildSpecGroups(p: ProductWithRelations): SpecGroup[] {
   const voltage = attrs.get("voltage");
   const cores = attrs.get("cores");
   const cs = attrs.get("crossSection");
-  if (voltage !== undefined) electrical.push({ label: "Номинальное напряжение", value: `${voltage} кВ` });
+  if (voltage !== undefined)
+    electrical.push({ label: "Номинальное напряжение", value: `${voltage} кВ` });
   if (cores !== undefined) electrical.push({ label: "Количество жил", value: String(cores) });
   if (cs !== undefined) electrical.push({ label: "Сечение", value: `${cs} мм²` });
 
@@ -136,14 +135,14 @@ function mapReviews(p: ProductWithRelations): ProductReview[] {
   }));
 }
 
-
-
 export function toDetailDTO(p: ProductWithRelations): ProductDetailDTO {
   const base = toCatalogDTO(p);
-  const galleryCount = p.images.length > 0 ? p.images.length : 3;
+  const images = productImages(p);
+  const galleryCount = images.length > 0 ? images.length : 3;
   return {
     ...base,
     description: (p.description ?? "").split("\n\n").filter(Boolean),
+    images,
     galleryCount,
     specGroups: buildSpecGroups(p),
     documents: mapDocuments(p),

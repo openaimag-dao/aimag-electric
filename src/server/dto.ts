@@ -1,9 +1,5 @@
 import type { Availability } from "@/types/catalog";
-import type {
-  ProductDocument,
-  ProductReview,
-  SpecGroup,
-} from "@/types/product-detail";
+import type { ProductDocument, ProductReview, SpecGroup } from "@/types/product-detail";
 
 /**
  * Domain DTOs returned by the service layer to the UI. They intentionally
@@ -43,10 +39,12 @@ export interface CatalogProductDTO {
   createdAt: string;
   popularity: number;
   badge?: "Хит" | "Новинка" | "Со склада";
+  image?: string | null;
 }
 
 export interface ProductDetailDTO extends CatalogProductDTO {
   description: string[];
+  images: string[];
   galleryCount: number;
   specGroups: SpecGroup[];
   documents: ProductDocument[];
