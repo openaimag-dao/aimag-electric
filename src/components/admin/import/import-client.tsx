@@ -41,6 +41,7 @@ function toContext(raw: RawCtx): ImportContext {
     productSkus: new Set(raw.products.map((p) => p.sku)),
     warehouseCodes: new Set(raw.warehouses.map((w) => w.code)),
     warehouseNameToCode: new Map(raw.warehouses.map((w) => [w.name.toLowerCase(), w.code])),
+    attributesByLowerKey: new Map(raw.attributes.map((a) => [a.key.toLowerCase(), a])),
   };
 }
 
@@ -223,6 +224,17 @@ export function ImportClient() {
           Заголовки распознаются на русском и английском. Поля со «*» обязательны. Поддержка .xlsx,
           .xls, .csv.
         </p>
+        {kind === "products" && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            Доп. колонки вида <code className="rounded bg-secondary px-1 py-0.5">attr:voltage</code>
+            , <code className="rounded bg-secondary px-1 py-0.5">attr:material</code> массово задают
+            значения характеристик — ключ после «attr:» ищется в{" "}
+            <a href="/admin/attributes" className="underline hover:text-signal-700">
+              /admin/attributes
+            </a>
+            .
+          </p>
+        )}
       </div>
 
       {/* Dropzone */}

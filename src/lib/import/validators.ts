@@ -16,6 +16,8 @@ export interface ImportContext {
   productSkus: Set<string>;
   warehouseCodes: Set<string>;
   warehouseNameToCode: Map<string, string>;
+  /** Attribute.key lowercased → { key, type } — resolves "attr:*" import columns case-insensitively. */
+  attributesByLowerKey: Map<string, { key: string; type: "STRING" | "NUMBER" | "BOOLEAN" }>;
 }
 
 const SLUG_RE = /^[a-z0-9-]+$/;
@@ -31,10 +33,39 @@ function warn(row: number, message: string, column?: string): ImportIssue {
 
 function slugify(input: string): string {
   const map: Record<string, string> = {
-    а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "e", ж: "zh", з: "z",
-    и: "i", й: "y", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r",
-    с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "ts", ч: "ch", ш: "sh",
-    щ: "sch", ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya",
+    а: "a",
+    б: "b",
+    в: "v",
+    г: "g",
+    д: "d",
+    е: "e",
+    ё: "e",
+    ж: "zh",
+    з: "z",
+    и: "i",
+    й: "y",
+    к: "k",
+    л: "l",
+    м: "m",
+    н: "n",
+    о: "o",
+    п: "p",
+    р: "r",
+    с: "s",
+    т: "t",
+    у: "u",
+    ф: "f",
+    х: "h",
+    ц: "ts",
+    ч: "ch",
+    ш: "sh",
+    щ: "sch",
+    ъ: "",
+    ы: "y",
+    ь: "",
+    э: "e",
+    ю: "yu",
+    я: "ya",
   };
   return input
     .toLowerCase()
@@ -78,7 +109,11 @@ function summarize(action: RowAction, label: string): string {
 
 // --- per-kind row validators ----------------------------------------------
 
-function validateCategory(data: Record<string, string>, rowNo: number, ctx: ImportContext): PreparedRow {
+function validateCategory(
+  data: Record<string, string>,
+  rowNo: number,
+  ctx: ImportContext
+): PreparedRow {
   const issues = checkRequired("categories", data, rowNo);
   const slug = (data.slug || "").trim();
   if (slug && !SLUG_RE.test(slug)) {
@@ -88,7 +123,11 @@ function validateCategory(data: Record<string, string>, rowNo: number, ctx: Impo
   if (data.order && order === null) issues.push(warn(rowNo, "Порядок не число — будет 0", "order"));
 
   const exists = ctx.categorySlugs.has(slug);
-  const action: RowAction = issues.some((i) => i.level === "error") ? "skip" : exists ? "update" : "create";
+  const action: RowAction = issues.some((i) => i.level === "error")
+    ? "skip"
+    : exists
+      ? "update"
+      : "create";
 
   return {
     row: rowNo,
@@ -99,14 +138,22 @@ function validateCategory(data: Record<string, string>, rowNo: number, ctx: Impo
   };
 }
 
-function validateBrand(data: Record<string, string>, rowNo: number, ctx: ImportContext): PreparedRow {
+function validateBrand(
+  data: Record<string, string>,
+  rowNo: number,
+  ctx: ImportContext
+): PreparedRow {
   const issues = checkRequired("brands", data, rowNo);
   const slug = (data.slug || "").trim();
   if (slug && !SLUG_RE.test(slug)) {
     issues.push(err(rowNo, "Slug: только строчная латиница, цифры и дефис", "slug"));
   }
   const exists = ctx.brandSlugs.has(slug);
-  const action: RowAction = issues.some((i) => i.level === "error") ? "skip" : exists ? "update" : "create";
+  const action: RowAction = issues.some((i) => i.level === "error")
+    ? "skip"
+    : exists
+      ? "update"
+      : "create";
 
   return {
     row: rowNo,
@@ -137,7 +184,11 @@ function resolveBrand(value: string, ctx: ImportContext): string | null {
   return byName ?? null;
 }
 
-function validateProduct(data: Record<string, string>, rowNo: number, ctx: ImportContext): PreparedRow {
+function validateProduct(
+  data: Record<string, string>,
+  rowNo: number,
+  ctx: ImportContext
+): PreparedRow {
   const issues = checkRequired("products", data, rowNo);
   const sku = (data.sku || "").trim();
 
@@ -145,25 +196,42 @@ function validateProduct(data: Record<string, string>, rowNo: number, ctx: Impor
   // categories/brands import, or already present).
   const catSlug = resolveCategory(data.category || "", ctx);
   if (data.category && !catSlug) {
-    issues.push(err(rowNo, `Категория «${data.category}» не найдена — импортируйте категории первыми`, "category"));
+    issues.push(
+      err(
+        rowNo,
+        `Категория «${data.category}» не найдена — импортируйте категории первыми`,
+        "category"
+      )
+    );
   }
   const brandSlug = resolveBrand(data.brand || "", ctx);
   if (data.brand && !brandSlug) {
-    issues.push(err(rowNo, `Производитель «${data.brand}» не найден — импортируйте производителей первыми`, "brand"));
+    issues.push(
+      err(
+        rowNo,
+        `Производитель «${data.brand}» не найден — импортируйте производителей первыми`,
+        "brand"
+      )
+    );
   }
 
   const price = parseNumber(data.price || "");
-  if (data.price && price === null) issues.push(warn(rowNo, "Цена не число — будет пропущена", "price"));
-  if (price !== null && price < 0) issues.push(err(rowNo, "Цена не может быть отрицательной", "price"));
+  if (data.price && price === null)
+    issues.push(warn(rowNo, "Цена не число — будет пропущена", "price"));
+  if (price !== null && price < 0)
+    issues.push(err(rowNo, "Цена не может быть отрицательной", "price"));
 
   const stock = parseNumber(data.stock || "");
-  if (data.stock && stock === null) issues.push(warn(rowNo, "Остаток не число — будет пропущен", "stock"));
+  if (data.stock && stock === null)
+    issues.push(warn(rowNo, "Остаток не число — будет пропущен", "stock"));
 
   const popularity = parseNumber(data.popularity || "");
 
   const badge = (data.badge || "").trim().toUpperCase();
   if (badge && !BADGES.has(badge)) {
-    issues.push(warn(rowNo, `Бейдж «${data.badge}» неизвестен (HIT/NEW/IN_STOCK) — будет пуст`, "badge"));
+    issues.push(
+      warn(rowNo, `Бейдж «${data.badge}» неизвестен (HIT/NEW/IN_STOCK) — будет пуст`, "badge")
+    );
   }
 
   const slug = (data.slug || "").trim() || (sku ? slugify(sku) : "");
@@ -181,8 +249,28 @@ function validateProduct(data: Record<string, string>, rowNo: number, ctx: Impor
     }
   }
 
+  // Bulk attribute values via "attr:<key>" columns (see /admin/attributes).
+  // Resolved case-insensitively; unrecognized keys or bad numbers are
+  // warnings only — they never block the product row itself.
+  for (const [col, raw] of Object.entries(data)) {
+    if (!col.startsWith("attr:") || !raw.trim()) continue;
+    const rawKey = col.slice("attr:".length);
+    const def = ctx.attributesByLowerKey.get(rawKey.toLowerCase());
+    if (!def) {
+      issues.push(
+        warn(rowNo, `Характеристика «${rawKey}» не найдена — добавьте в /admin/attributes`, col)
+      );
+    } else if (def.type === "NUMBER" && parseNumber(raw) === null) {
+      issues.push(warn(rowNo, `«${def.key}»: значение «${raw}» не число — будет пропущено`, col));
+    }
+  }
+
   const exists = ctx.productSkus.has(sku);
-  const action: RowAction = issues.some((i) => i.level === "error") ? "skip" : exists ? "update" : "create";
+  const action: RowAction = issues.some((i) => i.level === "error")
+    ? "skip"
+    : exists
+      ? "update"
+      : "create";
 
   return {
     row: rowNo,
@@ -204,7 +292,11 @@ function validateProduct(data: Record<string, string>, rowNo: number, ctx: Impor
   };
 }
 
-function validatePrice(data: Record<string, string>, rowNo: number, ctx: ImportContext): PreparedRow {
+function validatePrice(
+  data: Record<string, string>,
+  rowNo: number,
+  ctx: ImportContext
+): PreparedRow {
   const issues = checkRequired("prices", data, rowNo);
   const sku = (data.sku || "").trim();
   if (sku && !ctx.productSkus.has(sku)) {
@@ -214,7 +306,8 @@ function validatePrice(data: Record<string, string>, rowNo: number, ctx: ImportC
   if (data.price !== "" && price === null) {
     issues.push(err(rowNo, "Цена должна быть числом (или пусто = по запросу)", "price"));
   }
-  if (price !== null && price < 0) issues.push(err(rowNo, "Цена не может быть отрицательной", "price"));
+  if (price !== null && price < 0)
+    issues.push(err(rowNo, "Цена не может быть отрицательной", "price"));
 
   const kind = (data.kind || "BASE").trim().toUpperCase();
   if (data.kind && !PRICE_KINDS.has(kind)) {
@@ -232,7 +325,11 @@ function validatePrice(data: Record<string, string>, rowNo: number, ctx: ImportC
   };
 }
 
-function validateStock(data: Record<string, string>, rowNo: number, ctx: ImportContext): PreparedRow {
+function validateStock(
+  data: Record<string, string>,
+  rowNo: number,
+  ctx: ImportContext
+): PreparedRow {
   const issues = checkRequired("stock", data, rowNo);
   const sku = (data.sku || "").trim();
   if (sku && !ctx.productSkus.has(sku)) {
@@ -247,7 +344,8 @@ function validateStock(data: Record<string, string>, rowNo: number, ctx: ImportC
   }
   const quantity = parseNumber(data.quantity || "");
   if (quantity === null) issues.push(err(rowNo, "Количество должно быть числом", "quantity"));
-  else if (quantity < 0) issues.push(err(rowNo, "Количество не может быть отрицательным", "quantity"));
+  else if (quantity < 0)
+    issues.push(err(rowNo, "Количество не может быть отрицательным", "quantity"));
 
   const action: RowAction = issues.some((i) => i.level === "error") ? "skip" : "update";
   return {
@@ -292,9 +390,10 @@ export function buildPreview(
     // Duplicate key detection within the file.
     const key =
       kind === "products" || kind === "prices" || kind === "stock"
-        ? String((data.sku || "")).trim()
-        : String((data.slug || "")).trim();
-    const dupKey = kind === "stock" ? `${key}|${(p.data as Record<string, unknown>).warehouseCode}` : key;
+        ? String(data.sku || "").trim()
+        : String(data.slug || "").trim();
+    const dupKey =
+      kind === "stock" ? `${key}|${(p.data as Record<string, unknown>).warehouseCode}` : key;
     if (key) {
       if (seenKeys.has(dupKey)) {
         p.issues.push(warn(rowNo, "Повтор ключа в файле — применится последняя строка"));
@@ -323,7 +422,10 @@ export function buildPreview(
     update: prepared.filter((p) => p.action === "update").length,
     skip: prepared.filter((p) => p.action === "skip").length,
     errors: prepared.reduce((n, p) => n + p.issues.filter((i) => i.level === "error").length, 0),
-    warnings: prepared.reduce((n, p) => n + p.issues.filter((i) => i.level === "warning").length, 0),
+    warnings: prepared.reduce(
+      (n, p) => n + p.issues.filter((i) => i.level === "warning").length,
+      0
+    ),
   };
 
   return {

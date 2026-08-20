@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import type { Prisma } from "@prisma/client";
 
 import {
   attributeAdminRepository,
@@ -9,6 +8,7 @@ import {
 } from "@/server/repositories/admin";
 import { attributeValueFormSchema } from "@/lib/validations/admin";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
+import { coerceAttributeValue } from "@/lib/attributes";
 
 function revalidate() {
   revalidatePath("/admin/attribute-values");
@@ -16,23 +16,10 @@ function revalidate() {
 }
 
 /** The form always collects a plain string; store it in the column that matches the attribute's declared type. */
-function typedColumns(
-  type: "STRING" | "NUMBER" | "BOOLEAN",
-  raw: string
-): Pick<Prisma.AttributeValueUncheckedCreateInput, "valueString" | "valueNumber" | "valueBool"> {
-  if (type === "NUMBER") {
-    const n = Number(raw);
-    if (Number.isNaN(n)) throw new Error("Значение должно быть числом");
-    return { valueString: null, valueNumber: n, valueBool: null };
-  }
-  if (type === "BOOLEAN") {
-    return {
-      valueString: null,
-      valueNumber: null,
-      valueBool: ["1", "true", "да", "yes"].includes(raw.toLowerCase()),
-    };
-  }
-  return { valueString: raw, valueNumber: null, valueBool: null };
+function typedColumns(type: "STRING" | "NUMBER" | "BOOLEAN", raw: string) {
+  const coerced = coerceAttributeValue(type, raw);
+  if (!coerced) throw new Error("Значение должно быть числом");
+  return coerced;
 }
 
 export async function createAttributeValue(input: unknown): Promise<ActionResult> {

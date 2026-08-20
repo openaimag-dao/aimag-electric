@@ -34,6 +34,21 @@ function buildAliasIndex(specs: ColumnSpec[]): Map<string, string> {
   return index;
 }
 
+const ATTR_HEADER_RE = /^attr:(.+)$/i;
+
+/**
+ * Products import only: a column named e.g. "attr:crossSection" bulk-sets
+ * that attribute's value per row. Not part of the fixed IMPORT_COLUMNS
+ * schema since the set of attributes is admin-managed and open-ended (see
+ * /admin/attributes) — the key after "attr:" is passed through verbatim
+ * (case preserved) and resolved against real Attribute.key values when the
+ * import is applied.
+ */
+function attrColumnKey(header: string): string | null {
+  const m = header.trim().match(ATTR_HEADER_RE);
+  return m ? `attr:${m[1].trim()}` : null;
+}
+
 /**
  * Parse an .xlsx/.xls/.csv ArrayBuffer into canonical-key rows for the given
  * import kind. Header matching is alias-based and forgiving of case/spacing.
@@ -61,9 +76,10 @@ export function parseSheet(buffer: ArrayBuffer, kind: ImportKind): ParsedSheet {
   const aliasIndex = buildAliasIndex(specs);
 
   const headerRow = matrix[0].map((h) => String(h ?? "").trim());
-  // Map each source column index → canonical key (or null if unmapped).
+  // Map each source column index → canonical key (or an "attr:<key>"
+  // passthrough for products, or null if unmapped).
   const colKeys: (string | null)[] = headerRow.map(
-    (h) => aliasIndex.get(normalizeHeader(h)) ?? null
+    (h) => aliasIndex.get(normalizeHeader(h)) ?? attrColumnKey(h)
   );
 
   const mappedColumns = Array.from(new Set(colKeys.filter((k): k is string => k !== null)));
@@ -100,10 +116,7 @@ export function buildTemplateWorkbook(
 }
 
 /** Export arbitrary rows (e.g. the error log) to an .xlsx ArrayBuffer. */
-export function rowsToWorkbook(
-  rows: Record<string, unknown>[],
-  sheetName = "Лист1"
-): ArrayBuffer {
+export function rowsToWorkbook(rows: Record<string, unknown>[], sheetName = "Лист1"): ArrayBuffer {
   const ws = XLSX.utils.json_to_sheet(rows);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, sheetName);
