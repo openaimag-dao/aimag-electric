@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { QuoteDialog } from "@/components/common/quote-dialog";
+import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { ProductThumbnail } from "@/components/catalog/product-thumbnail";
 import { ProductPrice } from "@/components/catalog/product-price";
 import { AvailabilityBadge } from "@/components/catalog/availability-badge";
@@ -89,11 +89,19 @@ export function ProductCard({
           <Button asChild variant="outline" size="sm">
             <Link href={href}>Подробнее</Link>
           </Button>
-          <QuoteDialog>
-            <Button variant="signal" size="sm">
-              Запросить КП
-            </Button>
-          </QuoteDialog>
+          <AddToCartButton
+            variant="signal"
+            size="sm"
+            label="В проект"
+            product={{
+              productId: product.id,
+              slug: product.slug,
+              sku: product.sku,
+              title: product.title,
+              unit: product.unit,
+              priceTenge: product.price,
+            }}
+          />
         </div>
       </div>
     </article>

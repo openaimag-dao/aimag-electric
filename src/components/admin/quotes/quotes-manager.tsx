@@ -4,22 +4,42 @@ import * as React from "react";
 import { toast } from "sonner";
 
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
-  DropdownMenuSeparator, DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Trash2, Eye } from "lucide-react";
+import { MoreHorizontal, Trash2, Eye, Download } from "lucide-react";
 import { TableToolbar } from "@/components/admin/table-toolbar";
 import { FormDialog } from "@/components/admin/form-dialog";
 import { ConfirmDelete } from "@/components/admin/confirm-delete";
 import { QuoteStatusBadge, quoteStatusMeta } from "@/components/admin/quote-status-badge";
 import { setQuoteStatus, deleteQuote } from "@/server/actions/admin";
+import { formatTiyn } from "@/lib/money";
+
+export interface QuoteItemRow {
+  id: string;
+  title: string;
+  sku: string | null;
+  qty: number;
+  unit: string;
+  amountTiyn: number | null;
+}
 
 export interface QuoteListRow {
   id: string;
+  title: string | null;
   company: string;
   name: string;
   phone: string;
@@ -27,11 +47,20 @@ export interface QuoteListRow {
   message: string;
   status: string;
   createdAt: string;
+  items: QuoteItemRow[];
+}
+
+function quoteTotalTiyn(items: QuoteItemRow[]): number {
+  return items.reduce((sum, i) => sum + (i.amountTiyn ?? 0) * i.qty, 0);
 }
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("ru-RU", {
-    day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
@@ -42,7 +71,9 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
   const [pending, setPending] = React.useState<string | null>(null);
 
   const filtered = rows.filter((r) =>
-    `${r.company} ${r.name} ${r.phone} ${r.email ?? ""}`.toLowerCase().includes(query.toLowerCase().trim())
+    `${r.company} ${r.name} ${r.phone} ${r.email ?? ""}`
+      .toLowerCase()
+      .includes(query.toLowerCase().trim())
   );
 
   async function changeStatus(id: string, status: string) {
@@ -68,6 +99,7 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
             <TableRow>
               <TableHead>Компания</TableHead>
               <TableHead>Контакт</TableHead>
+              <TableHead>Позиции</TableHead>
               <TableHead>Статус</TableHead>
               <TableHead>Дата</TableHead>
               <TableHead className="w-12" />
@@ -80,6 +112,15 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
                 <TableCell>
                   <div className="text-sm text-primary">{row.name}</div>
                   <div className="text-xs text-muted-foreground">{row.phone}</div>
+                </TableCell>
+                <TableCell>
+                  {row.items.length > 0 ? (
+                    <span className="text-primary">
+                      {row.items.length} поз. · {formatTiyn(quoteTotalTiyn(row.items))}
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>
@@ -119,7 +160,7 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
             ))}
             {filtered.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground">
+                <TableCell colSpan={6} className="text-center text-muted-foreground">
                   Заявок не найдено.
                 </TableCell>
               </TableRow>
@@ -135,15 +176,90 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
       >
         {viewing && (
           <div className="space-y-3 text-sm">
-            <div className="flex justify-between"><span className="text-muted-foreground">Компания</span><span className="font-medium text-primary">{viewing.company}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Контакт</span><span className="text-primary">{viewing.name}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Телефон</span><a href={`tel:${viewing.phone}`} className="text-signal-700">{viewing.phone}</a></div>
-            {viewing.email && <div className="flex justify-between"><span className="text-muted-foreground">E-mail</span><a href={`mailto:${viewing.email}`} className="text-signal-700">{viewing.email}</a></div>}
-            <div className="flex justify-between"><span className="text-muted-foreground">Статус</span><QuoteStatusBadge status={viewing.status} /></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Дата</span><span className="text-primary">{formatDate(viewing.createdAt)}</span></div>
+            {viewing.title && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Проект</span>
+                <span className="font-medium text-primary">{viewing.title}</span>
+              </div>
+            )}
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Компания</span>
+              <span className="font-medium text-primary">{viewing.company}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Контакт</span>
+              <span className="text-primary">{viewing.name}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Телефон</span>
+              <a href={`tel:${viewing.phone}`} className="text-signal-700">
+                {viewing.phone}
+              </a>
+            </div>
+            {viewing.email && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">E-mail</span>
+                <a href={`mailto:${viewing.email}`} className="text-signal-700">
+                  {viewing.email}
+                </a>
+              </div>
+            )}
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Статус</span>
+              <QuoteStatusBadge status={viewing.status} />
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Дата</span>
+              <span className="text-primary">{formatDate(viewing.createdAt)}</span>
+            </div>
+
+            {viewing.items.length > 0 && (
+              <div className="pt-2">
+                <div className="mb-1 text-muted-foreground">Позиции ({viewing.items.length})</div>
+                <div className="overflow-hidden rounded-lg border border-border">
+                  <table className="w-full text-xs">
+                    <tbody>
+                      {viewing.items.map((i) => (
+                        <tr key={i.id} className="border-b border-border last:border-0">
+                          <td className="p-2 text-primary">
+                            {i.title}
+                            {i.sku && <span className="ml-1 text-muted-foreground">({i.sku})</span>}
+                          </td>
+                          <td className="whitespace-nowrap p-2 text-muted-foreground">
+                            {i.qty} {i.unit}
+                          </td>
+                          <td className="whitespace-nowrap p-2 text-right font-medium text-primary">
+                            {i.amountTiyn !== null
+                              ? formatTiyn(i.amountTiyn * i.qty)
+                              : "по запросу"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="mt-2 flex items-center justify-between">
+                  <span className="font-medium text-primary">
+                    Итого: {formatTiyn(quoteTotalTiyn(viewing.items))}
+                  </span>
+                  <Button asChild variant="outline" size="sm">
+                    <a
+                      href={`/admin/quotes/${viewing.id}/pdf`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Download className="size-4" /> Скачать PDF
+                    </a>
+                  </Button>
+                </div>
+              </div>
+            )}
+
             <div className="pt-2">
               <div className="mb-1 text-muted-foreground">Сообщение</div>
-              <p className="whitespace-pre-wrap rounded-lg border border-border bg-secondary/40 p-3 text-primary">{viewing.message}</p>
+              <p className="whitespace-pre-wrap rounded-lg border border-border bg-secondary/40 p-3 text-primary">
+                {viewing.message}
+              </p>
             </div>
           </div>
         )}

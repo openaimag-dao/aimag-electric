@@ -34,6 +34,12 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [{ protocol: "https", hostname: "**" }],
   },
+  // The KP-PDF route loads font files via a runtime path.join(), which the
+  // bundler's static file tracer can't always follow — make sure they ship
+  // with the serverless function regardless.
+  outputFileTracingIncludes: {
+    "/admin/quotes/[id]/pdf": ["./src/lib/pdf/fonts/**"],
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

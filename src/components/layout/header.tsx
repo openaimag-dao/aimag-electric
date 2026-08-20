@@ -6,6 +6,7 @@ import { SearchBar } from "@/components/layout/search-bar";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { QuoteDialog } from "@/components/common/quote-dialog";
 import { AccountLink } from "@/components/auth/account-link";
+import { CartBadge } from "@/components/cart/cart-badge";
 import { mainNav } from "@/config/navigation";
 import { siteConfig } from "@/config/site";
 
@@ -19,9 +20,7 @@ export function Header() {
             B2B-поставки электротехники · {siteConfig.contacts.city}
           </span>
           <div className="flex items-center gap-5">
-            <span className="text-primary-foreground/70">
-              {siteConfig.contacts.workingHours}
-            </span>
+            <span className="text-primary-foreground/70">{siteConfig.contacts.workingHours}</span>
             <a
               href={`tel:${siteConfig.contacts.phone.replace(/[\s()-]/g, "")}`}
               className="inline-flex items-center gap-1.5 font-medium hover:text-signal"
@@ -37,10 +36,7 @@ export function Header() {
       <div className="container flex h-16 items-center gap-4">
         <Logo />
 
-        <nav
-          aria-label="Основная навигация"
-          className="ml-4 hidden items-center gap-1 md:flex"
-        >
+        <nav aria-label="Основная навигация" className="ml-4 hidden items-center gap-1 md:flex">
           {mainNav.map((item) => (
             <Link
               key={item.href}
@@ -57,6 +53,7 @@ export function Header() {
         </div>
 
         <div className="ml-auto hidden items-center gap-4 md:flex lg:ml-3">
+          <CartBadge />
           <AccountLink />
           <QuoteDialog />
         </div>
