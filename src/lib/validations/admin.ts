@@ -54,19 +54,12 @@ export const priceFormSchema = z.object({
   productId: z.string().min(1, "Выберите товар"),
   kind: priceKind.default("BASE"),
   /** Цена в тенге в форме; сервис конвертирует в тиыны. Пусто = по запросу. */
-  amountTenge: z
-    .union([z.coerce.number().min(0), z.literal("")])
-    .optional(),
+  amountTenge: z.union([z.coerce.number().min(0), z.literal("")]).optional(),
   minQty: z.coerce.number().min(1).default(1),
 });
 export type PriceFormInput = z.infer<typeof priceFormSchema>;
 
-const documentKind = z.enum([
-  "CERTIFICATE",
-  "DATASHEET",
-  "MANUAL",
-  "DRAWING",
-]);
+const documentKind = z.enum(["CERTIFICATE", "DATASHEET", "MANUAL", "DRAWING"]);
 
 export const documentFormSchema = z.object({
   productId: z.string().min(1, "Выберите товар"),
@@ -86,14 +79,11 @@ export const userFormSchema = z.object({
   role: userRole.default("CUSTOMER"),
   company: z.string().optional().or(z.literal("")),
   phone: z.string().optional().or(z.literal("")),
+  // Optional: leave blank to keep the account passwordless (no login) on create,
+  // or to keep the existing password unchanged on edit.
+  password: z.string().min(8, "Минимум 8 символов").max(72).optional().or(z.literal("")),
 });
 export type UserFormInput = z.infer<typeof userFormSchema>;
 
-export const quoteStatus = z.enum([
-  "NEW",
-  "IN_PROGRESS",
-  "SENT",
-  "WON",
-  "LOST",
-]);
+export const quoteStatus = z.enum(["NEW", "IN_PROGRESS", "SENT", "WON", "LOST"]);
 export type QuoteStatusValue = z.infer<typeof quoteStatus>;
