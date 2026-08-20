@@ -19,15 +19,12 @@ export interface UserRow {
   phone: string | null;
 }
 
-export function UserForm({
-  initial, onDone,
-}: {
-  initial?: UserRow;
-  onDone: () => void;
-}) {
+export function UserForm({ initial, onDone }: { initial?: UserRow; onDone: () => void }) {
   const isEdit = Boolean(initial);
   const {
-    register, handleSubmit, setError,
+    register,
+    handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<UserFormInput>({
     resolver: zodResolver(userFormSchema),
@@ -37,6 +34,7 @@ export function UserForm({
       role: (initial?.role as UserFormInput["role"]) ?? "CUSTOMER",
       company: initial?.company ?? "",
       phone: initial?.phone ?? "",
+      password: "",
     },
   });
 
@@ -74,8 +72,23 @@ export function UserForm({
       <Field label="Компания" htmlFor="company" error={errors.company}>
         <Input id="company" {...register("company")} />
       </Field>
+      <Field
+        label={isEdit ? "Новый пароль (необязательно)" : "Пароль для входа (необязательно)"}
+        htmlFor="password"
+        error={errors.password}
+      >
+        <Input
+          id="password"
+          type="password"
+          autoComplete="new-password"
+          placeholder={isEdit ? "Оставьте пустым, чтобы не менять" : "Без пароля — вход невозможен"}
+          {...register("password")}
+        />
+      </Field>
       <div className="flex justify-end gap-2 pt-2">
-        <Button type="button" variant="outline" onClick={onDone}>Отмена</Button>
+        <Button type="button" variant="outline" onClick={onDone}>
+          Отмена
+        </Button>
         <Button type="submit" variant="signal" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="size-4 animate-spin" />}
           {isEdit ? "Сохранить" : "Создать"}

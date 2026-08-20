@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { hash } from "bcryptjs";
 
 import { userAdminRepository } from "@/server/repositories/admin";
 import { userFormSchema } from "@/lib/validations/admin";
@@ -20,6 +21,7 @@ export async function createUser(input: unknown): Promise<ActionResult> {
       role: v.data.role,
       company: v.data.company || null,
       phone: v.data.phone || null,
+      passwordHash: v.data.password ? await hash(v.data.password, 10) : null,
     });
     revalidate();
     return ok();
@@ -38,6 +40,9 @@ export async function updateUser(id: string, input: unknown): Promise<ActionResu
       role: v.data.role,
       company: v.data.company || null,
       phone: v.data.phone || null,
+      // Blank password field on edit means "keep current password" — never
+      // silently clear an existing hash just because the field was left empty.
+      ...(v.data.password ? { passwordHash: await hash(v.data.password, 10) } : {}),
     });
     revalidate();
     return ok();
