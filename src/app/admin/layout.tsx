@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { AdminMobileNav } from "@/components/admin/admin-mobile-nav";
+import { NotificationBell } from "@/components/admin/notification-bell";
 import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
@@ -9,11 +10,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-/**
- * Admin shell. In production, gate this with auth middleware / a server check
- * for role ADMIN|MANAGER (NextAuth session) — the layout is the natural place
- * to redirect unauthenticated users.
- */
+/** Admin shell. Auth is gated at the edge for /admin/* — see src/middleware.ts. */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen bg-secondary/30">
@@ -24,6 +21,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
             AIMAG ELECTRIC · Панель управления
           </span>
+          <div className="ml-auto">
+            <NotificationBell />
+          </div>
         </header>
         <main className="flex-1 p-4 lg:p-8">{children}</main>
       </div>

@@ -277,6 +277,20 @@ model Review {
   @@index([productId])
 }
 
+/** Broadcast staff notification (small back office — no per-user read state yet). */
+model Notification {
+  id        String    @id @default(cuid())
+  type      String
+  title     String
+  body      String?
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([readAt])
+  @@index([createdAt])
+}
+
 model Quote {
   id        String      @id @default(cuid())
   /** Optional project/object name the client gave their cart, e.g. "Электроснабжение объекта №1". */
