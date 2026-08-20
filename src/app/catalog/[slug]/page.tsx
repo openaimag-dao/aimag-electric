@@ -17,6 +17,7 @@ import { SpecTable } from "@/components/product/spec-table";
 import { DocumentList } from "@/components/product/document-list";
 import { Reviews } from "@/components/product/reviews";
 import { RelatedProducts } from "@/components/product/related-products";
+import { AnalogsCallout } from "@/components/product/analogs-callout";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -63,6 +64,8 @@ export default async function ProductPage({ params }: PageProps) {
   if (!product) notFound();
 
   const related = await productService.getRelated(product);
+  const analogs =
+    product.availability === "in_stock" ? [] : await productService.getAnalogsInStock(product);
   const avgRating = averageRating(product.reviews);
 
   const sections = [
@@ -136,6 +139,7 @@ export default async function ProductPage({ params }: PageProps) {
                 </p>
               </div>
               <PurchasePanel product={product} />
+              <AnalogsCallout products={analogs} />
             </div>
           </div>
         </div>
