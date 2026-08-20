@@ -9,3 +9,8 @@ export { quoteAdminRepository } from "./quote-admin-repository";
 export { customerAdminRepository, type CustomerAdminRow } from "./customer-admin-repository";
 export { dealAdminRepository, type DealAdminRow } from "./deal-admin-repository";
 export { activityAdminRepository } from "./activity-admin-repository";
+export { attributeAdminRepository } from "./attribute-admin-repository";
+export {
+  attributeValueAdminRepository,
+  type AttributeValueAdminRow,
+} from "./attribute-value-admin-repository";

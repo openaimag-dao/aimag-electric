@@ -87,6 +87,15 @@ function productImages(p: ProductForCatalog): string[] {
   return p.images.map((i) => i.url).filter((u): u is string => Boolean(u));
 }
 
+/** Every attribute value, stringified — feeds the catalog's dynamic facets (see buildFacets). */
+function attrBag(attrs: Map<string, string | number | boolean>): Record<string, string | number> {
+  const bag: Record<string, string | number> = {};
+  for (const [key, value] of attrs) {
+    bag[key] = typeof value === "boolean" ? (value ? "Да" : "Нет") : value;
+  }
+  return bag;
+}
+
 export function toCatalogDTO(p: ProductForCatalog): CatalogProductDTO {
   const attrs = attrMap(p);
   return {
@@ -104,6 +113,7 @@ export function toCatalogDTO(p: ProductForCatalog): CatalogProductDTO {
     cores: (attrs.get("cores") as number) ?? null,
     crossSection: (attrs.get("crossSection") as number) ?? null,
     voltage: (attrs.get("voltage") as number) ?? null,
+    attrs: attrBag(attrs),
     createdAt: p.createdAt.toISOString().slice(0, 10),
     popularity: p.popularity,
     badge: p.badge ? badgeLabels[p.badge] : undefined,

@@ -7,4 +7,6 @@ export * from "./document-actions";
 export * from "./user-actions";
 export * from "./quote-actions";
 export * from "./import-actions";
+export * from "./attribute-actions";
+export * from "./attribute-value-actions";
 export * from "./crm";

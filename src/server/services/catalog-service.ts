@@ -2,11 +2,11 @@ import "server-only";
 
 import { cache } from "react";
 
-import { productRepository, categoryRepository } from "@/server/repositories";
+import { productRepository, categoryRepository, attributeRepository } from "@/server/repositories";
 import { toCatalogDTO } from "@/server/mappers/product";
 import type { CatalogProductDTO, CategoryDTO } from "@/server/dto";
 import { queryCatalog, buildFacets, type CatalogFacets, type CatalogResult } from "@/lib/catalog";
-import type { CatalogFilters } from "@/types/catalog";
+import type { AttributeDef, CatalogFilters } from "@/types/catalog";
 
 /**
  * CatalogService — orchestrates repositories + pure query logic. Uses React
@@ -30,9 +30,21 @@ const loadCategories = cache(async (): Promise<CategoryDTO[]> => {
   }));
 });
 
+const loadAttributes = cache(async (): Promise<AttributeDef[]> => {
+  const rows = await attributeRepository.findFilterable();
+  return rows.map((a) => ({
+    key: a.key,
+    name: a.name,
+    unit: a.unit,
+    type: a.type,
+    order: a.order,
+  }));
+});
+
 export const catalogService = {
   loadProducts,
   loadCategories,
+  loadAttributes,
 
   async getCategoryNames(): Promise<Record<string, string>> {
     const cats = await loadCategories();
@@ -55,8 +67,12 @@ export const catalogService = {
 
   /** Facet options with live counts for the filter sidebar. */
   async facets(filters: CatalogFilters): Promise<CatalogFacets> {
-    const [products, names] = await Promise.all([loadProducts(), this.getCategoryNames()]);
-    return buildFacets(products, filters, names);
+    const [products, names, attributeDefs] = await Promise.all([
+      loadProducts(),
+      this.getCategoryNames(),
+      loadAttributes(),
+    ]);
+    return buildFacets(products, filters, names, attributeDefs);
   },
 
   async count(): Promise<number> {

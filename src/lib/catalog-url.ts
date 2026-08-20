@@ -15,11 +15,19 @@ function strList(v: string | null): string[] {
   return v ? v.split(",").filter(Boolean) : [];
 }
 
+const ATTR_PREFIX = "attr:";
+
 /** Parse filters from URL search params. Unknown/absent → defaults. */
 export function parseFilters(params: URLSearchParams): CatalogFilters {
   const sortRaw = params.get("sort") as SortKey | null;
   const sort = sortRaw && SORT_KEYS.includes(sortRaw) ? sortRaw : "popular";
   const pageRaw = Number(params.get("page"));
+
+  const attrs: Record<string, string[]> = {};
+  for (const [name, value] of params.entries()) {
+    if (!name.startsWith(ATTR_PREFIX)) continue;
+    attrs[name.slice(ATTR_PREFIX.length)] = strList(value);
+  }
 
   return {
     q: params.get("q") ?? "",
@@ -29,6 +37,7 @@ export function parseFilters(params: URLSearchParams): CatalogFilters {
     cores: numList(params.get("cores")),
     crossSections: numList(params.get("cs")),
     voltages: numList(params.get("v")),
+    attrs,
     priceMin: params.get("pmin") ? Number(params.get("pmin")) : null,
     priceMax: params.get("pmax") ? Number(params.get("pmax")) : null,
     inStockOnly: params.get("stock") === "1",
@@ -47,6 +56,9 @@ export function filtersToParams(f: CatalogFilters): URLSearchParams {
   if (f.cores.length) p.set("cores", f.cores.join(","));
   if (f.crossSections.length) p.set("cs", f.crossSections.join(","));
   if (f.voltages.length) p.set("v", f.voltages.join(","));
+  for (const [key, values] of Object.entries(f.attrs)) {
+    if (values.length) p.set(`${ATTR_PREFIX}${key}`, values.join(","));
+  }
   if (f.priceMin !== null) p.set("pmin", String(f.priceMin));
   if (f.priceMax !== null) p.set("pmax", String(f.priceMax));
   if (f.inStockOnly) p.set("stock", "1");

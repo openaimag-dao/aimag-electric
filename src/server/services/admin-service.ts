@@ -81,33 +81,27 @@ export const adminService = {
    * missing images/description/documents, low stock, and the recent audit feed.
    */
   async dashboardInsights() {
-    const [
-      noImages,
-      noDescription,
-      noDocuments,
-      lowStockList,
-      recentAudit,
-      recentImports,
-    ] = await Promise.all([
-      prisma.product.count({ where: { images: { none: {} } } }),
-      prisma.product.count({ where: { OR: [{ description: null }, { description: "" }] } }),
-      prisma.product.count({ where: { documents: { none: {} } } }),
-      prisma.stock.findMany({
-        where: { quantity: { lte: 5 } },
-        orderBy: { quantity: "asc" },
-        take: 8,
-        include: {
-          product: { select: { title: true, sku: true } },
-          warehouse: { select: { code: true } },
-        },
-      }),
-      prisma.auditLog.findMany({ orderBy: { createdAt: "desc" }, take: 8 }),
-      prisma.auditLog.findMany({
-        where: { action: "IMPORT" },
-        orderBy: { createdAt: "desc" },
-        take: 5,
-      }),
-    ]);
+    const [noImages, noDescription, noDocuments, lowStockList, recentAudit, recentImports] =
+      await Promise.all([
+        prisma.product.count({ where: { images: { none: {} } } }),
+        prisma.product.count({ where: { OR: [{ description: null }, { description: "" }] } }),
+        prisma.product.count({ where: { documents: { none: {} } } }),
+        prisma.stock.findMany({
+          where: { quantity: { lte: 5 } },
+          orderBy: { quantity: "asc" },
+          take: 8,
+          include: {
+            product: { select: { title: true, sku: true } },
+            warehouse: { select: { code: true } },
+          },
+        }),
+        prisma.auditLog.findMany({ orderBy: { createdAt: "desc" }, take: 8 }),
+        prisma.auditLog.findMany({
+          where: { action: "IMPORT" },
+          orderBy: { createdAt: "desc" },
+          take: 5,
+        }),
+      ]);
 
     return {
       quality: { noImages, noDescription, noDocuments },
@@ -135,12 +129,22 @@ export const adminService = {
 
   /** Lightweight reference lists for <Select> inputs in forms. */
   async refs() {
-    const [categories, brands, warehouses, products] = await Promise.all([
+    const [categories, brands, warehouses, products, attributes] = await Promise.all([
       prisma.category.findMany({ orderBy: { order: "asc" }, select: { id: true, title: true } }),
       prisma.brand.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
-      prisma.warehouse.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true, city: true } }),
-      prisma.product.findMany({ orderBy: { title: "asc" }, select: { id: true, title: true, sku: true } }),
+      prisma.warehouse.findMany({
+        orderBy: { name: "asc" },
+        select: { id: true, name: true, city: true },
+      }),
+      prisma.product.findMany({
+        orderBy: { title: "asc" },
+        select: { id: true, title: true, sku: true },
+      }),
+      prisma.attribute.findMany({
+        orderBy: { order: "asc" },
+        select: { id: true, key: true, name: true, unit: true, type: true },
+      }),
     ]);
-    return { categories, brands, warehouses, products };
+    return { categories, brands, warehouses, products, attributes };
   },
 };

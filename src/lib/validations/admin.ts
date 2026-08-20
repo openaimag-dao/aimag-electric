@@ -71,6 +71,28 @@ export const documentFormSchema = z.object({
 });
 export type DocumentFormInput = z.infer<typeof documentFormSchema>;
 
+const attributeType = z.enum(["STRING", "NUMBER", "BOOLEAN"]);
+
+export const attributeFormSchema = z.object({
+  key: z
+    .string()
+    .min(1, "Укажите ключ")
+    .regex(/^[a-zA-Z][a-zA-Z0-9]*$/, "Латиница, camelCase, без пробелов и дефисов"),
+  name: z.string().min(2, "Укажите название"),
+  type: attributeType.default("STRING"),
+  unit: z.string().optional().or(z.literal("")),
+  filterable: z.coerce.boolean().default(true),
+  order: z.coerce.number().int().min(0).default(0),
+});
+export type AttributeFormInput = z.infer<typeof attributeFormSchema>;
+
+export const attributeValueFormSchema = z.object({
+  productId: z.string().min(1, "Выберите товар"),
+  attributeId: z.string().min(1, "Выберите характеристику"),
+  value: z.string().min(1, "Укажите значение"),
+});
+export type AttributeValueFormInput = z.infer<typeof attributeValueFormSchema>;
+
 const userRole = z.enum(["ADMIN", "MANAGER", "CUSTOMER"]);
 
 export const userFormSchema = z.object({
