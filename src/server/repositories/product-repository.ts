@@ -37,6 +37,24 @@ export const productRepository = {
     });
   },
 
+  /** Substring match across title/SKU/brand/category, most popular first. */
+  search(query: string, take = 6) {
+    return prisma.product.findMany({
+      where: {
+        published: true,
+        OR: [
+          { title: { contains: query, mode: "insensitive" } },
+          { sku: { contains: query, mode: "insensitive" } },
+          { brand: { name: { contains: query, mode: "insensitive" } } },
+          { category: { title: { contains: query, mode: "insensitive" } } },
+        ],
+      },
+      select: productListSelect,
+      orderBy: { popularity: "desc" },
+      take,
+    });
+  },
+
   allSlugs() {
     return prisma.product.findMany({
       where: { published: true },
