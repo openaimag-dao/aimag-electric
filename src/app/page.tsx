@@ -1,6 +1,11 @@
-// Cached: every underlying query (homeService.*) is wrapped in unstable_cache
-// with its own revalidate window and tag, and admin writes call
-// revalidatePath("/") — no reason to force a fresh render on every request.
+// force-dynamic: every underlying query (homeService.*) is already
+// unstable_cache'd with its own revalidate window/tag, so this isn't about
+// data freshness — it's so the page doesn't need DATABASE_URL at *build*
+// time. Without it, `next build` tries to prerender "/" and fails outright
+// on any environment that doesn't have DATABASE_URL set for the build step
+// (e.g. this repo's Preview deployments today), rather than only failing at
+// request time on that one environment.
+export const dynamic = "force-dynamic";
 
 import {
   Hero,
