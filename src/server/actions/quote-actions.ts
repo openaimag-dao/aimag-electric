@@ -8,6 +8,7 @@ import { quoteSchema, type QuoteInput } from "@/lib/validations/quote";
 import { rateLimit } from "@/lib/security/rate-limit";
 import { logger } from "@/lib/logger";
 import { tengeToTiyn } from "@/lib/money";
+import { notificationService } from "@/server/services/notification-service";
 
 export interface QuoteActionState {
   ok: boolean;
@@ -67,6 +68,12 @@ export async function submitQuote(input: QuoteInput): Promise<QuoteActionState> 
     });
     revalidatePath("/admin/quotes");
     revalidatePath("/admin");
+    await notificationService.notifyStaff({
+      type: "quote.created",
+      title: `Новая заявка: ${parsed.data.company}`,
+      body: items.length > 0 ? `${items.length} позиц. · ${parsed.data.name}` : parsed.data.name,
+      link: "/admin/quotes",
+    });
     return { ok: true };
   } catch (e) {
     logger.error("quote.create_failed", { error: String(e) });
