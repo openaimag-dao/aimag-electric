@@ -27,7 +27,15 @@ let ensured = false;
 async function ensureTable() {
   if (ensured) return;
   for (const statement of CREATE_TABLE_STATEMENTS) {
-    await prisma.$executeRawUnsafe(statement);
+    try {
+      await prisma.$executeRawUnsafe(statement);
+    } catch (e) {
+      // Concurrent serverless invocations can both see "not exists" and
+      // race to create it — Postgres's IF NOT EXISTS isn't atomic against
+      // that. The loser gets a duplicate-key error; that's fine, the table
+      // exists either way.
+      if (!(e instanceof Error && /already exists/.test(e.message))) throw e;
+    }
   }
   ensured = true;
 }
