@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/footer";
 import { siteConfig } from "@/config/site";
 import { buildOrganizationJsonLd } from "@/lib/org-jsonld";
 import { AuthProvider } from "@/components/auth/session-provider";
+import { CartProvider } from "@/components/cart/cart-provider";
 import "./globals.css";
 
 const sans = Inter({
@@ -75,9 +76,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const { organization, website } = buildOrganizationJsonLd();
   return (
     <html lang="ru" className={`${sans.variable} ${display.variable} ${mono.variable}`}>
@@ -91,9 +90,11 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(website) }}
         />
         <AuthProvider>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <CartProvider>
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </CartProvider>
         </AuthProvider>
       </body>
     </html>

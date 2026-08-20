@@ -1,8 +1,5 @@
 import { AdminPageHeader } from "@/components/admin/page-header";
-import {
-  QuotesManager,
-  type QuoteListRow,
-} from "@/components/admin/quotes/quotes-manager";
+import { QuotesManager, type QuoteListRow } from "@/components/admin/quotes/quotes-manager";
 import { quoteAdminRepository } from "@/server/repositories/admin";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +8,7 @@ export default async function AdminQuotesPage() {
   const rows = await quoteAdminRepository.list();
   const data: QuoteListRow[] = rows.map((q) => ({
     id: q.id,
+    title: q.title,
     company: q.company,
     name: q.name,
     phone: q.phone,
@@ -18,6 +16,14 @@ export default async function AdminQuotesPage() {
     message: q.message,
     status: q.status,
     createdAt: q.createdAt.toISOString(),
+    items: q.items.map((i) => ({
+      id: i.id,
+      title: i.title,
+      sku: i.sku,
+      qty: i.qty,
+      unit: i.unit,
+      amountTiyn: i.amountTiyn,
+    })),
   }));
 
   return (

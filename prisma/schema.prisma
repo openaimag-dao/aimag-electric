@@ -279,6 +279,8 @@ model Review {
 
 model Quote {
   id        String      @id @default(cuid())
+  /** Optional project/object name the client gave their cart, e.g. "Электроснабжение объекта №1". */
+  title     String?
   company   String
   name      String
   phone     String
@@ -304,9 +306,12 @@ model QuoteItem {
   quoteId   String
   quote     Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
   productId String?
+  sku       String?
   title     String
   qty       Float   @default(1)
   unit      String  @default("шт")
+  /** Catalog price at the moment the item was added to the cart, in тиын (see Price.amount). Null if the product had no price ("по запросу"). */
+  amountTiyn Int?
   note      String?
 
   @@index([quoteId])

@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { QuoteForm } from "@/components/common/quote-form";
+import type { CartItem } from "@/types/cart";
 
 interface QuoteDialogProps {
   children?: React.ReactNode;
@@ -19,6 +20,8 @@ interface QuoteDialogProps {
   variant?: ButtonProps["variant"];
   size?: ButtonProps["size"];
   className?: string;
+  /** Pre-fill the КП with specific product lines (e.g. the product page you're on). */
+  items?: CartItem[];
 }
 
 /**
@@ -31,6 +34,7 @@ export function QuoteDialog({
   variant = "signal",
   size = "default",
   className,
+  items,
 }: QuoteDialogProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -47,11 +51,10 @@ export function QuoteDialog({
         <DialogHeader>
           <DialogTitle>Получить коммерческое предложение</DialogTitle>
           <DialogDescription>
-            Оставьте данные — инженер подберёт продукцию и пришлёт КП с ценами
-            и сроками поставки.
+            Оставьте данные — инженер подберёт продукцию и пришлёт КП с ценами и сроками поставки.
           </DialogDescription>
         </DialogHeader>
-        <QuoteForm />
+        <QuoteForm items={items} />
       </DialogContent>
     </Dialog>
   );
