@@ -5,12 +5,7 @@ import { cache } from "react";
 import { productRepository, categoryRepository } from "@/server/repositories";
 import { toCatalogDTO } from "@/server/mappers/product";
 import type { CatalogProductDTO, CategoryDTO } from "@/server/dto";
-import {
-  queryCatalog,
-  buildFacets,
-  type CatalogFacets,
-  type CatalogResult,
-} from "@/lib/catalog";
+import { queryCatalog, buildFacets, type CatalogFacets, type CatalogResult } from "@/lib/catalog";
 import type { CatalogFilters } from "@/types/catalog";
 
 /**
@@ -50,12 +45,17 @@ export const catalogService = {
     return queryCatalog(products, filters);
   },
 
+  /** Live search suggestions (autocomplete) — queried directly in the DB, not the full in-memory catalog. */
+  async searchSuggestions(query: string, limit = 6): Promise<CatalogProductDTO[]> {
+    const q = query.trim();
+    if (q.length < 2) return [];
+    const rows = await productRepository.search(q, limit);
+    return rows.map(toCatalogDTO);
+  },
+
   /** Facet options with live counts for the filter sidebar. */
   async facets(filters: CatalogFilters): Promise<CatalogFacets> {
-    const [products, names] = await Promise.all([
-      loadProducts(),
-      this.getCategoryNames(),
-    ]);
+    const [products, names] = await Promise.all([loadProducts(), this.getCategoryNames()]);
     return buildFacets(products, filters, names);
   },
 
