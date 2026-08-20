@@ -1,4 +1,6 @@
-export const dynamic = "force-dynamic";
+// Cached: every underlying query (homeService.*) is wrapped in unstable_cache
+// with its own revalidate window and tag, and admin writes call
+// revalidatePath("/") — no reason to force a fresh render on every request.
 
 import {
   Hero,
