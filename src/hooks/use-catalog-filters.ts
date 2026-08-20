@@ -42,10 +42,7 @@ export function useCatalogFilters() {
 
   /** Toggle a value inside an array-typed facet. */
   const toggle = React.useCallback(
-    <K extends "categories" | "manufacturers" | "materials">(
-      key: K,
-      value: string
-    ) => {
+    <K extends "categories" | "manufacturers" | "materials">(key: K, value: string) => {
       update((prev) => {
         const set = new Set(prev[key]);
         set.has(value) ? set.delete(value) : set.add(value);
@@ -66,5 +63,17 @@ export function useCatalogFilters() {
     [update]
   );
 
-  return { filters, update, toggle, toggleNum, commit };
+  /** Toggle a value inside a dynamic (per-attribute) facet. */
+  const toggleAttr = React.useCallback(
+    (key: string, value: string) => {
+      update((prev) => {
+        const set = new Set(prev.attrs[key] ?? []);
+        set.has(value) ? set.delete(value) : set.add(value);
+        return { ...prev, attrs: { ...prev.attrs, [key]: Array.from(set) } };
+      });
+    },
+    [update]
+  );
+
+  return { filters, update, toggle, toggleNum, toggleAttr, commit };
 }

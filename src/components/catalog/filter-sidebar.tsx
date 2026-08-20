@@ -25,7 +25,7 @@ const DEFAULT_OPEN = [
 ];
 
 export function FilterSidebar({ facets }: { facets: CatalogFacets }) {
-  const { filters, update, toggle, toggleNum, commit } = useCatalogFilters();
+  const { filters, update, toggle, toggleNum, toggleAttr, commit } = useCatalogFilters();
   const active = activeFilterCount(filters);
 
   return (
@@ -84,9 +84,7 @@ export function FilterSidebar({ facets }: { facets: CatalogFacets }) {
               bounds={facets.priceBounds}
               valueMin={filters.priceMin}
               valueMax={filters.priceMax}
-              onApply={(min, max) =>
-                update((prev) => ({ ...prev, priceMin: min, priceMax: max }))
-              }
+              onApply={(min, max) => update((prev) => ({ ...prev, priceMin: min, priceMax: max }))}
             />
           </AccordionContent>
         </AccordionItem>
@@ -151,7 +149,10 @@ export function FilterSidebar({ facets }: { facets: CatalogFacets }) {
         </AccordionItem>
 
         {/* Напряжение */}
-        <AccordionItem value="voltage" className="border-b-0">
+        <AccordionItem
+          value="voltage"
+          className={facets.dynamicAttributes.length ? "" : "border-b-0"}
+        >
           <AccordionTrigger>Напряжение, кВ</AccordionTrigger>
           <AccordionContent>
             <FacetCheckboxList
@@ -161,6 +162,27 @@ export function FilterSidebar({ facets }: { facets: CatalogFacets }) {
             />
           </AccordionContent>
         </AccordionItem>
+
+        {/* Прочие характеристики — генерируются из реально присутствующих в выборке атрибутов */}
+        {facets.dynamicAttributes.map((facet, i) => (
+          <AccordionItem
+            key={facet.key}
+            value={`attr-${facet.key}`}
+            className={i === facets.dynamicAttributes.length - 1 ? "border-b-0" : ""}
+          >
+            <AccordionTrigger>
+              {facet.name}
+              {facet.unit ? `, ${facet.unit}` : ""}
+            </AccordionTrigger>
+            <AccordionContent>
+              <FacetCheckboxList
+                options={facet.options}
+                selected={filters.attrs[facet.key] ?? []}
+                onToggle={(v) => toggleAttr(facet.key, v)}
+              />
+            </AccordionContent>
+          </AccordionItem>
+        ))}
       </Accordion>
 
       <Separator />

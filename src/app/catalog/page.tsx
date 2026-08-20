@@ -52,10 +52,11 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
 
 export default async function CatalogPage({ searchParams }: PageProps) {
   const { cat } = await searchParams;
-  const [products, categories, total] = await Promise.all([
+  const [products, categories, total, attributeDefs] = await Promise.all([
     catalogService.loadProducts(),
     catalogService.loadCategories(),
     catalogService.count(),
+    catalogService.loadAttributes(),
   ]);
   const categoryNames = Object.fromEntries(categories.map((c) => [c.slug, c.title]));
   const category = cat ? categories.find((c) => c.slug === cat) : null;
@@ -103,7 +104,11 @@ export default async function CatalogPage({ searchParams }: PageProps) {
       {/* Catalog body */}
       <div className="container py-8">
         <Suspense fallback={<CatalogSkeleton />}>
-          <CatalogView products={products} categoryNames={categoryNames} />
+          <CatalogView
+            products={products}
+            categoryNames={categoryNames}
+            attributeDefs={attributeDefs}
+          />
         </Suspense>
       </div>
     </div>

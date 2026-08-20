@@ -13,12 +13,10 @@ interface Chip {
 
 /** Removable chips summarizing every active filter — DigiKey-style. */
 export function ActiveFilterChips({ facets }: { facets: CatalogFacets }) {
-  const { filters, update, toggle, toggleNum } = useCatalogFilters();
+  const { filters, update, toggle, toggleNum, toggleAttr } = useCatalogFilters();
 
-  const labelFor = <T extends string | number>(
-    options: { value: T; label: string }[],
-    value: T
-  ) => options.find((o) => o.value === value)?.label ?? String(value);
+  const labelFor = <T extends string | number>(options: { value: T; label: string }[], value: T) =>
+    options.find((o) => o.value === value)?.label ?? String(value);
 
   const chips: Chip[] = [];
 
@@ -71,6 +69,15 @@ export function ActiveFilterChips({ facets }: { facets: CatalogFacets }) {
       onRemove: () => toggleNum("voltages", v),
     })
   );
+  for (const facet of facets.dynamicAttributes) {
+    for (const v of filters.attrs[facet.key] ?? []) {
+      chips.push({
+        key: `attr-${facet.key}-${v}`,
+        label: facet.unit ? `${v} ${facet.unit}` : v,
+        onRemove: () => toggleAttr(facet.key, v),
+      });
+    }
+  }
   if (filters.inStockOnly) {
     chips.push({
       key: "stock",

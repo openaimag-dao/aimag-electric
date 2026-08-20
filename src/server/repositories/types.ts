@@ -16,9 +16,6 @@ export type ProductWithRelations = Prisma.ProductGetPayload<{
   include: typeof productInclude;
 }>;
 
-/** Attribute keys the catalog grid/facets actually read (see toCatalogDTO). */
-const LISTING_ATTRIBUTE_KEYS = ["material", "cores", "crossSection", "voltage"];
-
 /**
  * Lean product shape for listing views (catalog grid, "related products").
  * Skips documents/reviews and the full attribute/warehouse graph that only
@@ -47,7 +44,11 @@ export const productListSelect = {
       valueBool: true,
       attribute: { select: { key: true } },
     },
-    where: { attribute: { key: { in: LISTING_ATTRIBUTE_KEYS } } },
+    // All filterable attributes, not just the four with dedicated
+    // CatalogProduct fields — new attributes staff add in /admin/attributes
+    // show up in facets automatically (see toCatalogDTO's `attrs` bag and
+    // buildFacets' dynamicAttributes).
+    where: { attribute: { filterable: true } },
   },
 } satisfies Prisma.ProductSelect;
 

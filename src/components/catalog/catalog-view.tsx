@@ -12,14 +12,15 @@ import { ProductCard } from "@/components/catalog/product-card";
 import { CatalogPagination } from "@/components/catalog/catalog-pagination";
 import { CatalogEmptyState } from "@/components/catalog/empty-state";
 import { PAGE_SIZE } from "@/config/catalog-sort";
-import type { CatalogProduct } from "@/types/catalog";
+import type { AttributeDef, CatalogProduct } from "@/types/catalog";
 
 interface CatalogViewProps {
   products: CatalogProduct[];
   categoryNames: Record<string, string>;
+  attributeDefs: AttributeDef[];
 }
 
-export function CatalogView({ products, categoryNames }: CatalogViewProps) {
+export function CatalogView({ products, categoryNames, attributeDefs }: CatalogViewProps) {
   const { filters } = useCatalogFilters();
 
   // Derived data — memoized so re-renders on unrelated state stay cheap.
@@ -28,8 +29,8 @@ export function CatalogView({ products, categoryNames }: CatalogViewProps) {
     [products, filters]
   );
   const facets = React.useMemo(
-    () => buildFacets(products, filters, categoryNames),
-    [products, categoryNames, filters]
+    () => buildFacets(products, filters, categoryNames, attributeDefs),
+    [products, categoryNames, attributeDefs, filters]
   );
   const activeCount = activeFilterCount(filters);
 

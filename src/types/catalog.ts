@@ -21,6 +21,8 @@ export interface CatalogProduct {
   crossSection: number | null;
   /** Номинальное напряжение, кВ. */
   voltage: number | null;
+  /** Все значения атрибутов по Attribute.key (включая material/cores/crossSection/voltage) — источник динамических фильтров. */
+  attrs?: Record<string, string | number>;
   /** Признак новинки для сортировки "по новизне". */
   createdAt: string;
   /** Индекс популярности (продажи/просмотры) для сортировки. */
@@ -45,6 +47,8 @@ export interface CatalogFilters {
   cores: number[];
   crossSections: number[];
   voltages: number[];
+  /** Значения прочих (динамических) атрибутов по Attribute.key, как строки — см. buildFacets/dynamicAttributes. */
+  attrs: Record<string, string[]>;
   priceMin: number | null;
   priceMax: number | null;
   /** true — показывать только товары в наличии. */
@@ -58,4 +62,13 @@ export interface FacetOption<T = string> {
   label: string;
   /** Сколько товаров matched бы этот вариант в текущей выборке. */
   count: number;
+}
+
+/** Filterable attribute definition, as managed in /admin/attributes. */
+export interface AttributeDef {
+  key: string;
+  name: string;
+  unit: string | null;
+  type: "STRING" | "NUMBER" | "BOOLEAN";
+  order: number;
 }

@@ -36,6 +36,8 @@ export interface CatalogProductDTO {
   cores: number | null;
   crossSection: number | null;
   voltage: number | null;
+  /** Every attribute value by Attribute.key (includes material/cores/crossSection/voltage too) — drives dynamic facets. */
+  attrs: Record<string, string | number>;
   createdAt: string;
   popularity: number;
   badge?: "Хит" | "Новинка" | "Со склада";
