@@ -11,6 +11,7 @@ import {
 import { attributeValueFormSchema } from "@/lib/validations/admin";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
 import { coerceAttributeValue, type AttributeValueType } from "@/lib/attributes";
+import { requireStaff } from "@/lib/security/rbac";
 
 function revalidate() {
   revalidatePath("/admin/attribute-values");
@@ -25,6 +26,7 @@ function typedColumns(type: "STRING" | "NUMBER" | "BOOLEAN", raw: string) {
 }
 
 export async function createAttributeValue(input: unknown): Promise<ActionResult> {
+  await requireStaff();
   const v = validate(attributeValueFormSchema, input);
   if (!v.success) return v.result;
   try {
@@ -45,6 +47,7 @@ export async function createAttributeValue(input: unknown): Promise<ActionResult
 }
 
 export async function updateAttributeValue(id: string, input: unknown): Promise<ActionResult> {
+  await requireStaff();
   const v = validate(attributeValueFormSchema, input);
   if (!v.success) return v.result;
   try {
@@ -65,6 +68,7 @@ export async function updateAttributeValue(id: string, input: unknown): Promise<
 }
 
 export async function deleteAttributeValue(id: string): Promise<ActionResult> {
+  await requireStaff();
   try {
     await attributeValueAdminRepository.remove(id);
     revalidate();
@@ -105,6 +109,7 @@ function attributeValueToString(
 export async function getProductSpecFields(
   productId: string
 ): Promise<ActionResult<ProductSpecField[]>> {
+  await requireStaff();
   try {
     const product = await productAdminRepository.byId(productId);
     if (!product) return fail("Товар не найден");
@@ -156,6 +161,7 @@ export async function saveProductSpecs(
   productId: string,
   fields: ProductSpecFieldInput[]
 ): Promise<ActionResult> {
+  await requireStaff();
   try {
     for (const f of fields) {
       const trimmed = f.value.trim();

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { documentAdminRepository } from "@/server/repositories/admin";
 import { documentFormSchema } from "@/lib/validations/admin";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
+import { requireStaff } from "@/lib/security/rbac";
 
 function revalidate() {
   revalidatePath("/admin/documents");
@@ -12,6 +13,7 @@ function revalidate() {
 }
 
 export async function createDocument(input: unknown): Promise<ActionResult> {
+  await requireStaff();
   const v = validate(documentFormSchema, input);
   if (!v.success) return v.result;
   try {
@@ -31,6 +33,7 @@ export async function createDocument(input: unknown): Promise<ActionResult> {
 }
 
 export async function updateDocument(id: string, input: unknown): Promise<ActionResult> {
+  await requireStaff();
   const v = validate(documentFormSchema, input);
   if (!v.success) return v.result;
   try {
@@ -50,6 +53,7 @@ export async function updateDocument(id: string, input: unknown): Promise<Action
 }
 
 export async function deleteDocument(id: string): Promise<ActionResult> {
+  await requireStaff();
   try {
     await documentAdminRepository.remove(id);
     revalidate();

@@ -51,8 +51,16 @@ const loadPopular = unstable_cache(
   { tags: [CACHE_TAGS.products], revalidate: 600 }
 );
 
+/** Real published-product count for the hero's catalog-size stat — not a hardcoded marketing number. */
+const loadProductCount = unstable_cache(
+  (): Promise<number> => productRepository.countPublished(),
+  ["home-product-count"],
+  { tags: [CACHE_TAGS.products], revalidate: 600 }
+);
+
 export const homeService = {
   categories: cache(loadCategories),
   brands: cache(loadBrands),
   popularProducts: cache((limit = 8) => loadPopular(limit)),
+  productCount: cache(loadProductCount),
 };

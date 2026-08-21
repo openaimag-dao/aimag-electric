@@ -6,6 +6,7 @@ import { categoryAdminRepository, categoryAttributeRepository } from "@/server/r
 import { categoryFormSchema } from "@/lib/validations/admin";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
+import { requireStaff } from "@/lib/security/rbac";
 
 function revalidate() {
   revalidatePath("/admin/categories");
@@ -15,6 +16,7 @@ function revalidate() {
 }
 
 export async function createCategory(input: unknown): Promise<ActionResult> {
+  await requireStaff();
   const v = validate(categoryFormSchema, input);
   if (!v.success) return v.result;
   try {
@@ -35,6 +37,7 @@ export async function createCategory(input: unknown): Promise<ActionResult> {
 }
 
 export async function updateCategory(id: string, input: unknown): Promise<ActionResult> {
+  await requireStaff();
   const v = validate(categoryFormSchema, input);
   if (!v.success) return v.result;
   try {
@@ -55,6 +58,7 @@ export async function updateCategory(id: string, input: unknown): Promise<Action
 }
 
 export async function deleteCategory(id: string): Promise<ActionResult> {
+  await requireStaff();
   try {
     const count = await categoryAdminRepository.countProducts(id);
     if (count > 0) {
@@ -76,6 +80,7 @@ export interface CategoryAttributeTemplateItem {
 export async function getCategoryAttributeTemplate(
   categoryId: string
 ): Promise<ActionResult<CategoryAttributeTemplateItem[]>> {
+  await requireStaff();
   try {
     const rows = await categoryAttributeRepository.listForCategory(categoryId);
     return ok(rows.map((r) => ({ attributeId: r.attributeId, required: r.required })));
@@ -89,6 +94,7 @@ export async function setCategoryAttributeTemplate(
   categoryId: string,
   items: CategoryAttributeTemplateItem[]
 ): Promise<ActionResult> {
+  await requireStaff();
   try {
     await categoryAttributeRepository.setForCategory(
       categoryId,

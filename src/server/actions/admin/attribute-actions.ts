@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { attributeAdminRepository } from "@/server/repositories/admin";
 import { attributeFormSchema } from "@/lib/validations/admin";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
+import { requireStaff } from "@/lib/security/rbac";
 
 function revalidate() {
   revalidatePath("/admin/attributes");
@@ -13,6 +14,7 @@ function revalidate() {
 }
 
 export async function createAttribute(input: unknown): Promise<ActionResult> {
+  await requireStaff();
   const v = validate(attributeFormSchema, input);
   if (!v.success) return v.result;
   try {
@@ -32,6 +34,7 @@ export async function createAttribute(input: unknown): Promise<ActionResult> {
 }
 
 export async function updateAttribute(id: string, input: unknown): Promise<ActionResult> {
+  await requireStaff();
   const v = validate(attributeFormSchema, input);
   if (!v.success) return v.result;
   try {
@@ -51,6 +54,7 @@ export async function updateAttribute(id: string, input: unknown): Promise<Actio
 }
 
 export async function deleteAttribute(id: string): Promise<ActionResult> {
+  await requireStaff();
   try {
     const count = await attributeAdminRepository.countValues(id);
     if (count > 0) {

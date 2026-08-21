@@ -6,6 +6,7 @@ import { priceAdminRepository } from "@/server/repositories/admin";
 import { priceFormSchema } from "@/lib/validations/admin";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
 import { tengeToTiyn } from "@/lib/money";
+import { requireStaff } from "@/lib/security/rbac";
 
 function revalidate() {
   revalidatePath("/admin/prices");
@@ -19,6 +20,7 @@ function amountTiyn(amountTenge: number | "" | undefined): number | null {
 }
 
 export async function createPrice(input: unknown): Promise<ActionResult> {
+  await requireStaff();
   const v = validate(priceFormSchema, input);
   if (!v.success) return v.result;
   try {
@@ -36,6 +38,7 @@ export async function createPrice(input: unknown): Promise<ActionResult> {
 }
 
 export async function updatePrice(id: string, input: unknown): Promise<ActionResult> {
+  await requireStaff();
   const v = validate(priceFormSchema, input);
   if (!v.success) return v.result;
   try {
@@ -53,6 +56,7 @@ export async function updatePrice(id: string, input: unknown): Promise<ActionRes
 }
 
 export async function deletePrice(id: string): Promise<ActionResult> {
+  await requireStaff();
   try {
     await priceAdminRepository.remove(id);
     revalidate();

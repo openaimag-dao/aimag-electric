@@ -27,15 +27,16 @@ import { homeService } from "@/server/services";
  * Articles) remain in config as editorial content.
  */
 export default async function HomePage() {
-  const [categories, popular, brands] = await Promise.all([
+  const [categories, popular, brands, productCount] = await Promise.all([
     homeService.categories(),
     homeService.popularProducts(8),
     homeService.brands(),
+    homeService.productCount(),
   ]);
 
   return (
     <>
-      <Hero categories={categories} />
+      <Hero categories={categories} productCount={productCount} />
       <Categories categories={categories} />
       <PopularProducts products={popular} />
       <Manufacturers brands={brands} />

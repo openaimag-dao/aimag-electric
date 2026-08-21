@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { productImageAdminRepository } from "@/server/repositories/admin";
 import { productImageFormSchema } from "@/lib/validations/admin";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
+import { requireStaff } from "@/lib/security/rbac";
 
 function revalidate() {
   revalidatePath("/admin/product-images");
@@ -14,11 +15,13 @@ function revalidate() {
 
 /** Images for one product — powers the inline photo panel in the product edit dialog. */
 export async function getProductImages(productId: string) {
+  await requireStaff();
   const rows = await productImageAdminRepository.listForProduct(productId);
   return rows.map((r) => ({ id: r.id, url: r.url ?? "", alt: r.alt, order: r.order }));
 }
 
 export async function createProductImage(input: unknown): Promise<ActionResult> {
+  await requireStaff();
   const v = validate(productImageFormSchema, input);
   if (!v.success) return v.result;
   try {
@@ -36,6 +39,7 @@ export async function createProductImage(input: unknown): Promise<ActionResult> 
 }
 
 export async function updateProductImage(id: string, input: unknown): Promise<ActionResult> {
+  await requireStaff();
   const v = validate(productImageFormSchema, input);
   if (!v.success) return v.result;
   try {
@@ -53,6 +57,7 @@ export async function updateProductImage(id: string, input: unknown): Promise<Ac
 }
 
 export async function deleteProductImage(id: string): Promise<ActionResult> {
+  await requireStaff();
   try {
     await productImageAdminRepository.remove(id);
     revalidate();
