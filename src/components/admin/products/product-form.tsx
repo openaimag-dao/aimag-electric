@@ -11,6 +11,7 @@ import { Field, Input, Textarea, NativeSelect } from "@/components/admin/form-fi
 import { Label } from "@/components/ui/label";
 import { productFormSchema, type ProductFormInput } from "@/lib/validations/admin";
 import { createProduct, updateProduct } from "@/server/actions/admin";
+import { ProductPhotosPanel } from "@/components/admin/products/product-photos-panel";
 
 export interface ProductRow {
   id: string;
@@ -82,6 +83,14 @@ export function ProductForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+      {isEdit ? (
+        <ProductPhotosPanel productId={initial!.id} />
+      ) : (
+        <p className="rounded-lg border border-dashed border-border bg-secondary/40 p-3 text-xs text-muted-foreground">
+          Фото можно будет добавить после создания товара — откройте его на редактирование.
+        </p>
+      )}
+
       <Field label="Название" htmlFor="title" error={errors.title}>
         <Input id="title" {...register("title")} />
       </Field>
@@ -100,7 +109,9 @@ export function ProductForm({
           <NativeSelect id="categoryId" {...register("categoryId")}>
             <option value="">— выберите —</option>
             {categories.map((c) => (
-              <option key={c.id} value={c.id}>{c.label}</option>
+              <option key={c.id} value={c.id}>
+                {c.label}
+              </option>
             ))}
           </NativeSelect>
         </Field>
@@ -108,7 +119,9 @@ export function ProductForm({
           <NativeSelect id="brandId" {...register("brandId")}>
             <option value="">— выберите —</option>
             {brands.map((b) => (
-              <option key={b.id} value={b.id}>{b.label}</option>
+              <option key={b.id} value={b.id}>
+                {b.label}
+              </option>
             ))}
           </NativeSelect>
         </Field>
@@ -159,11 +172,7 @@ export function ProductForm({
           control={control}
           name="published"
           render={({ field }) => (
-            <Switch
-              id="published"
-              checked={field.value}
-              onCheckedChange={field.onChange}
-            />
+            <Switch id="published" checked={field.value} onCheckedChange={field.onChange} />
           )}
         />
       </div>

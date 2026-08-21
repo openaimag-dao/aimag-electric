@@ -18,6 +18,9 @@ export const productImageAdminRepository = {
   byId(id: string) {
     return prisma.productImage.findUnique({ where: { id }, include });
   },
+  listForProduct(productId: string) {
+    return prisma.productImage.findMany({ where: { productId }, orderBy: { order: "asc" } });
+  },
   create(data: Prisma.ProductImageCreateInput) {
     return prisma.productImage.create({ data });
   },

@@ -12,6 +12,12 @@ function revalidate() {
   revalidatePath("/catalog");
 }
 
+/** Images for one product — powers the inline photo panel in the product edit dialog. */
+export async function getProductImages(productId: string) {
+  const rows = await productImageAdminRepository.listForProduct(productId);
+  return rows.map((r) => ({ id: r.id, url: r.url ?? "", alt: r.alt, order: r.order }));
+}
+
 export async function createProductImage(input: unknown): Promise<ActionResult> {
   const v = validate(productImageFormSchema, input);
   if (!v.success) return v.result;
