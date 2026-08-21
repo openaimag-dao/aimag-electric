@@ -18,6 +18,7 @@ import {
   type DuplicateCandidate,
 } from "@/server/actions/admin";
 import { ProductPhotosPanel } from "@/components/admin/products/product-photos-panel";
+import { ProductSpecsPanel } from "@/components/admin/products/product-specs-panel";
 
 export interface ProductRow {
   id: string;
@@ -89,6 +90,7 @@ export function ProductForm({
 
   const title = useWatch({ control, name: "title" });
   const brandId = useWatch({ control, name: "brandId" });
+  const categoryId = useWatch({ control, name: "categoryId" });
   const [duplicates, setDuplicates] = React.useState<DuplicateCandidate[]>([]);
 
   React.useEffect(() => {
@@ -168,6 +170,10 @@ export function ProductForm({
           </NativeSelect>
         </Field>
       </div>
+
+      {isEdit && categoryId && (
+        <ProductSpecsPanel productId={initial!.id} categoryId={categoryId} />
+      )}
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Field label="Единица" htmlFor="unit" error={errors.unit} hint="м / шт / компл">
