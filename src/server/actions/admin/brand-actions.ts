@@ -6,6 +6,7 @@ import { brandAdminRepository } from "@/server/repositories/admin";
 import { brandFormSchema } from "@/lib/validations/admin";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
+import { requireStaff } from "@/lib/security/rbac";
 
 function revalidate() {
   revalidatePath("/admin/brands");
@@ -14,6 +15,7 @@ function revalidate() {
 }
 
 export async function createBrand(input: unknown): Promise<ActionResult> {
+  await requireStaff();
   const v = validate(brandFormSchema, input);
   if (!v.success) return v.result;
   try {
@@ -30,6 +32,7 @@ export async function createBrand(input: unknown): Promise<ActionResult> {
 }
 
 export async function updateBrand(id: string, input: unknown): Promise<ActionResult> {
+  await requireStaff();
   const v = validate(brandFormSchema, input);
   if (!v.success) return v.result;
   try {
@@ -46,6 +49,7 @@ export async function updateBrand(id: string, input: unknown): Promise<ActionRes
 }
 
 export async function deleteBrand(id: string): Promise<ActionResult> {
+  await requireStaff();
   try {
     const count = await brandAdminRepository.countProducts(id);
     if (count > 0) {

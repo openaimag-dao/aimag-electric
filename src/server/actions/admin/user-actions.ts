@@ -6,12 +6,14 @@ import { hash } from "bcryptjs";
 import { userAdminRepository } from "@/server/repositories/admin";
 import { userFormSchema } from "@/lib/validations/admin";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
+import { requireStaff } from "@/lib/security/rbac";
 
 function revalidate() {
   revalidatePath("/admin/users");
 }
 
 export async function createUser(input: unknown): Promise<ActionResult> {
+  await requireStaff();
   const v = validate(userFormSchema, input);
   if (!v.success) return v.result;
   try {
@@ -31,6 +33,7 @@ export async function createUser(input: unknown): Promise<ActionResult> {
 }
 
 export async function updateUser(id: string, input: unknown): Promise<ActionResult> {
+  await requireStaff();
   const v = validate(userFormSchema, input);
   if (!v.success) return v.result;
   try {
@@ -52,6 +55,7 @@ export async function updateUser(id: string, input: unknown): Promise<ActionResu
 }
 
 export async function deleteUser(id: string): Promise<ActionResult> {
+  await requireStaff();
   try {
     await userAdminRepository.remove(id);
     revalidate();

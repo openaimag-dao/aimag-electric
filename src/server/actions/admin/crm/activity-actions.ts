@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { activityAdminRepository } from "@/server/repositories/admin";
 import { activityFormSchema } from "@/lib/validations/crm";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
+import { requireStaff } from "@/lib/security/rbac";
 
 function revalidate(customerId?: string, dealId?: string) {
   revalidatePath("/admin/crm");
@@ -13,6 +14,7 @@ function revalidate(customerId?: string, dealId?: string) {
 }
 
 export async function createActivity(input: unknown): Promise<ActionResult> {
+  await requireStaff();
   const v = validate(activityFormSchema, input);
   if (!v.success) return v.result;
   const d = v.data;
@@ -36,6 +38,7 @@ export async function createActivity(input: unknown): Promise<ActionResult> {
 }
 
 export async function toggleActivityDone(id: string, done: boolean): Promise<ActionResult> {
+  await requireStaff();
   try {
     await activityAdminRepository.toggleDone(id, done);
     revalidate();
@@ -46,6 +49,7 @@ export async function toggleActivityDone(id: string, done: boolean): Promise<Act
 }
 
 export async function deleteActivity(id: string): Promise<ActionResult> {
+  await requireStaff();
   try {
     await activityAdminRepository.remove(id);
     revalidate();

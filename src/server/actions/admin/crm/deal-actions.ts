@@ -6,6 +6,7 @@ import { dealAdminRepository } from "@/server/repositories/admin";
 import { dealFormSchema, dealStage } from "@/lib/validations/crm";
 import { tengeToTiyn } from "@/lib/money";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
+import { requireStaff } from "@/lib/security/rbac";
 
 function revalidate() {
   revalidatePath("/admin/crm");
@@ -18,6 +19,7 @@ function amount(amountTenge: number | "" | undefined): number | null {
 }
 
 export async function createDeal(input: unknown): Promise<ActionResult> {
+  await requireStaff();
   const v = validate(dealFormSchema, input);
   if (!v.success) return v.result;
   const d = v.data;
@@ -40,6 +42,7 @@ export async function createDeal(input: unknown): Promise<ActionResult> {
 }
 
 export async function updateDeal(id: string, input: unknown): Promise<ActionResult> {
+  await requireStaff();
   const v = validate(dealFormSchema, input);
   if (!v.success) return v.result;
   const d = v.data;
@@ -62,6 +65,7 @@ export async function updateDeal(id: string, input: unknown): Promise<ActionResu
 }
 
 export async function setDealStage(id: string, stage: string): Promise<ActionResult> {
+  await requireStaff();
   const parsed = dealStage.safeParse(stage);
   if (!parsed.success) return fail("Некорректная стадия");
   try {
@@ -74,6 +78,7 @@ export async function setDealStage(id: string, stage: string): Promise<ActionRes
 }
 
 export async function deleteDeal(id: string): Promise<ActionResult> {
+  await requireStaff();
   try {
     await dealAdminRepository.remove(id);
     revalidate();

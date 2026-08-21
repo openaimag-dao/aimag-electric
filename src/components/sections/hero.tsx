@@ -4,7 +4,7 @@ import { ArrowRight, FileText, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { QuoteDialog } from "@/components/common/quote-dialog";
 import { CatalogSearch } from "@/components/sections/catalog-search";
-import { heroStats } from "@/config/stats";
+import { getHeroStats } from "@/config/stats";
 import type { CategoryDTO } from "@/server/dto";
 
 /**
@@ -12,10 +12,17 @@ import type { CategoryDTO } from "@/server/dto";
  * Right: trust stats panel. Signature: live-conductor routing over a blueprint
  * grid, terminating in animated "current" nodes.
  */
-export function Hero({ categories }: { categories: CategoryDTO[] }) {
+export function Hero({
+  categories,
+  productCount,
+}: {
+  categories: CategoryDTO[];
+  productCount: number;
+}) {
+  const heroStats = getHeroStats(productCount);
   return (
     <section className="relative overflow-hidden bg-steel-950 text-white">
-      <div className="absolute inset-0 conductor-grid opacity-50" aria-hidden />
+      <div className="conductor-grid absolute inset-0 opacity-50" aria-hidden />
       <div
         className="absolute -right-32 -top-24 size-[560px] rounded-full bg-signal/20 blur-[130px]"
         aria-hidden
@@ -57,15 +64,14 @@ export function Hero({ categories }: { categories: CategoryDTO[] }) {
             Официальный B2B-поставщик · Казахстан
           </span>
 
-          <h1 className="mt-6 font-display text-4xl font-bold leading-[1.04] tracking-tight text-balance sm:text-5xl lg:text-[3.4rem]">
+          <h1 className="mt-6 text-balance font-display text-4xl font-bold leading-[1.04] tracking-tight sm:text-5xl lg:text-[3.4rem]">
             Электротехника для промышленных проектов —
             <span className="text-signal"> со склада и с расчётом под задачу</span>
           </h1>
 
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-steel-300">
-            Кабели, провода, изоляторы, СИП, муфты и высоковольтное оборудование
-            от заводов-изготовителей. Документы для юрлиц и тендеров, доставка по
-            всему Казахстану.
+            Кабели, провода, изоляторы, СИП, муфты и высоковольтное оборудование от
+            заводов-изготовителей. Документы для юрлиц и тендеров, доставка по всему Казахстану.
           </p>
 
           {/* Catalog search */}
@@ -114,9 +120,7 @@ export function Hero({ categories }: { categories: CategoryDTO[] }) {
                 <div className="font-display text-3xl font-bold text-signal sm:text-4xl">
                   {stat.value}
                 </div>
-                <div className="mt-1.5 text-sm leading-snug text-steel-400">
-                  {stat.label}
-                </div>
+                <div className="mt-1.5 text-sm leading-snug text-steel-400">{stat.label}</div>
               </div>
             ))}
           </div>

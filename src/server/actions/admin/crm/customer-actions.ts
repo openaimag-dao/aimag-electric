@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { customerAdminRepository } from "@/server/repositories/admin";
 import { customerFormSchema } from "@/lib/validations/crm";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
+import { requireStaff } from "@/lib/security/rbac";
 
 function revalidate() {
   revalidatePath("/admin/crm/customers");
@@ -26,6 +27,7 @@ function toData(d: ReturnType<typeof customerFormSchema.parse>) {
 }
 
 export async function createCustomer(input: unknown): Promise<ActionResult> {
+  await requireStaff();
   const v = validate(customerFormSchema, input);
   if (!v.success) return v.result;
   try {
@@ -38,6 +40,7 @@ export async function createCustomer(input: unknown): Promise<ActionResult> {
 }
 
 export async function updateCustomer(id: string, input: unknown): Promise<ActionResult> {
+  await requireStaff();
   const v = validate(customerFormSchema, input);
   if (!v.success) return v.result;
   try {
@@ -61,6 +64,7 @@ export async function updateCustomer(id: string, input: unknown): Promise<Action
 }
 
 export async function deleteCustomer(id: string): Promise<ActionResult> {
+  await requireStaff();
   try {
     await customerAdminRepository.remove(id);
     revalidate();
