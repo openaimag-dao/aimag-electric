@@ -85,7 +85,7 @@ export function CategorySpecTemplatePanel({
       </div>
       <p className="mb-3 text-xs text-muted-foreground">
         Отметьте, какие характеристики относятся к товарам этой категории, и какие из них
-        обязательны — это влияет на оценку «Качество каталога».
+        обязательны — это справочный шаблон для менеджеров.
       </p>
 
       {loading ? (
