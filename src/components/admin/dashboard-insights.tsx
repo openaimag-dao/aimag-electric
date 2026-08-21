@@ -1,7 +1,17 @@
 import Link from "next/link";
-import { ImageOff, FileWarning, FileX, PackageX, Activity, Upload } from "lucide-react";
+import {
+  ImageOff,
+  FileWarning,
+  FileX,
+  PackageX,
+  Activity,
+  Upload,
+  Tag,
+  ListChecks,
+} from "lucide-react";
 
 import { adminService } from "@/server/services/admin-service";
+import { cn } from "@/lib/utils";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("ru-RU", {
@@ -24,32 +34,60 @@ const actionLabels: Record<string, string> = {
 
 /** Server component: data-quality + operations widgets for the dashboard. */
 export async function DashboardInsights() {
-  const { quality, lowStock, recentAudit, recentImports } =
-    await adminService.dashboardInsights();
+  const { quality, lowStock, recentAudit, recentImports } = await adminService.dashboardInsights();
 
   return (
     <div className="space-y-6">
       {/* Data quality */}
       <div>
-        <h2 className="mb-3 font-display text-lg font-semibold text-primary">Качество каталога</h2>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="font-display text-lg font-semibold text-primary">Качество каталога</h2>
+          <span className="text-sm text-muted-foreground">
+            Catalog Health:{" "}
+            <span
+              className={cn(
+                "font-display text-base font-bold",
+                quality.healthScore >= 80
+                  ? "text-emerald-600"
+                  : quality.healthScore >= 50
+                    ? "text-amber-600"
+                    : "text-red-600"
+              )}
+            >
+              {quality.healthScore}%
+            </span>
+          </span>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-3 xl:grid-cols-5">
           <QualityCard
             icon={ImageOff}
-            label="Товары без фото"
+            label="Без фото"
             value={quality.noImages}
-            href="/admin/products"
+            href="/admin/products?quality=no-image"
+          />
+          <QualityCard
+            icon={Tag}
+            label="Без цены"
+            value={quality.noPrice}
+            href="/admin/products?quality=no-price"
+          />
+          <QualityCard
+            icon={ListChecks}
+            label="Без характеристик"
+            value={quality.noSpecs}
+            href="/admin/products?quality=no-specs"
           />
           <QualityCard
             icon={FileWarning}
             label="Без описания (SEO)"
             value={quality.noDescription}
-            href="/admin/products"
+            href="/admin/products?quality=no-description"
           />
           <QualityCard
             icon={FileX}
             label="Без документов"
             value={quality.noDocuments}
-            href="/admin/products"
+            href="/admin/products?quality=no-documents"
           />
         </div>
       </div>
@@ -70,7 +108,9 @@ export async function DashboardInsights() {
                   <span className="min-w-0 truncate text-primary">{s.title}</span>
                   <span className="flex shrink-0 items-center gap-2">
                     <span className="font-mono text-xs text-muted-foreground">{s.warehouse}</span>
-                    <span className={`font-mono font-semibold ${s.quantity <= 0 ? "text-red-600" : "text-amber-600"}`}>
+                    <span
+                      className={`font-mono font-semibold ${s.quantity <= 0 ? "text-red-600" : "text-amber-600"}`}
+                    >
                       {s.quantity}
                     </span>
                   </span>
@@ -119,7 +159,9 @@ export async function DashboardInsights() {
             {recentImports.map((imp) => (
               <li key={imp.id} className="flex items-center justify-between gap-3 py-2 text-sm">
                 <span className="min-w-0 truncate text-primary">{imp.summary}</span>
-                <span className="shrink-0 text-xs text-muted-foreground">{formatDate(imp.createdAt)}</span>
+                <span className="shrink-0 text-xs text-muted-foreground">
+                  {formatDate(imp.createdAt)}
+                </span>
               </li>
             ))}
           </ul>
@@ -148,7 +190,9 @@ function QualityCard({
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Icon className="size-4" /> {label}
       </div>
-      <div className={`mt-2 font-display text-2xl font-bold ${value > 0 ? "text-amber-600" : "text-emerald-600"}`}>
+      <div
+        className={`mt-2 font-display text-2xl font-bold ${value > 0 ? "text-amber-600" : "text-emerald-600"}`}
+      >
         {value}
       </div>
     </Link>

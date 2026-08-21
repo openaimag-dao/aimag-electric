@@ -1,6 +1,7 @@
 import "server-only";
 
 import { prisma } from "@/lib/prisma";
+import { qualityWhere } from "@/lib/admin/product-quality";
 
 /** Aggregations for the admin dashboard + reference lists for form selects. */
 export const adminService = {
@@ -81,30 +82,49 @@ export const adminService = {
    * missing images/description/documents, low stock, and the recent audit feed.
    */
   async dashboardInsights() {
-    const [noImages, noDescription, noDocuments, lowStockList, recentAudit, recentImports] =
-      await Promise.all([
-        prisma.product.count({ where: { images: { none: {} } } }),
-        prisma.product.count({ where: { OR: [{ description: null }, { description: "" }] } }),
-        prisma.product.count({ where: { documents: { none: {} } } }),
-        prisma.stock.findMany({
-          where: { quantity: { lte: 5 } },
-          orderBy: { quantity: "asc" },
-          take: 8,
-          include: {
-            product: { select: { title: true, sku: true } },
-            warehouse: { select: { code: true } },
-          },
-        }),
-        prisma.auditLog.findMany({ orderBy: { createdAt: "desc" }, take: 8 }),
-        prisma.auditLog.findMany({
-          where: { action: "IMPORT" },
-          orderBy: { createdAt: "desc" },
-          take: 5,
-        }),
-      ]);
+    const [
+      total,
+      noImages,
+      noPrice,
+      noSpecs,
+      noDescription,
+      noDocuments,
+      lowStockList,
+      recentAudit,
+      recentImports,
+    ] = await Promise.all([
+      prisma.product.count(),
+      prisma.product.count({ where: qualityWhere("no-image") }),
+      prisma.product.count({ where: qualityWhere("no-price") }),
+      prisma.product.count({ where: qualityWhere("no-specs") }),
+      prisma.product.count({ where: qualityWhere("no-description") }),
+      prisma.product.count({ where: qualityWhere("no-documents") }),
+      prisma.stock.findMany({
+        where: { quantity: { lte: 5 } },
+        orderBy: { quantity: "asc" },
+        take: 8,
+        include: {
+          product: { select: { title: true, sku: true } },
+          warehouse: { select: { code: true } },
+        },
+      }),
+      prisma.auditLog.findMany({ orderBy: { createdAt: "desc" }, take: 8 }),
+      prisma.auditLog.findMany({
+        where: { action: "IMPORT" },
+        orderBy: { createdAt: "desc" },
+        take: 5,
+      }),
+    ]);
+
+    // Average gap rate across the 5 checks, inverted — a single honest number, not a fabricated score.
+    const gapChecks = [noImages, noPrice, noSpecs, noDescription, noDocuments];
+    const healthScore =
+      total === 0
+        ? 100
+        : Math.round(100 * (1 - gapChecks.reduce((a, b) => a + b, 0) / (gapChecks.length * total)));
 
     return {
-      quality: { noImages, noDescription, noDocuments },
+      quality: { total, noImages, noPrice, noSpecs, noDescription, noDocuments, healthScore },
       lowStock: lowStockList.map((s) => ({
         title: s.product.title,
         sku: s.product.sku,

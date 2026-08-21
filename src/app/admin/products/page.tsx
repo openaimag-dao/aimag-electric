@@ -1,12 +1,10 @@
 import { AdminPageHeader } from "@/components/admin/page-header";
-import {
-  ProductsManager,
-  type ProductListRow,
-} from "@/components/admin/products/products-manager";
+import { ProductsManager, type ProductListRow } from "@/components/admin/products/products-manager";
 import { productAdminRepository } from "@/server/repositories/admin";
 import { adminService } from "@/server/services/admin-service";
 import { formatTengePerUnit, tiynToTenge } from "@/lib/money";
 import { deriveAvailabilityFromStock } from "@/lib/availability";
+import { parseAdminProductsQuery, ADMIN_PRODUCTS_PAGE_SIZE } from "@/lib/admin/products-url";
 
 export const dynamic = "force-dynamic";
 
@@ -16,11 +14,25 @@ function priceLabel(prices: { kind: string; amount: number | null }[], unit: str
   return formatTengePerUnit(tiynToTenge(base.amount), unit);
 }
 
+interface PageProps {
+  searchParams: Promise<Record<string, string | undefined>>;
+}
 
+export default async function AdminProductsPage({ searchParams }: PageProps) {
+  const sp = await searchParams;
+  const query = parseAdminProductsQuery(new URLSearchParams(sp as Record<string, string>));
 
-export default async function AdminProductsPage() {
-  const [rows, refs] = await Promise.all([
-    productAdminRepository.list(),
+  const [{ rows, total }, refs] = await Promise.all([
+    productAdminRepository.listPage({
+      page: query.page,
+      pageSize: ADMIN_PRODUCTS_PAGE_SIZE,
+      q: query.q || undefined,
+      categoryId: query.category || undefined,
+      brandId: query.brand || undefined,
+      published:
+        query.status === "published" ? true : query.status === "hidden" ? false : undefined,
+      quality: query.quality || undefined,
+    }),
     adminService.refs(),
   ]);
 
@@ -47,14 +59,22 @@ export default async function AdminProductsPage() {
 
   const categories = refs.categories.map((c) => ({ id: c.id, label: c.title }));
   const brands = refs.brands.map((b) => ({ id: b.id, label: b.name }));
+  const pageCount = Math.max(1, Math.ceil(total / ADMIN_PRODUCTS_PAGE_SIZE));
 
   return (
     <div className="space-y-6">
       <AdminPageHeader
         title="Товары"
-        description={`${rows.length} позиций в каталоге. Цена и наличие — из разделов «Цены» и «Склады».`}
+        description={`${total} позиций в каталоге. Цена и наличие — из разделов «Цены» и «Склады».`}
       />
-      <ProductsManager rows={data} categories={categories} brands={brands} />
+      <ProductsManager
+        rows={data}
+        categories={categories}
+        brands={brands}
+        total={total}
+        page={query.page}
+        pageCount={pageCount}
+      />
     </div>
   );
 }
