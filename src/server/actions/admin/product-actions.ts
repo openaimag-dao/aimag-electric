@@ -1,10 +1,17 @@
 "use server";
 
 import { revalidatePath, revalidateTag } from "next/cache";
+import type { Prisma } from "@prisma/client";
 
 import { productAdminRepository } from "@/server/repositories/admin";
 import { productFormSchema } from "@/lib/validations/admin";
-import { ok, validate, toActionError, type ActionResult } from "@/server/actions/action-result";
+import {
+  ok,
+  fail,
+  validate,
+  toActionError,
+  type ActionResult,
+} from "@/server/actions/action-result";
 import { requireStaff } from "@/lib/security/rbac";
 import { audit } from "@/server/audit";
 import { CACHE_TAGS } from "@/lib/cache-tags";
@@ -33,6 +40,39 @@ export async function findPossibleDuplicates(input: {
     (c) => titleSimilarity(c.title, input.title) >= DUPLICATE_TITLE_SIMILARITY_THRESHOLD
   );
   return ok(matches);
+}
+
+export interface BulkProductPatch {
+  categoryId?: string;
+  brandId?: string;
+  published?: boolean;
+}
+
+/** Applies category/brand/status changes to a selected set of products at once. */
+export async function bulkUpdateProducts(
+  ids: string[],
+  patch: BulkProductPatch
+): Promise<ActionResult<{ count: number }>> {
+  await requireStaff();
+  if (ids.length === 0) return fail("Не выбрано ни одного товара");
+  const data: Prisma.ProductUncheckedUpdateManyInput = {};
+  if (patch.categoryId) data.categoryId = patch.categoryId;
+  if (patch.brandId) data.brandId = patch.brandId;
+  if (patch.published !== undefined) data.published = patch.published;
+  if (Object.keys(data).length === 0) return fail("Не выбрано ни одного изменения");
+  try {
+    const result = await productAdminRepository.bulkUpdate(ids, data);
+    await audit({
+      action: "UPDATE",
+      entity: "Product",
+      summary: `Массовое изменение: ${result.count} товар(ов)`,
+      meta: { ids, patch },
+    });
+    revalidate();
+    return ok({ count: result.count });
+  } catch (e) {
+    return toActionError(e);
+  }
 }
 
 function revalidate() {
