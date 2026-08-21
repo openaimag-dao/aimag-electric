@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Field, Input, Textarea, NativeSelect } from "@/components/admin/form-fields";
 import { categoryFormSchema, type CategoryFormInput } from "@/lib/validations/admin";
 import { createCategory, updateCategory } from "@/server/actions/admin";
+import { CategorySpecTemplatePanel } from "@/components/admin/categories/category-spec-template-panel";
 
 const ICON_OPTIONS = ["Cable", "Zap", "Shield", "Link2", "Combine", "ToggleRight", "Factory"];
 
@@ -23,7 +24,20 @@ export interface CategoryRow {
   order: number;
 }
 
-export function CategoryForm({ initial, onDone }: { initial?: CategoryRow; onDone: () => void }) {
+interface AttributeRef {
+  id: string;
+  label: string;
+}
+
+export function CategoryForm({
+  initial,
+  attributes,
+  onDone,
+}: {
+  initial?: CategoryRow;
+  attributes: AttributeRef[];
+  onDone: () => void;
+}) {
   const isEdit = Boolean(initial);
   const {
     register,
@@ -114,6 +128,15 @@ export function CategoryForm({ initial, onDone }: { initial?: CategoryRow; onDon
           </div>
         )}
       </div>
+
+      {isEdit ? (
+        <CategorySpecTemplatePanel categoryId={initial!.id} attributes={attributes} />
+      ) : (
+        <p className="rounded-lg border border-dashed border-border bg-secondary/40 p-3 text-xs text-muted-foreground">
+          Шаблон характеристик можно будет настроить после создания категории — откройте её на
+          редактирование.
+        </p>
+      )}
 
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="outline" onClick={onDone}>

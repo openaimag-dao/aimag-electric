@@ -24,7 +24,18 @@ export interface CategoryListRow extends CategoryRow {
   productCount: number;
 }
 
-export function CategoriesManager({ rows }: { rows: CategoryListRow[] }) {
+interface AttributeRef {
+  id: string;
+  label: string;
+}
+
+export function CategoriesManager({
+  rows,
+  attributes,
+}: {
+  rows: CategoryListRow[];
+  attributes: AttributeRef[];
+}) {
   const {
     query,
     setQuery,
@@ -118,7 +129,7 @@ export function CategoriesManager({ rows }: { rows: CategoryListRow[] }) {
         onOpenChange={setFormOpen}
         title={editing ? "Редактировать категорию" : "Новая категория"}
       >
-        <CategoryForm initial={editing} onDone={closeForm} />
+        <CategoryForm initial={editing} attributes={attributes} onDone={closeForm} />
       </FormDialog>
 
       <ConfirmDelete

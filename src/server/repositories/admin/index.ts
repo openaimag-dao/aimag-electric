@@ -18,3 +18,7 @@ export {
   productImageAdminRepository,
   type ProductImageAdminRow,
 } from "./product-image-admin-repository";
+export {
+  categoryAttributeRepository,
+  type CategoryAttributeItem,
+} from "./category-attribute-repository";

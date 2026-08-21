@@ -40,3 +40,36 @@ export function columnSelfHeal(ddl: string) {
     }
   };
 }
+
+/** Same idea as {@link columnSelfHeal}, for a whole missing table (CREATE TABLE + its indexes/constraints). */
+export function tableSelfHeal(ddls: string[]) {
+  let ensured = false;
+
+  async function ensure() {
+    if (ensured) return;
+    for (const ddl of ddls) {
+      try {
+        await prisma.$executeRawUnsafe(ddl);
+      } catch (e) {
+        // Concurrent serverless invocations can race to create the same
+        // table/constraint — the loser's "already exists" is fine.
+        if (!(e instanceof Error && /already exists/.test(e.message))) throw e;
+      }
+    }
+    ensured = true;
+  }
+
+  function isMissingTable(e: unknown) {
+    return e instanceof Error && /does not exist/.test(e.message);
+  }
+
+  return async function withSelfHeal<T>(fn: () => Promise<T>): Promise<T> {
+    try {
+      return await fn();
+    } catch (e) {
+      if (!isMissingTable(e)) throw e;
+      await ensure();
+      return fn();
+    }
+  };
+}
