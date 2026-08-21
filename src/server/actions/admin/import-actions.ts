@@ -10,10 +10,12 @@ import { tengeToTiyn } from "@/lib/money";
 import { requireStaff } from "@/lib/security/rbac";
 import { audit } from "@/server/audit";
 import { CACHE_TAGS } from "@/lib/cache-tags";
+import { coerceAttributeValue } from "@/lib/attributes";
 
 /** Build the reference context (also exposed for client-side preview). */
 async function loadContext(): Promise<ImportContext> {
-  const { categories, brands, products, warehouses } = await importRepository.loadContext();
+  const { categories, brands, products, warehouses, attributes } =
+    await importRepository.loadContext();
   return {
     categorySlugs: new Set(categories.map((c) => c.slug)),
     categoryTitleToSlug: new Map(categories.map((c) => [c.title.toLowerCase(), c.slug])),
@@ -22,13 +24,15 @@ async function loadContext(): Promise<ImportContext> {
     productSkus: new Set(products.map((p) => p.sku)),
     warehouseCodes: new Set(warehouses.map((w) => w.code)),
     warehouseNameToCode: new Map(warehouses.map((w) => [w.name.toLowerCase(), w.code])),
+    attributesByLowerKey: new Map(attributes.map((a) => [a.key.toLowerCase(), a])),
   };
 }
 
 /** Serialize the context Sets/Maps so the client can validate without a DB. */
 export async function getImportContext() {
-  const { categories, brands, products, warehouses } = await importRepository.loadContext();
-  return { categories, brands, products, warehouses };
+  const { categories, brands, products, warehouses, attributes } =
+    await importRepository.loadContext();
+  return { categories, brands, products, warehouses, attributes };
 }
 
 const BADGE_ENUM: Record<string, "HIT" | "NEW" | "IN_STOCK"> = {
@@ -36,7 +40,6 @@ const BADGE_ENUM: Record<string, "HIT" | "NEW" | "IN_STOCK"> = {
   NEW: "NEW",
   IN_STOCK: "IN_STOCK",
 };
-
 
 function collectErrors(rows: PreparedRow[]): ImportIssue[] {
   return rows.flatMap((r) => r.issues.filter((i) => i.level === "error"));
@@ -98,22 +101,32 @@ export async function applyImport(
           await prisma.brand.upsert({
             where: { slug: String(d.slug) },
             update: { name: String(d.name), origin: String(d.origin || "") || null },
-            create: { slug: String(d.slug), name: String(d.name), origin: String(d.origin || "") || null },
+            create: {
+              slug: String(d.slug),
+              name: String(d.name),
+              origin: String(d.origin || "") || null,
+            },
           });
           r.action === "create" ? created++ : updated++;
         } catch {
           failed++;
-          runtimeErrors.push({ row: r.row, level: "error", message: "Ошибка записи производителя" });
+          runtimeErrors.push({
+            row: r.row,
+            level: "error",
+            message: "Ошибка записи производителя",
+          });
         }
       }
     } else if (kind === "products") {
       // Resolve slugs → ids once.
-      const [cats, brands] = await Promise.all([
+      const [cats, brands, attributeDefs] = await Promise.all([
         importRepository.categoryIdBySlug(),
         importRepository.brandIdBySlug(),
+        prisma.attribute.findMany({ select: { id: true, key: true, type: true } }),
       ]);
       const catId = new Map(cats.map((c) => [c.slug, c.id]));
       const brandId = new Map(brands.map((b) => [b.slug, b.id]));
+      const attrByLowerKey = new Map(attributeDefs.map((a) => [a.key.toLowerCase(), a]));
       // Resolve the default warehouse once, not per-product (was an N+1).
       const defaultWarehouse = await prisma.warehouse.findFirst({ orderBy: { code: "asc" } });
 
@@ -123,7 +136,11 @@ export async function applyImport(
         const bId = brandId.get(String(d.brandSlug));
         if (!cId || !bId) {
           failed++;
-          runtimeErrors.push({ row: r.row, level: "error", message: "Категория/производитель не разрешены" });
+          runtimeErrors.push({
+            row: r.row,
+            level: "error",
+            message: "Категория/производитель не разрешены",
+          });
           continue;
         }
         const sku = String(d.sku);
@@ -170,7 +187,12 @@ export async function applyImport(
             await prisma.price.upsert({
               where: { productId_kind: { productId: product.id, kind: "BASE" } },
               update: { amount: tengeToTiyn(price) },
-              create: { productId: product.id, kind: "BASE", amount: tengeToTiyn(price), minQty: 1 },
+              create: {
+                productId: product.id,
+                kind: "BASE",
+                amount: tengeToTiyn(price),
+                minQty: 1,
+              },
             });
           }
 
@@ -189,14 +211,46 @@ export async function applyImport(
           if (imageUrls.length > 0) {
             await prisma.productImage.deleteMany({ where: { productId: product.id } });
             await prisma.productImage.createMany({
-              data: imageUrls.map((url, i) => ({ productId: product.id, url, alt: String(d.title), order: i })),
+              data: imageUrls.map((url, i) => ({
+                productId: product.id,
+                url,
+                alt: String(d.title),
+                order: i,
+              })),
             });
+          }
+
+          // Bulk attribute values from "attr:<key>" columns. Best-effort per
+          // value — a bad one is a warning on the row, not a failed product.
+          for (const [col, raw] of Object.entries(d)) {
+            if (!col.startsWith("attr:") || !String(raw).trim()) continue;
+            const def = attrByLowerKey.get(col.slice("attr:".length).toLowerCase());
+            if (!def) continue; // already warned in the preview
+            const typed = coerceAttributeValue(def.type, String(raw));
+            if (!typed) continue; // already warned in the preview (bad number)
+            try {
+              await prisma.attributeValue.upsert({
+                where: { productId_attributeId: { productId: product.id, attributeId: def.id } },
+                update: typed,
+                create: { productId: product.id, attributeId: def.id, ...typed },
+              });
+            } catch {
+              runtimeErrors.push({
+                row: r.row,
+                level: "warning",
+                message: `Характеристика «${def.key}» не записана (${sku})`,
+              });
+            }
           }
 
           r.action === "create" ? created++ : updated++;
         } catch {
           failed++;
-          runtimeErrors.push({ row: r.row, level: "error", message: `Ошибка записи товара (${sku})` });
+          runtimeErrors.push({
+            row: r.row,
+            level: "error",
+            message: `Ошибка записи товара (${sku})`,
+          });
         }
       }
     } else if (kind === "prices") {
@@ -217,7 +271,12 @@ export async function applyImport(
           await prisma.price.upsert({
             where: { productId_kind: { productId, kind: knd } },
             update: { amount: price === null ? null : tengeToTiyn(price), minQty },
-            create: { productId, kind: knd, amount: price === null ? null : tengeToTiyn(price), minQty },
+            create: {
+              productId,
+              kind: knd,
+              amount: price === null ? null : tengeToTiyn(price),
+              minQty,
+            },
           });
           updated++;
         } catch {
