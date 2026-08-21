@@ -8,6 +8,32 @@ import { ok, validate, toActionError, type ActionResult } from "@/server/actions
 import { requireStaff } from "@/lib/security/rbac";
 import { audit } from "@/server/audit";
 import { CACHE_TAGS } from "@/lib/cache-tags";
+import {
+  titleSimilarity,
+  DUPLICATE_TITLE_SIMILARITY_THRESHOLD,
+} from "@/lib/admin/duplicate-detection";
+
+export interface DuplicateCandidate {
+  id: string;
+  title: string;
+  sku: string;
+  slug: string;
+}
+
+/** Soft duplicate check — same brand + very similar title. Not a hard block. */
+export async function findPossibleDuplicates(input: {
+  title: string;
+  brandId: string;
+  excludeId?: string;
+}): Promise<ActionResult<DuplicateCandidate[]>> {
+  await requireStaff();
+  if (!input.title.trim() || !input.brandId) return ok([]);
+  const candidates = await productAdminRepository.listByBrand(input.brandId, input.excludeId);
+  const matches = candidates.filter(
+    (c) => titleSimilarity(c.title, input.title) >= DUPLICATE_TITLE_SIMILARITY_THRESHOLD
+  );
+  return ok(matches);
+}
 
 function revalidate() {
   revalidatePath("/admin/products");
@@ -40,7 +66,12 @@ export async function createProduct(input: unknown): Promise<ActionResult> {
   if (!v.success) return v.result;
   try {
     const product = await productAdminRepository.create(toData(v.data));
-    await audit({ action: "CREATE", entity: "Product", entityId: product.id, summary: `Товар создан: ${v.data.title}` });
+    await audit({
+      action: "CREATE",
+      entity: "Product",
+      entityId: product.id,
+      summary: `Товар создан: ${v.data.title}`,
+    });
     revalidate();
     return ok();
   } catch (e) {
@@ -54,7 +85,12 @@ export async function updateProduct(id: string, input: unknown): Promise<ActionR
   if (!v.success) return v.result;
   try {
     await productAdminRepository.update(id, toData(v.data));
-    await audit({ action: "UPDATE", entity: "Product", entityId: id, summary: `Товар изменён: ${v.data.title}` });
+    await audit({
+      action: "UPDATE",
+      entity: "Product",
+      entityId: id,
+      summary: `Товар изменён: ${v.data.title}`,
+    });
     revalidate();
     return ok();
   } catch (e) {
@@ -66,7 +102,12 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
   await requireStaff();
   try {
     await productAdminRepository.remove(id);
-    await audit({ action: "DELETE", entity: "Product", entityId: id, summary: `Товар удалён (${id})` });
+    await audit({
+      action: "DELETE",
+      entity: "Product",
+      entityId: id,
+      summary: `Товар удалён (${id})`,
+    });
     revalidate();
     return ok();
   } catch (e) {
