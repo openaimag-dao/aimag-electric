@@ -51,16 +51,14 @@ const loadPopular = unstable_cache(
   { tags: [CACHE_TAGS.products], revalidate: 600 }
 );
 
-/** Real published-product count for the hero's catalog-size stat — not a hardcoded marketing number. */
-const loadProductCount = unstable_cache(
-  (): Promise<number> => productRepository.countPublished(),
-  ["home-product-count"],
-  { tags: [CACHE_TAGS.products], revalidate: 600 }
-);
-
 export const homeService = {
   categories: cache(loadCategories),
   brands: cache(loadBrands),
   popularProducts: cache((limit = 8) => loadPopular(limit)),
-  productCount: cache(loadProductCount),
+  // Real published-product count for the hero's catalog-size stat — not a
+  // hardcoded marketing number. Deliberately uncached (unstable_cache here
+  // produced a stale/wrong count in production — a cheap COUNT query doesn't
+  // need the persistence, and catalogService.count() proves the same query
+  // is fast enough to run per-request): same pattern as that function.
+  productCount: cache((): Promise<number> => productRepository.countPublished()),
 };
