@@ -1,8 +1,9 @@
 "use client";
 
-import { Controller, useForm } from "react-hook-form";
+import * as React from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, TriangleAlert } from "lucide-react";
 import { handleFormResult } from "@/lib/admin/form-submit";
 
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,12 @@ import { Switch } from "@/components/ui/switch";
 import { Field, Input, Textarea, NativeSelect } from "@/components/admin/form-fields";
 import { Label } from "@/components/ui/label";
 import { productFormSchema, type ProductFormInput } from "@/lib/validations/admin";
-import { createProduct, updateProduct } from "@/server/actions/admin";
+import {
+  createProduct,
+  updateProduct,
+  findPossibleDuplicates,
+  type DuplicateCandidate,
+} from "@/server/actions/admin";
 import { ProductPhotosPanel } from "@/components/admin/products/product-photos-panel";
 
 export interface ProductRow {
@@ -81,8 +87,44 @@ export function ProductForm({
     });
   }
 
+  const title = useWatch({ control, name: "title" });
+  const brandId = useWatch({ control, name: "brandId" });
+  const [duplicates, setDuplicates] = React.useState<DuplicateCandidate[]>([]);
+
+  React.useEffect(() => {
+    if (!title?.trim() || !brandId) {
+      setDuplicates([]);
+      return;
+    }
+    const t = setTimeout(async () => {
+      const result = await findPossibleDuplicates({
+        title,
+        brandId,
+        excludeId: initial?.id,
+      });
+      setDuplicates(result.ok ? (result.data ?? []) : []);
+    }, 500);
+    return () => clearTimeout(t);
+  }, [title, brandId, initial?.id]);
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+      {duplicates.length > 0 && (
+        <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">
+          <TriangleAlert className="mt-0.5 size-4 shrink-0" />
+          <div>
+            <p className="font-medium">Возможно, такой товар уже есть у этого производителя:</p>
+            <ul className="mt-1 list-inside list-disc">
+              {duplicates.map((d) => (
+                <li key={d.id}>
+                  {d.title} <span className="font-mono text-xs">({d.sku})</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
       {isEdit ? (
         <ProductPhotosPanel productId={initial!.id} />
       ) : (

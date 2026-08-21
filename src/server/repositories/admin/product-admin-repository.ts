@@ -84,6 +84,13 @@ export const productAdminRepository = {
   count() {
     return prisma.product.count();
   },
+  /** Candidate set for duplicate detection — same brand, excluding the product being edited. */
+  listByBrand(brandId: string, excludeId?: string) {
+    return prisma.product.findMany({
+      where: { brandId, ...(excludeId ? { id: { not: excludeId } } : {}) },
+      select: { id: true, title: true, sku: true, slug: true },
+    });
+  },
 };
 
 export type ProductAdminRow = Prisma.ProductGetPayload<{ include: typeof listInclude }>;
