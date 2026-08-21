@@ -91,6 +91,9 @@ export const productAdminRepository = {
       select: { id: true, title: true, sku: true, slug: true },
     });
   },
+  bulkUpdate(ids: string[], data: Prisma.ProductUncheckedUpdateManyInput) {
+    return prisma.product.updateMany({ where: { id: { in: ids } }, data });
+  },
 };
 
 export type ProductAdminRow = Prisma.ProductGetPayload<{ include: typeof listInclude }>;
