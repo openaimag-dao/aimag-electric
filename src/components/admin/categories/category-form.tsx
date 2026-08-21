@@ -1,9 +1,8 @@
 "use client";
 
-import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, ImageOff } from "lucide-react";
 import { handleFormResult } from "@/lib/admin/form-submit";
 
 import { Button } from "@/components/ui/button";
@@ -11,9 +10,7 @@ import { Field, Input, Textarea, NativeSelect } from "@/components/admin/form-fi
 import { categoryFormSchema, type CategoryFormInput } from "@/lib/validations/admin";
 import { createCategory, updateCategory } from "@/server/actions/admin";
 
-const ICON_OPTIONS = [
-  "Cable", "Zap", "Shield", "Link2", "Combine", "ToggleRight", "Factory",
-];
+const ICON_OPTIONS = ["Cable", "Zap", "Shield", "Link2", "Combine", "ToggleRight", "Factory"];
 
 export interface CategoryRow {
   id: string;
@@ -22,20 +19,16 @@ export interface CategoryRow {
   description: string | null;
   spec: string | null;
   icon: string | null;
+  image: string | null;
   order: number;
 }
 
-export function CategoryForm({
-  initial,
-  onDone,
-}: {
-  initial?: CategoryRow;
-  onDone: () => void;
-}) {
+export function CategoryForm({ initial, onDone }: { initial?: CategoryRow; onDone: () => void }) {
   const isEdit = Boolean(initial);
   const {
     register,
     handleSubmit,
+    watch,
     setError,
     formState: { errors, isSubmitting },
   } = useForm<CategoryFormInput>({
@@ -46,12 +39,17 @@ export function CategoryForm({
       description: initial?.description ?? "",
       spec: initial?.spec ?? "",
       icon: initial?.icon ?? "",
+      image: initial?.image ?? "",
       order: initial?.order ?? 0,
     },
   });
 
+  const previewUrl = watch("image");
+
   async function onSubmit(values: CategoryFormInput) {
-    const result = isEdit ? await updateCategory(initial!.id, values) : await createCategory(values);
+    const result = isEdit
+      ? await updateCategory(initial!.id, values)
+      : await createCategory(values);
     handleFormResult<CategoryFormInput>(result, {
       setError,
       onDone,
@@ -80,7 +78,9 @@ export function CategoryForm({
           <NativeSelect id="icon" {...register("icon")}>
             <option value="">— нет —</option>
             {ICON_OPTIONS.map((i) => (
-              <option key={i} value={i}>{i}</option>
+              <option key={i} value={i}>
+                {i}
+              </option>
             ))}
           </NativeSelect>
         </Field>
@@ -88,6 +88,32 @@ export function CategoryForm({
       <Field label="Описание" htmlFor="description" error={errors.description}>
         <Textarea id="description" {...register("description")} />
       </Field>
+
+      <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+        <Field
+          label="Фото (URL)"
+          htmlFor="image"
+          error={errors.image}
+          hint="показывается на карточке категории на главной вместо/поверх иконки"
+        >
+          <Input id="image" {...register("image")} />
+        </Field>
+        {previewUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element -- arbitrary external URL, live preview only
+          <img
+            src={previewUrl}
+            alt=""
+            className="size-14 shrink-0 rounded-lg border border-border object-cover"
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+            }}
+          />
+        ) : (
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-lg border border-dashed border-border text-muted-foreground">
+            <ImageOff className="size-5" />
+          </div>
+        )}
+      </div>
 
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="outline" onClick={onDone}>

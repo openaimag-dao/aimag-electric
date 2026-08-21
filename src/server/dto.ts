@@ -13,6 +13,7 @@ export interface CategoryDTO {
   description: string | null;
   spec: string | null;
   icon: string | null;
+  image: string | null;
 }
 
 export interface BrandDTO {

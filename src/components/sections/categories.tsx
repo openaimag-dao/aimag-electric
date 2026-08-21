@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 
 import { SectionHeading } from "@/components/common/section-heading";
@@ -40,7 +41,23 @@ export function Categories({ categories }: { categories: CategoryDTO[] }) {
             href={`/catalog?cat=${lead.slug}`}
             className="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-steel-950 p-8 text-white lg:row-span-2"
           >
-            <div className="absolute inset-0 conductor-grid opacity-40" aria-hidden />
+            {lead.image ? (
+              <>
+                <Image
+                  src={lead.image}
+                  alt=""
+                  fill
+                  sizes="(min-width: 1024px) 33vw, 100vw"
+                  className="object-cover opacity-70 transition-opacity group-hover:opacity-80"
+                />
+                <div
+                  className="absolute inset-0 bg-gradient-to-t from-steel-950 via-steel-950/70 to-steel-950/20"
+                  aria-hidden
+                />
+              </>
+            ) : (
+              <div className="conductor-grid absolute inset-0 opacity-40" aria-hidden />
+            )}
             <div
               className="absolute -right-16 -top-16 size-64 rounded-full bg-signal/20 blur-3xl transition-opacity group-hover:opacity-80"
               aria-hidden
@@ -63,7 +80,7 @@ export function Categories({ categories }: { categories: CategoryDTO[] }) {
             </div>
             <span className="relative mt-8 inline-flex items-center gap-1.5 text-sm font-semibold text-signal">
               Открыть раздел
-              <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              <ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
             </span>
           </Link>
 
@@ -75,9 +92,15 @@ export function Categories({ categories }: { categories: CategoryDTO[] }) {
                 href={`/catalog?cat=${category.slug}`}
                 className="group flex items-start gap-4 rounded-2xl border border-border bg-card p-6 transition-all hover:-translate-y-0.5 hover:border-signal/60 hover:shadow-lg"
               >
-                <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-xl bg-steel-950 text-signal transition-colors group-hover:bg-signal group-hover:text-steel-950">
-                  <Icon className="size-6" />
-                </span>
+                {category.image ? (
+                  <span className="relative size-12 shrink-0 overflow-hidden rounded-xl">
+                    <Image src={category.image} alt="" fill sizes="48px" className="object-cover" />
+                  </span>
+                ) : (
+                  <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-xl bg-steel-950 text-signal transition-colors group-hover:bg-signal group-hover:text-steel-950">
+                    <Icon className="size-6" />
+                  </span>
+                )}
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="font-display text-base font-semibold text-primary">
