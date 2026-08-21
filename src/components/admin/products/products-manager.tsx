@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Search, Plus, Loader2 } from "lucide-react";
+import { Search, Plus, Loader2, Download } from "lucide-react";
 import { toast } from "sonner";
 
 import { useCrudManager } from "@/hooks/use-crud-manager";
@@ -34,8 +34,9 @@ import { RowActions } from "@/components/admin/row-actions";
 import { FormDialog } from "@/components/admin/form-dialog";
 import { ConfirmDelete } from "@/components/admin/confirm-delete";
 import { ProductForm, type ProductRow } from "@/components/admin/products/product-form";
-import { deleteProduct, bulkUpdateProducts } from "@/server/actions/admin";
+import { deleteProduct, bulkUpdateProducts, exportProductsXlsx } from "@/server/actions/admin";
 import { QUALITY_FILTERS, QUALITY_FILTER_LABELS } from "@/lib/admin/product-quality";
+import { downloadBase64Xlsx } from "@/lib/admin/download-file";
 
 export interface ProductListRow extends ProductRow {
   categoryTitle: string;
@@ -123,6 +124,26 @@ export function ProductsManager({
 
   const bulkHasChanges = Boolean(bulkCategoryId || bulkBrandId || bulkStatus);
 
+  const [exporting, setExporting] = React.useState(false);
+
+  async function handleExport() {
+    setExporting(true);
+    const result = await exportProductsXlsx({
+      q: query.q,
+      category: query.category,
+      brand: query.brand,
+      status: query.status,
+      quality: query.quality,
+    });
+    setExporting(false);
+    if (result.ok && result.data) {
+      downloadBase64Xlsx(result.data.base64, result.data.filename);
+      toast.success(`Экспортировано товаров: ${result.data.count}`);
+    } else {
+      toast.error(result.error ?? "Не удалось экспортировать");
+    }
+  }
+
   async function applyBulk() {
     setBulkPending(true);
     const result = await bulkUpdateProducts(Array.from(selected), {
@@ -207,6 +228,10 @@ export function ProductsManager({
 
         <div className="ml-auto flex items-center gap-3">
           <span className="text-sm text-muted-foreground">Всего: {total}</span>
+          <Button variant="outline" onClick={handleExport} disabled={exporting}>
+            {exporting ? <Loader2 className="animate-spin" /> : <Download />}
+            Экспорт .xlsx
+          </Button>
           <Button onClick={openCreate} variant="signal">
             <Plus />
             Добавить товар

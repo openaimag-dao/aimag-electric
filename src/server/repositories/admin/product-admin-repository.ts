@@ -13,15 +13,35 @@ const listInclude = {
   _count: { select: { documents: true, reviews: true } },
 } satisfies Prisma.ProductInclude;
 
-export interface ProductListParams {
-  page: number;
-  pageSize: number;
+export interface ProductFilterParams {
   q?: string;
   categoryId?: string;
   brandId?: string;
   /** undefined = both published and hidden */
   published?: boolean;
   quality?: ProductQualityFilter;
+}
+
+export interface ProductListParams extends ProductFilterParams {
+  page: number;
+  pageSize: number;
+}
+
+function buildWhere(params: ProductFilterParams): Prisma.ProductWhereInput {
+  return {
+    ...(params.q
+      ? {
+          OR: [
+            { title: { contains: params.q, mode: "insensitive" } },
+            { sku: { contains: params.q, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+    ...(params.categoryId ? { categoryId: params.categoryId } : {}),
+    ...(params.brandId ? { brandId: params.brandId } : {}),
+    ...(params.published !== undefined ? { published: params.published } : {}),
+    ...(params.quality ? qualityWhere(params.quality) : {}),
+  };
 }
 
 export const productAdminRepository = {
@@ -33,20 +53,7 @@ export const productAdminRepository = {
   },
   /** Server-side filtered + paginated listing — the products table doesn't load the whole catalog into the browser. */
   async listPage(params: ProductListParams) {
-    const where: Prisma.ProductWhereInput = {
-      ...(params.q
-        ? {
-            OR: [
-              { title: { contains: params.q, mode: "insensitive" } },
-              { sku: { contains: params.q, mode: "insensitive" } },
-            ],
-          }
-        : {}),
-      ...(params.categoryId ? { categoryId: params.categoryId } : {}),
-      ...(params.brandId ? { brandId: params.brandId } : {}),
-      ...(params.published !== undefined ? { published: params.published } : {}),
-      ...(params.quality ? qualityWhere(params.quality) : {}),
-    };
+    const where = buildWhere(params);
     const [rows, total] = await Promise.all([
       prisma.product.findMany({
         where,
@@ -58,6 +65,14 @@ export const productAdminRepository = {
       prisma.product.count({ where }),
     ]);
     return { rows, total };
+  },
+  /** Same filters as listPage, unbounded — for XLSX export. */
+  listForExport(params: ProductFilterParams) {
+    return prisma.product.findMany({
+      where: buildWhere(params),
+      orderBy: { createdAt: "desc" },
+      include: listInclude,
+    });
   },
   byId(id: string) {
     return prisma.product.findUnique({

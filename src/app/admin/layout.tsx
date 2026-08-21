@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { AdminMobileNav } from "@/components/admin/admin-mobile-nav";
+import { AdminGlobalSearch } from "@/components/admin/admin-global-search";
 import { NotificationBell } from "@/components/admin/notification-bell";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -18,10 +19,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/90 px-4 backdrop-blur lg:px-8">
           <AdminMobileNav />
-          <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-            AIMAG ELECTRIC · Панель управления
+          <span className="hidden shrink-0 font-mono text-xs uppercase tracking-wider text-muted-foreground lg:inline">
+            AIMAG ELECTRIC
           </span>
-          <div className="ml-auto">
+          <div className="max-w-md flex-1">
+            <AdminGlobalSearch />
+          </div>
+          <div className="ml-auto flex items-center gap-3">
             <NotificationBell />
           </div>
         </header>
