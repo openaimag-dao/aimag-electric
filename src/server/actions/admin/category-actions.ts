@@ -2,7 +2,7 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 
-import { categoryAdminRepository } from "@/server/repositories/admin";
+import { categoryAdminRepository, categoryAttributeRepository } from "@/server/repositories/admin";
 import { categoryFormSchema } from "@/lib/validations/admin";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
@@ -62,6 +62,40 @@ export async function deleteCategory(id: string): Promise<ActionResult> {
     }
     await categoryAdminRepository.remove(id);
     revalidate();
+    return ok();
+  } catch (e) {
+    return fail(prismaError(e));
+  }
+}
+
+export interface CategoryAttributeTemplateItem {
+  attributeId: string;
+  required: boolean;
+}
+
+export async function getCategoryAttributeTemplate(
+  categoryId: string
+): Promise<ActionResult<CategoryAttributeTemplateItem[]>> {
+  try {
+    const rows = await categoryAttributeRepository.listForCategory(categoryId);
+    return ok(rows.map((r) => ({ attributeId: r.attributeId, required: r.required })));
+  } catch (e) {
+    return fail(prismaError(e));
+  }
+}
+
+/** Replaces the category's "which characteristics matter" template in one go. */
+export async function setCategoryAttributeTemplate(
+  categoryId: string,
+  items: CategoryAttributeTemplateItem[]
+): Promise<ActionResult> {
+  try {
+    await categoryAttributeRepository.setForCategory(
+      categoryId,
+      items.map((item, i) => ({ ...item, order: i }))
+    );
+    revalidatePath("/admin/categories");
+    revalidatePath("/admin/products");
     return ok();
   } catch (e) {
     return fail(prismaError(e));
