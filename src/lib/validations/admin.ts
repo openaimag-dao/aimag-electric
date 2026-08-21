@@ -11,6 +11,7 @@ export const categoryFormSchema = z.object({
   description: z.string().optional().or(z.literal("")),
   spec: z.string().optional().or(z.literal("")),
   icon: z.string().optional().or(z.literal("")),
+  image: z.string().optional().or(z.literal("")),
   order: z.coerce.number().int().min(0).default(0),
 });
 export type CategoryFormInput = z.infer<typeof categoryFormSchema>;

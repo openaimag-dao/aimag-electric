@@ -27,6 +27,7 @@ const loadCategories = cache(async (): Promise<CategoryDTO[]> => {
     description: c.description,
     spec: c.spec,
     icon: c.icon,
+    image: c.image,
   }));
 });
 

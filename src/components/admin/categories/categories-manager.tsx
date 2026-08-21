@@ -1,5 +1,7 @@
 "use client";
 
+import { ImageOff } from "lucide-react";
+
 import { useCrudManager } from "@/hooks/use-crud-manager";
 
 import {
@@ -36,10 +38,7 @@ export function CategoriesManager({ rows }: { rows: CategoryListRow[] }) {
     deleting,
     setDeleting,
     closeDelete,
-  } = useCrudManager<CategoryListRow, CategoryRow>(
-    rows,
-    (r) => `${r.title} ${r.slug}`
-  );
+  } = useCrudManager<CategoryListRow, CategoryRow>(rows, (r) => `${r.title} ${r.slug}`);
 
   return (
     <div className="space-y-4">
@@ -56,6 +55,7 @@ export function CategoriesManager({ rows }: { rows: CategoryListRow[] }) {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-14">Фото</TableHead>
               <TableHead>Название</TableHead>
               <TableHead>Slug</TableHead>
               <TableHead>Метка</TableHead>
@@ -67,6 +67,23 @@ export function CategoriesManager({ rows }: { rows: CategoryListRow[] }) {
           <TableBody>
             {filtered.map((row) => (
               <TableRow key={row.id}>
+                <TableCell>
+                  {row.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- arbitrary external URL, admin thumbnail only
+                    <img
+                      src={row.image}
+                      alt=""
+                      className="size-10 rounded-md border border-border object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <div className="flex size-10 items-center justify-center rounded-md border border-dashed border-border text-muted-foreground">
+                      <ImageOff className="size-4" />
+                    </div>
+                  )}
+                </TableCell>
                 <TableCell className="font-medium text-primary">{row.title}</TableCell>
                 <TableCell className="font-mono text-xs text-muted-foreground">
                   {row.slug}
@@ -81,16 +98,13 @@ export function CategoriesManager({ rows }: { rows: CategoryListRow[] }) {
                 <TableCell className="text-center">{row.productCount}</TableCell>
                 <TableCell className="text-center text-muted-foreground">{row.order}</TableCell>
                 <TableCell>
-                  <RowActions
-                    onEdit={() => openEdit(row)}
-                    onDelete={() => setDeleting(row)}
-                  />
+                  <RowActions onEdit={() => openEdit(row)} onDelete={() => setDeleting(row)} />
                 </TableCell>
               </TableRow>
             ))}
             {filtered.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground">
+                <TableCell colSpan={7} className="text-center text-muted-foreground">
                   Ничего не найдено.
                 </TableCell>
               </TableRow>

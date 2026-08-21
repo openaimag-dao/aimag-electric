@@ -3,22 +3,29 @@ import "server-only";
 import type { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
+import { columnSelfHeal } from "@/lib/db-self-heal";
+
+const withImageColumn = columnSelfHeal(
+  `ALTER TABLE "Category" ADD COLUMN IF NOT EXISTS "image" TEXT`
+);
 
 export const categoryAdminRepository = {
   list() {
-    return prisma.category.findMany({
-      orderBy: { order: "asc" },
-      include: { _count: { select: { products: true } } },
-    });
+    return withImageColumn(() =>
+      prisma.category.findMany({
+        orderBy: { order: "asc" },
+        include: { _count: { select: { products: true } } },
+      })
+    );
   },
   byId(id: string) {
-    return prisma.category.findUnique({ where: { id } });
+    return withImageColumn(() => prisma.category.findUnique({ where: { id } }));
   },
   create(data: Prisma.CategoryCreateInput) {
-    return prisma.category.create({ data });
+    return withImageColumn(() => prisma.category.create({ data }));
   },
   update(id: string, data: Prisma.CategoryUpdateInput) {
-    return prisma.category.update({ where: { id }, data });
+    return withImageColumn(() => prisma.category.update({ where: { id }, data }));
   },
   remove(id: string) {
     return prisma.category.delete({ where: { id } });

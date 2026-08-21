@@ -111,6 +111,8 @@ model Category {
   description String?
   spec        String?
   icon        String?
+  /** Optional photo URL — shown instead of/alongside the icon badge on the homepage category grid. */
+  image       String?
   order       Int       @default(0)
   products    Product[]
   createdAt   DateTime  @default(now())

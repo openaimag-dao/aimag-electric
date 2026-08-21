@@ -24,6 +24,7 @@ export async function createCategory(input: unknown): Promise<ActionResult> {
       description: v.data.description || null,
       spec: v.data.spec || null,
       icon: v.data.icon || null,
+      image: v.data.image || null,
       order: v.data.order,
     });
     revalidate();
@@ -43,6 +44,7 @@ export async function updateCategory(id: string, input: unknown): Promise<Action
       description: v.data.description || null,
       spec: v.data.spec || null,
       icon: v.data.icon || null,
+      image: v.data.image || null,
       order: v.data.order,
     });
     revalidate();

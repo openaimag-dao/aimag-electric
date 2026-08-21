@@ -23,6 +23,7 @@ const loadCategories = unstable_cache(
       description: c.description,
       spec: c.spec,
       icon: c.icon,
+      image: c.image,
     }));
   },
   ["home-categories"],
