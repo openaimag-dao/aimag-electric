@@ -14,6 +14,7 @@ import {
   KanbanSquare,
   SlidersHorizontal,
   ListChecks,
+  Image as ImageIcon,
 } from "lucide-react";
 
 export interface AdminNavItem {
@@ -29,6 +30,7 @@ export const adminNav: AdminNavItem[] = [
   { label: "Категории", href: "/admin/categories", icon: FolderTree },
   { label: "Производители", href: "/admin/brands", icon: Factory },
   { label: "Товары", href: "/admin/products", icon: Package },
+  { label: "Фото товаров", href: "/admin/product-images", icon: ImageIcon },
   { label: "Характеристики", href: "/admin/attributes", icon: SlidersHorizontal },
   { label: "Значения характеристик", href: "/admin/attribute-values", icon: ListChecks },
   { label: "Цены", href: "/admin/prices", icon: Tag },

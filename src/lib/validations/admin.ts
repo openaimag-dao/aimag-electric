@@ -71,6 +71,14 @@ export const documentFormSchema = z.object({
 });
 export type DocumentFormInput = z.infer<typeof documentFormSchema>;
 
+export const productImageFormSchema = z.object({
+  productId: z.string().min(1, "Выберите товар"),
+  url: z.string().min(1, "Укажите ссылку на фото"),
+  alt: z.string().optional().or(z.literal("")),
+  order: z.coerce.number().int().min(0).default(0),
+});
+export type ProductImageFormInput = z.infer<typeof productImageFormSchema>;
+
 const attributeType = z.enum(["STRING", "NUMBER", "BOOLEAN"]);
 
 export const attributeFormSchema = z.object({

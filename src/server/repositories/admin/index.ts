@@ -14,3 +14,7 @@ export {
   attributeValueAdminRepository,
   type AttributeValueAdminRow,
 } from "./attribute-value-admin-repository";
+export {
+  productImageAdminRepository,
+  type ProductImageAdminRow,
+} from "./product-image-admin-repository";
