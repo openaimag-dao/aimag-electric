@@ -1,11 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { put } from "@vercel/blob";
 
 import { productImageAdminRepository } from "@/server/repositories/admin";
 import { productImageFormSchema } from "@/lib/validations/admin";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
 import { requireStaff } from "@/lib/security/rbac";
+import { ALLOWED_IMAGE_TYPES, MAX_IMAGE_SIZE, formatFileSize } from "@/lib/uploads";
 
 function revalidate() {
   revalidatePath("/admin/product-images");
@@ -53,6 +55,29 @@ export async function updateProductImage(id: string, input: unknown): Promise<Ac
     return ok();
   } catch (e) {
     return fail(prismaError(e));
+  }
+}
+
+/** Uploads a real image file to Vercel Blob and returns its public URL — the caller still calls createProductImage with it, same as the URL-paste flow. */
+export async function uploadProductImageFile(
+  formData: FormData
+): Promise<ActionResult<{ url: string }>> {
+  await requireStaff();
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return fail("Файл не выбран");
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    return fail("Поддерживаются только изображения: JPEG, PNG, WebP, GIF");
+  }
+  if (file.size > MAX_IMAGE_SIZE) {
+    return fail(`Файл слишком большой (макс. ${formatFileSize(MAX_IMAGE_SIZE)})`);
+  }
+  try {
+    const blob = await put(`product-images/${crypto.randomUUID()}-${file.name}`, file, {
+      access: "public",
+    });
+    return ok({ url: blob.url });
+  } catch {
+    return fail("Не удалось загрузить файл. Проверьте, что хранилище подключено.");
   }
 }
 
