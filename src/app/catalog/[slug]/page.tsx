@@ -18,6 +18,8 @@ import { DocumentList } from "@/components/product/document-list";
 import { Reviews } from "@/components/product/reviews";
 import { RelatedProducts } from "@/components/product/related-products";
 import { AnalogsCallout } from "@/components/product/analogs-callout";
+import { RecordRecentlyViewed } from "@/components/recently-viewed/record-recently-viewed";
+import { RecentlyViewedSection } from "@/components/recently-viewed/recently-viewed-section";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -87,6 +89,7 @@ export default async function ProductPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
+      <RecordRecentlyViewed productId={product.id} />
 
       <div className="container py-6">
         {/* Breadcrumb */}
@@ -199,6 +202,10 @@ export default async function ProductPage({ params }: PageProps) {
             <RelatedProducts products={related} />
           </div>
         </section>
+
+        <div className="mt-12">
+          <RecentlyViewedSection excludeProductId={product.id} />
+        </div>
       </div>
     </div>
   );

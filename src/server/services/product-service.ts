@@ -27,6 +27,14 @@ export const productService = {
     return rows.map((r) => r.slug);
   },
 
+  /** Resolve a client-held list of product ids (favorites, compare, recently viewed) to live catalog data, most-recent-first as given by the caller. Silently drops ids that no longer exist or were unpublished. */
+  async getByIds(ids: string[]): Promise<CatalogProductDTO[]> {
+    if (ids.length === 0) return [];
+    const rows = await productRepository.findByIds(ids);
+    const byId = new Map(rows.map((r) => [r.id, toCatalogDTO(r)]));
+    return ids.map((id) => byId.get(id)).filter((p): p is CatalogProductDTO => Boolean(p));
+  },
+
   /** Related = same category, nearest by voltage/section, excluding self. */
   async getRelated(product: CatalogProductDTO, limit = 4): Promise<CatalogProductDTO[]> {
     const rows = await productRepository.findByCategory(product.categorySlug, 50);

@@ -6,6 +6,8 @@ import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { ProductThumbnail } from "@/components/catalog/product-thumbnail";
 import { ProductPrice } from "@/components/catalog/product-price";
 import { AvailabilityBadge } from "@/components/catalog/availability-badge";
+import { FavoriteButton } from "@/components/catalog/favorite-button";
+import { CompareToggleButton } from "@/components/catalog/compare-toggle-button";
 import type { CatalogProduct } from "@/types/catalog";
 
 /**
@@ -53,6 +55,8 @@ export function ProductCard({
           status={product.availability}
           className="absolute right-3 top-3 shadow-sm"
         />
+        <FavoriteButton productId={product.id} className="absolute bottom-3 right-3" />
+        <CompareToggleButton productId={product.id} className="absolute bottom-3 left-3" />
       </div>
 
       <div className="flex flex-1 flex-col p-4">

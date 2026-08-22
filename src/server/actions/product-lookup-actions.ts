@@ -1,0 +1,31 @@
+"use server";
+
+import { headers } from "next/headers";
+
+import { productService } from "@/server/services/product-service";
+import { rateLimit } from "@/lib/security/rate-limit";
+import type { CatalogProduct } from "@/types/catalog";
+
+const MAX_IDS = 24;
+
+/**
+ * Resolves a client-held list of product ids (favorites, compare, recently
+ * viewed — all stored in localStorage, never on the server) to live catalog
+ * data. Public, unauthenticated — rate-limited per IP since it's called
+ * straight from the browser on page load.
+ */
+export async function getProductsByIds(ids: unknown): Promise<CatalogProduct[]> {
+  if (!Array.isArray(ids)) return [];
+  const clean = ids
+    .filter((id): id is string => typeof id === "string" && id.length > 0)
+    .slice(0, MAX_IDS);
+  if (clean.length === 0) return [];
+
+  const hdrs = await headers();
+  const ip =
+    hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() || hdrs.get("x-real-ip") || "unknown";
+  const limit = rateLimit(`product-lookup:${ip}`, 60, 60_000);
+  if (!limit.ok) return [];
+
+  return productService.getByIds(clean);
+}
