@@ -16,6 +16,7 @@ import {
   ListChecks,
   Image as ImageIcon,
   Building2,
+  Truck,
 } from "lucide-react";
 
 export interface AdminNavItem {
@@ -40,6 +41,7 @@ export const adminNav: AdminNavItem[] = [
   { label: "Пользователи", href: "/admin/users", icon: Users },
   { label: "Компании", href: "/admin/companies", icon: Building2 },
   { label: "Заявки", href: "/admin/quotes", icon: Inbox },
+  { label: "Заказы", href: "/admin/orders", icon: Truck },
   { label: "CRM: клиенты", href: "/admin/crm/customers", icon: Contact },
   { label: "CRM: сделки", href: "/admin/crm/deals", icon: KanbanSquare },
   { label: "Импорт", href: "/admin/import", icon: Upload },

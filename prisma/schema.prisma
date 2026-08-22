@@ -343,12 +343,114 @@ model Quote {
   approvalToken String?     @unique
   respondedAt   DateTime?
   responseNote  String?
+  order         Order?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
   @@index([status])
   @@index([createdAt])
   @@index([customerId])
+}
+
+// ---------------------------------------------------------------------------
+// Orders (Phase 16-18) — created from an approved (WON) Quote by staff.
+// Quote/Customer/User links are copied from the source quote where it has
+// them; Company/Project links stay null unless genuinely known (Quote has
+// no DB relation to either) — not guessed, to avoid a false company/project
+// association on an order.
+// ---------------------------------------------------------------------------
+
+enum OrderStatus {
+  NEW
+  CONFIRMED
+  PROCESSING
+  SHIPPING
+  DELIVERED
+  CANCELLED
+}
+
+enum OrderDocumentKind {
+  INVOICE
+  CONTRACT
+  ACT
+  SPECIFICATION
+  WAYBILL
+  OTHER
+}
+
+model Order {
+  id                String          @id @default(cuid())
+  /**
+   * Human-readable order number shown to staff/customer, e.g. "ORD-260822-A1B2".
+   */
+  number            String          @unique
+  status            OrderStatus     @default(NEW)
+  quoteId           String?         @unique
+  quote             Quote?          @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  projectId         String?
+  project           Project?        @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  customerId        String?
+  customer          Customer?       @relation(fields: [customerId], references: [id])
+  companyId         String?
+  company           Company?        @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  userId            String?
+  user              User?           @relation("OrderOwner", fields: [userId], references: [id])
+  managerId         String?
+  manager           User?           @relation("OrderManager", fields: [managerId], references: [id])
+  carrier           String?
+  trackingNumber    String?
+  estimatedDelivery DateTime?
+  actualDelivery    DateTime?
+  /**
+   * Snapshot of the total at order creation, in тиын.
+   */
+  totalTiyn         Int?
+  notes             String?         @db.Text
+  items             OrderItem[]
+  documents         OrderDocument[]
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@index([status])
+  @@index([customerId])
+  @@index([companyId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+/**
+ * One order line — snapshot, like QuoteItem/ProjectItem (productId/slug are not FKs).
+ */
+model OrderItem {
+  id         String  @id @default(cuid())
+  orderId    String
+  order      Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId  String?
+  slug       String?
+  sku        String?
+  title      String
+  qty        Float   @default(1)
+  unit       String  @default("шт")
+  amountTiyn Int?
+  position   Int     @default(0)
+
+  @@index([orderId])
+}
+
+/**
+ * Invoice/contract/act/specification/waybill files — uploaded to Vercel Blob, same as product documents.
+ */
+model OrderDocument {
+  id       String            @id @default(cuid())
+  orderId  String
+  order    Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  title    String
+  kind     OrderDocumentKind
+  url      String
+  size     String?
+  position Int               @default(0)
+
+  @@index([orderId])
 }
 
 model QuoteItem {
@@ -393,6 +495,7 @@ model Customer {
   user       User?          @relation(fields: [userId], references: [id])
   deals      Deal[]
   quotes     Quote[]
+  orders     Order[]
   activities Activity[]
   ownerId    String? // ответственный менеджер
   owner      User?          @relation("CustomerOwner", fields: [ownerId], references: [id])
@@ -481,6 +584,8 @@ model User {
   companyMemberships CompanyMember[]
   ownedProjects      Project[]       @relation("ProjectOwner")
   managedProjects    Project[]       @relation("ProjectManager")
+  ownedOrders        Order[]         @relation("OrderOwner")
+  managedOrders      Order[]         @relation("OrderManager")
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
 }
@@ -514,6 +619,7 @@ model Company {
   notes         String?         @db.Text
   members       CompanyMember[]
   projects      Project[]
+  orders        Order[]
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 
@@ -573,6 +679,7 @@ model Project {
   managerId   String?
   manager     User?         @relation("ProjectManager", fields: [managerId], references: [id])
   items       ProjectItem[]
+  orders      Order[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
