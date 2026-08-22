@@ -30,6 +30,26 @@ export const warehouseFormSchema = z.object({
 });
 export type WarehouseFormInput = z.infer<typeof warehouseFormSchema>;
 
+export const companyFormSchema = z.object({
+  name: z.string().min(2, "Укажите название"),
+  bin: z.string().optional().or(z.literal("")),
+  legalAddress: z.string().optional().or(z.literal("")),
+  actualAddress: z.string().optional().or(z.literal("")),
+  phone: z.string().optional().or(z.literal("")),
+  email: z.string().email("Некорректный email").optional().or(z.literal("")),
+  notes: z.string().optional().or(z.literal("")),
+});
+export type CompanyFormInput = z.infer<typeof companyFormSchema>;
+
+export const companyRole = z.enum(["COMPANY_ADMIN", "PROCUREMENT", "ENGINEER", "VIEWER"]);
+
+export const companyMemberFormSchema = z.object({
+  companyId: z.string().min(1, "Укажите компанию"),
+  userId: z.string().min(1, "Укажите пользователя"),
+  role: companyRole,
+});
+export type CompanyMemberFormInput = z.infer<typeof companyMemberFormSchema>;
+
 const productBadge = z.enum(["HIT", "NEW", "IN_STOCK"]);
 
 export const productFormSchema = z.object({

@@ -1,6 +1,7 @@
 export * from "./category-actions";
 export * from "./brand-actions";
 export * from "./warehouse-actions";
+export * from "./company-actions";
 export * from "./product-actions";
 export * from "./price-actions";
 export * from "./document-actions";

@@ -1,10 +1,22 @@
 import Link from "next/link";
-import { FileText, Briefcase, CheckSquare, Users, ArrowRight, Building2 } from "lucide-react";
+import {
+  FileText,
+  Briefcase,
+  CheckSquare,
+  Users,
+  ArrowRight,
+  Building2,
+  Hash,
+  Phone,
+  Mail,
+} from "lucide-react";
 
 import { currentUser, isStaff } from "@/server/auth/session";
 import { accountRepository } from "@/server/repositories/account-repository";
+import { companyAdminRepository } from "@/server/repositories/admin";
 import { quoteStatusMeta } from "@/components/admin/quote-status-badge";
 import { dealStageMeta } from "@/config/crm-meta";
+import { companyRoleMeta } from "@/config/company-meta";
 import { tiynToTenge, formatTenge } from "@/lib/money";
 import { cn } from "@/lib/utils";
 
@@ -22,9 +34,10 @@ export default async function AccountPage() {
 }
 
 async function CustomerDashboard({ userId }: { userId: string }) {
-  const [customers, directQuotes] = await Promise.all([
+  const [customers, directQuotes, membership] = await Promise.all([
     accountRepository.customerData(userId),
     accountRepository.quotesByUser(userId),
+    companyAdminRepository.forUser(userId),
   ]);
 
   const deals = customers.flatMap((c) => c.deals);
@@ -40,6 +53,46 @@ async function CustomerDashboard({ userId }: { userId: string }) {
 
   return (
     <div className="space-y-8">
+      {membership && (
+        <section className="rounded-xl border border-border bg-card p-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <Building2 className="size-4 text-signal-700" />
+                <h2 className="font-display text-base font-semibold text-primary">
+                  {membership.company.name}
+                </h2>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                {membership.company.bin && (
+                  <span className="flex items-center gap-1">
+                    <Hash className="size-3" /> БИН {membership.company.bin}
+                  </span>
+                )}
+                {membership.company.phone && (
+                  <span className="flex items-center gap-1">
+                    <Phone className="size-3" /> {membership.company.phone}
+                  </span>
+                )}
+                {membership.company.email && (
+                  <span className="flex items-center gap-1">
+                    <Mail className="size-3" /> {membership.company.email}
+                  </span>
+                )}
+              </div>
+            </div>
+            <span
+              className={cn(
+                "shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium",
+                (companyRoleMeta[membership.role] ?? companyRoleMeta.VIEWER).className
+              )}
+            >
+              {(companyRoleMeta[membership.role] ?? companyRoleMeta.VIEWER).label}
+            </span>
+          </div>
+        </section>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard icon={FileText} label="Заявки" value={quotes.length} />
         <StatCard icon={Briefcase} label="Сделки в работе" value={openDeals} />
@@ -62,10 +115,19 @@ async function CustomerDashboard({ userId }: { userId: string }) {
                       {q.items.length > 1 && ` +${q.items.length - 1}`}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {q.createdAt.toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" })}
+                      {q.createdAt.toLocaleDateString("ru-RU", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })}
                     </p>
                   </div>
-                  <span className={cn("shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium", meta.className)}>
+                  <span
+                    className={cn(
+                      "shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium",
+                      meta.className
+                    )}
+                  >
                     {meta.label}
                   </span>
                 </div>
@@ -87,7 +149,12 @@ async function CustomerDashboard({ userId }: { userId: string }) {
                 <div key={d.id} className="rounded-xl border border-border bg-card p-4">
                   <div className="flex items-start justify-between gap-2">
                     <p className="text-sm font-medium text-primary">{d.title}</p>
-                    <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-xs font-medium", meta.className)}>
+                    <span
+                      className={cn(
+                        "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium",
+                        meta.className
+                      )}
+                    >
                       {meta.label}
                     </span>
                   </div>
@@ -128,7 +195,11 @@ async function StaffDashboard({ userId }: { userId: string }) {
           </Link>
         </div>
         {ownedDeals.length === 0 ? (
-          <EmptyState text="За вами не закреплены активные сделки." href="/admin/crm/deals" cta="Открыть CRM" />
+          <EmptyState
+            text="За вами не закреплены активные сделки."
+            href="/admin/crm/deals"
+            cta="Открыть CRM"
+          />
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             {ownedDeals.map((d) => {
@@ -137,7 +208,12 @@ async function StaffDashboard({ userId }: { userId: string }) {
                 <div key={d.id} className="rounded-xl border border-border bg-card p-4">
                   <div className="flex items-start justify-between gap-2">
                     <p className="text-sm font-medium text-primary">{d.title}</p>
-                    <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-xs font-medium", meta.className)}>
+                    <span
+                      className={cn(
+                        "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium",
+                        meta.className
+                      )}
+                    >
                       {meta.label}
                     </span>
                   </div>
