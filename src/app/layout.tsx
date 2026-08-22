@@ -7,6 +7,9 @@ import { siteConfig } from "@/config/site";
 import { buildOrganizationJsonLd } from "@/lib/org-jsonld";
 import { AuthProvider } from "@/components/auth/session-provider";
 import { CartProvider } from "@/components/cart/cart-provider";
+import { FavoritesProvider } from "@/components/favorites/favorites-provider";
+import { CompareProvider } from "@/components/compare/compare-provider";
+import { RecentlyViewedProvider } from "@/components/recently-viewed/recently-viewed-provider";
 import "./globals.css";
 
 const sans = Inter({
@@ -91,9 +94,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         />
         <AuthProvider>
           <CartProvider>
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
+            <FavoritesProvider>
+              <CompareProvider>
+                <RecentlyViewedProvider>
+                  <Header />
+                  <main className="flex-1">{children}</main>
+                  <Footer />
+                </RecentlyViewedProvider>
+              </CompareProvider>
+            </FavoritesProvider>
           </CartProvider>
         </AuthProvider>
       </body>

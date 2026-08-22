@@ -7,6 +7,8 @@ import { MobileNav } from "@/components/layout/mobile-nav";
 import { QuoteDialog } from "@/components/common/quote-dialog";
 import { AccountLink } from "@/components/auth/account-link";
 import { CartBadge } from "@/components/cart/cart-badge";
+import { FavoritesBadge } from "@/components/favorites/favorites-badge";
+import { CompareBadge } from "@/components/compare/compare-badge";
 import { mainNav } from "@/config/navigation";
 import { siteConfig } from "@/config/site";
 
@@ -52,7 +54,9 @@ export function Header() {
           <SearchBar />
         </div>
 
-        <div className="ml-auto hidden items-center gap-4 md:flex lg:ml-3">
+        <div className="ml-auto hidden items-center gap-2 md:flex lg:ml-3">
+          <CompareBadge />
+          <FavoritesBadge />
           <CartBadge />
           <AccountLink />
           <QuoteDialog />

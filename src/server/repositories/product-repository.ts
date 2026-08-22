@@ -62,6 +62,15 @@ export const productRepository = {
     });
   },
 
+  /** Lookup by a client-held id list (favorites, compare, recently viewed) — order is not guaranteed here, callers re-sort to match the input. */
+  findByIds(ids: string[]) {
+    if (ids.length === 0) return Promise.resolve([]);
+    return prisma.product.findMany({
+      where: { published: true, id: { in: ids } },
+      select: productListSelect,
+    });
+  },
+
   countPublished() {
     return prisma.product.count({ where: { published: true } });
   },
