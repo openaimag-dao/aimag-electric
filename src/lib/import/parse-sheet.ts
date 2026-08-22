@@ -1,7 +1,6 @@
 import * as XLSX from "xlsx";
 
-import type { ColumnSpec, ImportKind } from "@/types/import";
-import { IMPORT_COLUMNS } from "@/config/import-columns";
+import type { ColumnSpec } from "@/types/import";
 
 /** Normalize a header for alias matching: lowercase, strip spaces/punctuation. */
 function normalizeHeader(h: string): string {
@@ -51,9 +50,12 @@ function attrColumnKey(header: string): string | null {
 
 /**
  * Parse an .xlsx/.xls/.csv ArrayBuffer into canonical-key rows for the given
- * import kind. Header matching is alias-based and forgiving of case/spacing.
+ * column schema. Header matching is alias-based and forgiving of
+ * case/spacing. Shared by the admin catalog import (IMPORT_COLUMNS[kind])
+ * and the customer-facing "Загрузить ТЗ" matcher (its own column schema) —
+ * neither owns this parser.
  */
-export function parseSheet(buffer: ArrayBuffer, kind: ImportKind): ParsedSheet {
+export function parseSheet(buffer: ArrayBuffer, specs: ColumnSpec[]): ParsedSheet {
   const wb = XLSX.read(buffer, { type: "array" });
   const sheetName = wb.SheetNames[0];
   const sheet = wb.Sheets[sheetName];
@@ -72,7 +74,6 @@ export function parseSheet(buffer: ArrayBuffer, kind: ImportKind): ParsedSheet {
     return { rows: [], sourceColumns: [], mappedColumns: [], missingRequired: [] };
   }
 
-  const specs = IMPORT_COLUMNS[kind];
   const aliasIndex = buildAliasIndex(specs);
 
   const headerRow = matrix[0].map((h) => String(h ?? "").trim());
@@ -105,13 +106,13 @@ export function parseSheet(buffer: ArrayBuffer, kind: ImportKind): ParsedSheet {
 
 /** Generate a downloadable template workbook (headers + one example row). */
 export function buildTemplateWorkbook(
-  kind: ImportKind,
+  sheetName: string,
   headers: string[],
   example: (string | number)[]
 ): ArrayBuffer {
   const ws = XLSX.utils.aoa_to_sheet([headers, example]);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, kind);
+  XLSX.utils.book_append_sheet(wb, ws, sheetName);
   return XLSX.write(wb, { type: "array", bookType: "xlsx" });
 }
 

@@ -81,7 +81,7 @@ export function ImportClient() {
     setResult(null);
     try {
       const buffer = await file.arrayBuffer();
-      const parsed = parseSheet(buffer, kind);
+      const parsed = parseSheet(buffer, IMPORT_COLUMNS[kind]);
 
       if (parsed.missingRequired.length > 0) {
         toast.error(`Не найдены обязательные колонки: ${parsed.missingRequired.join(", ")}`);
