@@ -14,6 +14,19 @@ export const warehouseAdminRepository = {
   byId(id: string) {
     return prisma.warehouse.findUnique({ where: { id } });
   },
+  byIdWithStock(id: string) {
+    return prisma.warehouse.findUnique({
+      where: { id },
+      include: {
+        stock: {
+          orderBy: { quantity: "desc" },
+          include: {
+            product: { select: { id: true, slug: true, sku: true, title: true, unit: true } },
+          },
+        },
+      },
+    });
+  },
   create(data: Prisma.WarehouseCreateInput) {
     return prisma.warehouse.create({ data });
   },
