@@ -15,6 +15,7 @@ import {
   SlidersHorizontal,
   ListChecks,
   Image as ImageIcon,
+  Building2,
 } from "lucide-react";
 
 export interface AdminNavItem {
@@ -37,6 +38,7 @@ export const adminNav: AdminNavItem[] = [
   { label: "Склады", href: "/admin/warehouses", icon: Warehouse },
   { label: "Документы", href: "/admin/documents", icon: FileText },
   { label: "Пользователи", href: "/admin/users", icon: Users },
+  { label: "Компании", href: "/admin/companies", icon: Building2 },
   { label: "Заявки", href: "/admin/quotes", icon: Inbox },
   { label: "CRM: клиенты", href: "/admin/crm/customers", icon: Contact },
   { label: "CRM: сделки", href: "/admin/crm/deals", icon: KanbanSquare },

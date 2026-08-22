@@ -455,23 +455,79 @@ model Activity {
 }
 
 model User {
-  id              String     @id @default(cuid())
-  name            String?
-  email           String     @unique
-  emailVerified   DateTime?
-  passwordHash    String?
-  role            UserRole   @default(CUSTOMER)
-  company         String?
-  phone           String?
-  accounts        Account[]
-  sessions        Session[]
-  quotes          Quote[]
-  customerProfile Customer[]
-  ownedCustomers  Customer[] @relation("CustomerOwner")
-  ownedDeals      Deal[]     @relation("DealOwner")
-  activities      Activity[]
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  id                 String          @id @default(cuid())
+  name               String?
+  email              String          @unique
+  emailVerified      DateTime?
+  passwordHash       String?
+  role               UserRole        @default(CUSTOMER)
+  company            String?
+  phone              String?
+  accounts           Account[]
+  sessions           Session[]
+  quotes             Quote[]
+  customerProfile    Customer[]
+  ownedCustomers     Customer[]      @relation("CustomerOwner")
+  ownedDeals         Deal[]          @relation("DealOwner")
+  activities         Activity[]
+  companyMemberships CompanyMember[]
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// B2B company accounts
+// ---------------------------------------------------------------------------
+
+enum CompanyRole {
+  COMPANY_ADMIN
+  PROCUREMENT
+  ENGINEER
+  VIEWER
+}
+
+/**
+ * A B2B customer organization — the structured counterpart to the free-text
+ * `company` labels on User/Quote/Customer (those stay as-is; this is an
+ * opt-in layer for companies that want real requisites and multiple portal
+ * users). Deliberately its own table with no new column on User, so it adds
+ * zero risk to any existing unguarded `prisma.user.*` query.
+ */
+model Company {
+  id            String          @id @default(cuid())
+  name          String
+  bin           String?         @unique
+  legalAddress  String?
+  actualAddress String?
+  phone         String?
+  email         String?
+  notes         String?         @db.Text
+  members       CompanyMember[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@index([name])
+}
+
+/**
+ * One user's membership in a company, with the B2B role that gates what
+ * they can do there (Phase 4 of the roadmap: Company Admin manages
+ * employees, Procurement requests quotes, Engineer creates projects,
+ * Viewer is read-only). Checked server-side wherever it matters — never
+ * trust the client for this.
+ */
+model CompanyMember {
+  id        String      @id @default(cuid())
+  companyId String
+  company   Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      CompanyRole @default(VIEWER)
+  createdAt DateTime    @default(now())
+
+  @@unique([companyId, userId])
+  @@index([companyId])
+  @@index([userId])
 }
 
 model Account {
