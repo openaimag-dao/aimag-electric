@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Briefcase, Plus } from "lucide-react";
+import { Briefcase, Plus, Upload } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/admin/form-dialog";
@@ -31,10 +31,18 @@ export function ProjectsListClient({ rows }: { rows: ProjectListRow[] }) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">{rows.length} проектов</p>
-        <Button variant="signal" onClick={() => setOpen(true)}>
-          <Plus className="size-4" />
-          Новый проект
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" asChild>
+            <Link href="/account/projects/import">
+              <Upload className="size-4" />
+              Загрузить ТЗ
+            </Link>
+          </Button>
+          <Button variant="signal" onClick={() => setOpen(true)}>
+            <Plus className="size-4" />
+            Новый проект
+          </Button>
+        </div>
       </div>
 
       {rows.length === 0 ? (
