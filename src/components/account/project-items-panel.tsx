@@ -2,12 +2,19 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Loader2, Minus, Plus, Trash2 } from "lucide-react";
+import { Loader2, Minus, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { AddProjectItem } from "@/components/account/add-project-item";
-import { updateProjectItemQty, removeProjectItem } from "@/server/actions/project-actions";
+import { AvailabilityBadge } from "@/components/catalog/availability-badge";
+import {
+  updateProjectItemQty,
+  removeProjectItem,
+  addProjectItem,
+} from "@/server/actions/project-actions";
+import { getProductAlternatives } from "@/server/actions/product-lookup-actions";
 import { tiynToTenge, formatTenge } from "@/lib/money";
+import type { CatalogProduct } from "@/types/catalog";
 
 export interface ProjectItemRow {
   id: string;
@@ -31,6 +38,42 @@ export function ProjectItemsPanel({
   editable: boolean;
 }) {
   const [busyId, setBusyId] = React.useState<string | null>(null);
+  const [openAlternativesId, setOpenAlternativesId] = React.useState<string | null>(null);
+  const [alternatives, setAlternatives] = React.useState<Record<string, CatalogProduct[]>>({});
+  const [loadingAlternativesId, setLoadingAlternativesId] = React.useState<string | null>(null);
+  const [addingAlternativeId, setAddingAlternativeId] = React.useState<string | null>(null);
+
+  async function toggleAlternatives(item: ProjectItemRow) {
+    if (openAlternativesId === item.id) {
+      setOpenAlternativesId(null);
+      return;
+    }
+    setOpenAlternativesId(item.id);
+    if (alternatives[item.id] || !item.productId) return;
+    setLoadingAlternativesId(item.id);
+    const found = await getProductAlternatives(item.productId);
+    setLoadingAlternativesId(null);
+    setAlternatives((prev) => ({ ...prev, [item.id]: found }));
+  }
+
+  async function handleAddAlternative(product: CatalogProduct) {
+    setAddingAlternativeId(product.id);
+    const result = await addProjectItem(projectId, {
+      productId: product.id,
+      slug: product.slug,
+      sku: product.sku,
+      title: product.title,
+      qty: 1,
+      unit: product.unit,
+      priceTenge: product.price,
+    });
+    setAddingAlternativeId(null);
+    if (!result.ok) {
+      toast.error(result.error ?? "Не удалось добавить товар");
+      return;
+    }
+    toast.success("Аналог добавлен в проект");
+  }
 
   async function handleQty(itemId: string, qty: number) {
     if (qty <= 0) return;
@@ -64,81 +107,143 @@ export function ProjectItemsPanel({
         ) : (
           <div className="divide-y divide-border">
             {items.map((item) => (
-              <div
-                key={item.id}
-                className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="min-w-0">
-                  {item.slug ? (
-                    <Link
-                      href={`/catalog/${item.slug}`}
-                      className="font-medium text-primary hover:text-signal-700"
-                    >
-                      {item.title}
-                    </Link>
-                  ) : (
-                    <p className="font-medium text-primary">{item.title}</p>
-                  )}
-                  {item.sku && (
-                    <p className="mt-0.5 font-mono text-xs text-muted-foreground">
-                      Арт. {item.sku}
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-4">
-                  {editable ? (
-                    <div className="flex items-center gap-1.5 rounded-md border border-border">
+              <div key={item.id} className="p-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    {item.slug ? (
+                      <Link
+                        href={`/catalog/${item.slug}`}
+                        className="font-medium text-primary hover:text-signal-700"
+                      >
+                        {item.title}
+                      </Link>
+                    ) : (
+                      <p className="font-medium text-primary">{item.title}</p>
+                    )}
+                    {item.sku && (
+                      <p className="mt-0.5 font-mono text-xs text-muted-foreground">
+                        Арт. {item.sku}
+                      </p>
+                    )}
+                    {item.productId && (
                       <button
                         type="button"
-                        aria-label="Уменьшить количество"
-                        className="flex size-8 items-center justify-center text-steel-600 hover:text-primary disabled:opacity-50"
-                        onClick={() => handleQty(item.id, item.qty - 1)}
-                        disabled={busyId === item.id || item.qty <= 1}
+                        onClick={() => toggleAlternatives(item)}
+                        className="mt-1 inline-flex items-center gap-1 text-xs text-steel-600 hover:text-signal-700"
                       >
-                        <Minus className="size-3.5" />
+                        <Search className="size-3" />
+                        Найти аналог
                       </button>
-                      <span className="min-w-10 text-center text-sm tabular-nums">
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    {editable ? (
+                      <div className="flex items-center gap-1.5 rounded-md border border-border">
+                        <button
+                          type="button"
+                          aria-label="Уменьшить количество"
+                          className="flex size-8 items-center justify-center text-steel-600 hover:text-primary disabled:opacity-50"
+                          onClick={() => handleQty(item.id, item.qty - 1)}
+                          disabled={busyId === item.id || item.qty <= 1}
+                        >
+                          <Minus className="size-3.5" />
+                        </button>
+                        <span className="min-w-10 text-center text-sm tabular-nums">
+                          {item.qty} {item.unit}
+                        </span>
+                        <button
+                          type="button"
+                          aria-label="Увеличить количество"
+                          className="flex size-8 items-center justify-center text-steel-600 hover:text-primary disabled:opacity-50"
+                          onClick={() => handleQty(item.id, item.qty + 1)}
+                          disabled={busyId === item.id}
+                        >
+                          <Plus className="size-3.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-sm tabular-nums text-muted-foreground">
                         {item.qty} {item.unit}
                       </span>
+                    )}
+
+                    <span className="w-28 text-right text-sm font-semibold text-primary">
+                      {item.amountTiyn !== null
+                        ? formatTenge(tiynToTenge(item.amountTiyn) * item.qty)
+                        : "по запросу"}
+                    </span>
+
+                    {editable && (
                       <button
                         type="button"
-                        aria-label="Увеличить количество"
-                        className="flex size-8 items-center justify-center text-steel-600 hover:text-primary disabled:opacity-50"
-                        onClick={() => handleQty(item.id, item.qty + 1)}
+                        aria-label="Удалить позицию"
+                        className="text-muted-foreground hover:text-red-600 disabled:opacity-50"
+                        onClick={() => handleRemove(item.id)}
                         disabled={busyId === item.id}
                       >
-                        <Plus className="size-3.5" />
+                        {busyId === item.id ? (
+                          <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="size-4" />
+                        )}
                       </button>
-                    </div>
-                  ) : (
-                    <span className="text-sm tabular-nums text-muted-foreground">
-                      {item.qty} {item.unit}
-                    </span>
-                  )}
-
-                  <span className="w-28 text-right text-sm font-semibold text-primary">
-                    {item.amountTiyn !== null
-                      ? formatTenge(tiynToTenge(item.amountTiyn) * item.qty)
-                      : "по запросу"}
-                  </span>
-
-                  {editable && (
-                    <button
-                      type="button"
-                      aria-label="Удалить позицию"
-                      className="text-muted-foreground hover:text-red-600 disabled:opacity-50"
-                      onClick={() => handleRemove(item.id)}
-                      disabled={busyId === item.id}
-                    >
-                      {busyId === item.id ? (
-                        <Loader2 className="size-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="size-4" />
-                      )}
-                    </button>
-                  )}
+                    )}
+                  </div>
                 </div>
+
+                {openAlternativesId === item.id && (
+                  <div className="mt-3 rounded-lg border border-border bg-secondary/30 p-3">
+                    {loadingAlternativesId === item.id ? (
+                      <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Loader2 className="size-3.5 animate-spin" /> Ищем аналоги…
+                      </p>
+                    ) : !alternatives[item.id]?.length ? (
+                      <p className="text-sm text-muted-foreground">
+                        Аналогов в этой категории не найдено.
+                      </p>
+                    ) : (
+                      <div className="space-y-2">
+                        {alternatives[item.id].map((p) => (
+                          <div
+                            key={p.id}
+                            className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-card p-2"
+                          >
+                            <div className="min-w-0">
+                              <Link
+                                href={`/catalog/${p.slug}`}
+                                className="text-sm font-medium text-primary hover:text-signal-700"
+                              >
+                                {p.title}
+                              </Link>
+                              <div className="mt-1 flex items-center gap-2">
+                                <AvailabilityBadge status={p.availability} />
+                                <span className="text-xs text-muted-foreground">
+                                  {p.price !== null ? formatTenge(p.price) : "по запросу"}
+                                </span>
+                              </div>
+                            </div>
+                            {editable && (
+                              <button
+                                type="button"
+                                onClick={() => handleAddAlternative(p)}
+                                disabled={addingAlternativeId === p.id}
+                                className="inline-flex items-center gap-1 rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                              >
+                                {addingAlternativeId === p.id ? (
+                                  <Loader2 className="size-3 animate-spin" />
+                                ) : (
+                                  <Plus className="size-3" />
+                                )}
+                                Добавить
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>
