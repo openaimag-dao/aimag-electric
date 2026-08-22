@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { warehouseAdminRepository } from "@/server/repositories/admin";
-import { warehouseFormSchema } from "@/lib/validations/admin";
+import { warehouseFormSchema, stockQuantityFormSchema } from "@/lib/validations/admin";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
 import { requireStaff } from "@/lib/security/rbac";
 
@@ -42,6 +42,23 @@ export async function deleteWarehouse(id: string): Promise<ActionResult> {
   try {
     await warehouseAdminRepository.remove(id);
     revalidate();
+    return ok();
+  } catch (e) {
+    return fail(prismaError(e));
+  }
+}
+
+export async function updateStockQuantity(
+  warehouseId: string,
+  stockId: string,
+  input: unknown
+): Promise<ActionResult> {
+  await requireStaff();
+  const v = validate(stockQuantityFormSchema, input);
+  if (!v.success) return v.result;
+  try {
+    await warehouseAdminRepository.updateStockQuantity(stockId, v.data.quantity);
+    revalidatePath(`/admin/warehouses/${warehouseId}`);
     return ok();
   } catch (e) {
     return fail(prismaError(e));
