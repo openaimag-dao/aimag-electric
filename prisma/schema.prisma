@@ -318,25 +318,33 @@ model Notification {
 }
 
 model Quote {
-  id         String      @id @default(cuid())
+  id            String      @id @default(cuid())
   /**
    * Optional project/object name the client gave their cart, e.g. "Электроснабжение объекта №1".
    */
-  title      String?
-  company    String
-  name       String
-  phone      String
-  email      String?
-  message    String      @db.Text
-  status     QuoteStatus @default(NEW)
-  userId     String?
-  user       User?       @relation(fields: [userId], references: [id])
-  customerId String?
-  customer   Customer?   @relation(fields: [customerId], references: [id])
-  deal       Deal?
-  items      QuoteItem[]
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  title         String?
+  company       String
+  name          String
+  phone         String
+  email         String?
+  message       String      @db.Text
+  status        QuoteStatus @default(NEW)
+  userId        String?
+  user          User?       @relation(fields: [userId], references: [id])
+  customerId    String?
+  customer      Customer?   @relation(fields: [customerId], references: [id])
+  deal          Deal?
+  items         QuoteItem[]
+  /**
+   * Unguessable public link token — lets a customer open, approve, or
+   * reject this quote at /kp/[token] without registering (Phase 15).
+   * Set on every quote at creation so a link is always ready to share.
+   */
+  approvalToken String?     @unique
+  respondedAt   DateTime?
+  responseNote  String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
   @@index([status])
   @@index([createdAt])
@@ -583,7 +591,9 @@ model ProjectItem {
   projectId  String
   project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   productId  String?
-  /** Snapshot for linking back to the product page — like productId, not a FK (see CartItem). */
+  /**
+   * Snapshot for linking back to the product page — like productId, not a FK (see CartItem).
+   */
   slug       String?
   sku        String?
   title      String

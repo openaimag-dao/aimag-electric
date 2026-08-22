@@ -20,7 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Trash2, Eye, Download } from "lucide-react";
+import { MoreHorizontal, Trash2, Eye, Download, Link2 } from "lucide-react";
 import { TableToolbar } from "@/components/admin/table-toolbar";
 import { FormDialog } from "@/components/admin/form-dialog";
 import { ConfirmDelete } from "@/components/admin/confirm-delete";
@@ -47,6 +47,9 @@ export interface QuoteListRow {
   message: string;
   status: string;
   createdAt: string;
+  approvalToken: string | null;
+  respondedAt: string | null;
+  responseNote: string | null;
   items: QuoteItemRow[];
 }
 
@@ -82,6 +85,16 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
     setPending(null);
     if (result.ok) toast.success("Статус обновлён");
     else toast.error(result.error ?? "Ошибка");
+  }
+
+  async function copyClientLink(token: string) {
+    const url = `${window.location.origin}/kp/${token}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Ссылка скопирована");
+    } catch {
+      toast.error("Не удалось скопировать. Ссылка: " + url);
+    }
   }
 
   return (
@@ -212,6 +225,33 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
               <span className="text-muted-foreground">Дата</span>
               <span className="text-primary">{formatDate(viewing.createdAt)}</span>
             </div>
+
+            {viewing.approvalToken && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Ссылка для клиента</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => copyClientLink(viewing.approvalToken!)}
+                >
+                  <Link2 className="size-3.5" /> Скопировать
+                </Button>
+              </div>
+            )}
+
+            {viewing.respondedAt && (
+              <div
+                className={
+                  viewing.status === "WON"
+                    ? "rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-emerald-700"
+                    : "rounded-lg border border-red-200 bg-red-50 p-3 text-red-700"
+                }
+              >
+                Клиент {viewing.status === "WON" ? "одобрил" : "отклонил"} КП{" "}
+                {formatDate(viewing.respondedAt)}
+                {viewing.responseNote && <p className="mt-1">«{viewing.responseNote}»</p>}
+              </div>
+            )}
 
             {viewing.items.length > 0 && (
               <div className="pt-2">

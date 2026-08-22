@@ -52,6 +52,7 @@ export async function submitQuote(input: QuoteInput): Promise<QuoteActionState> 
       phone: parsed.data.phone,
       email: parsed.data.email || null,
       message: parsed.data.message || (items.length > 0 ? "Заявка из проекта (см. позиции)" : ""),
+      approvalToken: crypto.randomUUID(),
       ...(user ? { user: { connect: { id: user.id } } } : {}),
       items: items.length
         ? {

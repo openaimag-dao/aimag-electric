@@ -1,6 +1,7 @@
 import "server-only";
 
 import { prisma } from "@/lib/prisma";
+import { withQuoteColumns } from "@/server/repositories/quote-self-heal";
 
 /**
  * Data access for the customer/staff cabinet. Everything is scoped to the
@@ -21,11 +22,13 @@ export const accountRepository = {
 
   /** Quotes tied to this user directly (submitted while logged in). */
   quotesByUser(userId: string) {
-    return prisma.quote.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
-      include: { items: true },
-    });
+    return withQuoteColumns(() =>
+      prisma.quote.findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" },
+        include: { items: true },
+      })
+    );
   },
 
   /** Staff workload: customers and deals they own. */
