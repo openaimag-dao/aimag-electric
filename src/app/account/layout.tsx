@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { currentUser, isStaff } from "@/server/auth/session";
 import { SignOutButton } from "@/components/auth/sign-out-button";
+import { AccountSubnav } from "@/components/account/account-subnav";
 
 export const metadata: Metadata = {
   title: "Личный кабинет",
@@ -12,11 +13,7 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function AccountLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function AccountLayout({ children }: { children: React.ReactNode }) {
   const user = await currentUser();
   if (!user) redirect("/login?callbackUrl=/account");
 
@@ -41,6 +38,7 @@ export default async function AccountLayout({
           <SignOutButton />
         </div>
       </div>
+      <AccountSubnav />
       {children}
     </div>
   );

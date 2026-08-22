@@ -471,6 +471,8 @@ model User {
   ownedDeals         Deal[]          @relation("DealOwner")
   activities         Activity[]
   companyMemberships CompanyMember[]
+  ownedProjects      Project[]       @relation("ProjectOwner")
+  managedProjects    Project[]       @relation("ProjectManager")
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
 }
@@ -503,6 +505,7 @@ model Company {
   email         String?
   notes         String?         @db.Text
   members       CompanyMember[]
+  projects      Project[]
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 
@@ -528,6 +531,70 @@ model CompanyMember {
   @@unique([companyId, userId])
   @@index([companyId])
   @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Project workspace (B2B specification/BOM) — saved from the existing
+// client-side cart ("В проект" / "Проект пуст" — see CartProvider), which
+// stays as the fast add-to-cart flow. This is the persisted, named,
+// company-shareable upgrade: history, status, multiple projects at once.
+// ---------------------------------------------------------------------------
+
+enum ProjectStatus {
+  DRAFT
+  ANALYSIS
+  QUOTATION
+  APPROVAL
+  ORDER
+  COMPLETED
+  CANCELLED
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  title       String
+  description String?       @db.Text
+  objectName  String?
+  region      String?
+  status      ProjectStatus @default(DRAFT)
+  deadline    DateTime?
+  companyId   String?
+  company     Company?      @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  ownerId     String
+  owner       User          @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  managerId   String?
+  manager     User?         @relation("ProjectManager", fields: [managerId], references: [id])
+  items       ProjectItem[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([companyId])
+  @@index([ownerId])
+  @@index([status])
+}
+
+/**
+ * One BOM line. `productId` is a soft snapshot reference (no FK, like
+ * QuoteItem.productId) — the product may later be unpublished or removed
+ * without breaking the project's history of what was specified.
+ */
+model ProjectItem {
+  id         String   @id @default(cuid())
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  productId  String?
+  /** Snapshot for linking back to the product page — like productId, not a FK (see CartItem). */
+  slug       String?
+  sku        String?
+  title      String
+  qty        Float    @default(1)
+  unit       String   @default("шт")
+  amountTiyn Int?
+  note       String?
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@index([projectId])
 }
 
 model Account {

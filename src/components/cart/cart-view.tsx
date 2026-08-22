@@ -6,6 +6,7 @@ import { Minus, Plus, Trash2, ShoppingCart } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { QuoteForm } from "@/components/common/quote-form";
+import { SaveAsProjectButton } from "@/components/cart/save-as-project-button";
 import { useCart } from "@/components/cart/cart-provider";
 import { formatTenge } from "@/lib/money";
 
@@ -114,6 +115,9 @@ export function CartView() {
               clear();
             }}
           />
+        </div>
+        <div className="mt-4 border-t border-border pt-4">
+          <SaveAsProjectButton items={items} />
         </div>
       </div>
     </div>

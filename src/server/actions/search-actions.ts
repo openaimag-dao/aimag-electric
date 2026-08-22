@@ -6,6 +6,7 @@ import { catalogService } from "@/server/services/catalog-service";
 import { rateLimit } from "@/lib/security/rate-limit";
 
 export interface SearchSuggestion {
+  id: string;
   slug: string;
   title: string;
   sku: string;
@@ -31,6 +32,7 @@ export async function searchSuggestions(query: string): Promise<SearchSuggestion
 
   const results = await catalogService.searchSuggestions(q, 6);
   return results.map((p) => ({
+    id: p.id,
     slug: p.slug,
     title: p.title,
     sku: p.sku,
