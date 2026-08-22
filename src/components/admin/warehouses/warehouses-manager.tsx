@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useCrudManager } from "@/hooks/use-crud-manager";
 
 import {
@@ -36,10 +38,7 @@ export function WarehousesManager({ rows }: { rows: WarehouseListRow[] }) {
     deleting,
     setDeleting,
     closeDelete,
-  } = useCrudManager<WarehouseListRow, WarehouseRow>(
-    rows,
-    (r) => `${r.name} ${r.code} ${r.city}`
-  );
+  } = useCrudManager<WarehouseListRow, WarehouseRow>(rows, (r) => `${r.name} ${r.code} ${r.city}`);
 
   return (
     <div className="space-y-4">
@@ -67,16 +66,29 @@ export function WarehousesManager({ rows }: { rows: WarehouseListRow[] }) {
             {filtered.map((row) => (
               <TableRow key={row.id}>
                 <TableCell>
-                  <Badge variant="muted" className="font-mono">{row.code}</Badge>
+                  <Badge variant="muted" className="font-mono">
+                    {row.code}
+                  </Badge>
                 </TableCell>
-                <TableCell className="font-medium text-primary">{row.name}</TableCell>
-                <TableCell className="text-muted-foreground">{row.city}</TableCell>
-                <TableCell className="text-center">{row.stockCount}</TableCell>
                 <TableCell>
-                  <RowActions
-                    onEdit={() => openEdit(row)}
-                    onDelete={() => setDeleting(row)}
-                  />
+                  <Link
+                    href={`/admin/warehouses/${row.id}`}
+                    className="font-medium text-primary hover:text-signal-700 hover:underline"
+                  >
+                    {row.name}
+                  </Link>
+                </TableCell>
+                <TableCell className="text-muted-foreground">{row.city}</TableCell>
+                <TableCell className="text-center">
+                  <Link
+                    href={`/admin/warehouses/${row.id}`}
+                    className="text-primary hover:text-signal-700 hover:underline"
+                  >
+                    {row.stockCount}
+                  </Link>
+                </TableCell>
+                <TableCell>
+                  <RowActions onEdit={() => openEdit(row)} onDelete={() => setDeleting(row)} />
                 </TableCell>
               </TableRow>
             ))}
@@ -102,11 +114,7 @@ export function WarehousesManager({ rows }: { rows: WarehouseListRow[] }) {
       <ConfirmDelete
         open={Boolean(deleting)}
         onOpenChange={closeDelete}
-        description={
-          deleting
-            ? `Склад «${deleting.name}» и связанные остатки будут удалены.`
-            : ""
-        }
+        description={deleting ? `Склад «${deleting.name}» и связанные остатки будут удалены.` : ""}
         action={() => deleteWarehouse(deleting!.id)}
       />
     </div>
