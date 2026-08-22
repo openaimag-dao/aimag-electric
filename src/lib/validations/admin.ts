@@ -138,3 +138,38 @@ export type UserFormInput = z.infer<typeof userFormSchema>;
 
 export const quoteStatus = z.enum(["NEW", "IN_PROGRESS", "SENT", "WON", "LOST"]);
 export type QuoteStatusValue = z.infer<typeof quoteStatus>;
+
+export const orderStatus = z.enum([
+  "NEW",
+  "CONFIRMED",
+  "PROCESSING",
+  "SHIPPING",
+  "DELIVERED",
+  "CANCELLED",
+]);
+export type OrderStatusValue = z.infer<typeof orderStatus>;
+
+export const orderDeliveryFormSchema = z.object({
+  carrier: z.string().max(120).optional().or(z.literal("")),
+  trackingNumber: z.string().max(120).optional().or(z.literal("")),
+  estimatedDelivery: z.string().optional().or(z.literal("")),
+  actualDelivery: z.string().optional().or(z.literal("")),
+});
+export type OrderDeliveryFormInput = z.infer<typeof orderDeliveryFormSchema>;
+
+const orderDocumentKind = z.enum([
+  "INVOICE",
+  "CONTRACT",
+  "ACT",
+  "SPECIFICATION",
+  "WAYBILL",
+  "OTHER",
+]);
+
+export const orderDocumentFormSchema = z.object({
+  title: z.string().min(2, "Укажите название"),
+  kind: orderDocumentKind.default("OTHER"),
+  url: z.string().min(1, "Укажите ссылку на файл"),
+  size: z.string().optional().or(z.literal("")),
+});
+export type OrderDocumentFormInput = z.infer<typeof orderDocumentFormSchema>;

@@ -1,11 +1,14 @@
 import { AdminPageHeader } from "@/components/admin/page-header";
 import { QuotesManager, type QuoteListRow } from "@/components/admin/quotes/quotes-manager";
-import { quoteAdminRepository } from "@/server/repositories/admin";
+import { quoteAdminRepository, orderAdminRepository } from "@/server/repositories/admin";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminQuotesPage() {
-  const rows = await quoteAdminRepository.list();
+  const [rows, quoteIdsWithOrders] = await Promise.all([
+    quoteAdminRepository.list(),
+    orderAdminRepository.quoteIdsWithOrders(),
+  ]);
   const data: QuoteListRow[] = rows.map((q) => ({
     id: q.id,
     title: q.title,
@@ -19,6 +22,7 @@ export default async function AdminQuotesPage() {
     approvalToken: q.approvalToken,
     respondedAt: q.respondedAt ? q.respondedAt.toISOString() : null,
     responseNote: q.responseNote,
+    hasOrder: quoteIdsWithOrders.has(q.id),
     items: q.items.map((i) => ({
       id: i.id,
       title: i.title,

@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import {
@@ -20,12 +22,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Trash2, Eye, Download, Link2 } from "lucide-react";
+import { MoreHorizontal, Trash2, Eye, Download, Link2, PackagePlus, Loader2 } from "lucide-react";
 import { TableToolbar } from "@/components/admin/table-toolbar";
 import { FormDialog } from "@/components/admin/form-dialog";
 import { ConfirmDelete } from "@/components/admin/confirm-delete";
 import { QuoteStatusBadge, quoteStatusMeta } from "@/components/admin/quote-status-badge";
-import { setQuoteStatus, deleteQuote } from "@/server/actions/admin";
+import { setQuoteStatus, deleteQuote, createOrderFromQuote } from "@/server/actions/admin";
 import { formatTiyn } from "@/lib/money";
 
 export interface QuoteItemRow {
@@ -50,6 +52,7 @@ export interface QuoteListRow {
   approvalToken: string | null;
   respondedAt: string | null;
   responseNote: string | null;
+  hasOrder: boolean;
   items: QuoteItemRow[];
 }
 
@@ -68,10 +71,25 @@ function formatDate(iso: string) {
 }
 
 export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
+  const router = useRouter();
   const [query, setQuery] = React.useState("");
   const [viewing, setViewing] = React.useState<QuoteListRow | undefined>();
   const [deleting, setDeleting] = React.useState<QuoteListRow | undefined>();
   const [pending, setPending] = React.useState<string | null>(null);
+  const [creatingOrder, setCreatingOrder] = React.useState(false);
+
+  async function handleCreateOrder(quoteId: string) {
+    setCreatingOrder(true);
+    const result = await createOrderFromQuote(quoteId);
+    setCreatingOrder(false);
+    if (!result.ok || !result.data) {
+      toast.error(result.error ?? "Не удалось создать заказ");
+      return;
+    }
+    toast.success("Заказ создан");
+    setViewing(undefined);
+    router.push(`/admin/orders/${result.data.id}`);
+  }
 
   const filtered = rows.filter((r) =>
     `${r.company} ${r.name} ${r.phone} ${r.email ?? ""}`
@@ -251,6 +269,32 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
                 {formatDate(viewing.respondedAt)}
                 {viewing.responseNote && <p className="mt-1">«{viewing.responseNote}»</p>}
               </div>
+            )}
+
+            {viewing.status === "WON" && !viewing.hasOrder && (
+              <Button
+                variant="signal"
+                size="sm"
+                className="w-full"
+                onClick={() => handleCreateOrder(viewing.id)}
+                disabled={creatingOrder}
+              >
+                {creatingOrder ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <PackagePlus className="size-4" />
+                )}
+                Создать заказ
+              </Button>
+            )}
+
+            {viewing.hasOrder && (
+              <Link
+                href="/admin/orders"
+                className="block rounded-lg border border-border bg-secondary/40 p-3 text-center text-signal-700 hover:underline"
+              >
+                Заказ уже создан — открыть список заказов
+              </Link>
             )}
 
             {viewing.items.length > 0 && (

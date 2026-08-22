@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Briefcase } from "lucide-react";
+import { LayoutDashboard, Briefcase, Truck } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 const items = [
   { label: "Обзор", href: "/account", icon: LayoutDashboard, exact: true },
   { label: "Проекты", href: "/account/projects", icon: Briefcase, exact: false },
+  { label: "Заказы", href: "/account/orders", icon: Truck, exact: false },
 ];
 
 export function AccountSubnav() {

@@ -5,3 +5,4 @@ export { quoteRepository } from "./quote-repository";
 export { notificationRepository } from "./notification-repository";
 export { attributeRepository } from "./attribute-repository";
 export { projectRepository, ProjectAccessError } from "./project-repository";
+export { orderRepository } from "./order-repository";
