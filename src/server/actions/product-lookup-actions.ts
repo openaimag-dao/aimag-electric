@@ -29,3 +29,22 @@ export async function getProductsByIds(ids: unknown): Promise<CatalogProduct[]> 
 
   return productService.getByIds(clean);
 }
+
+/**
+ * Real alternatives for a BOM/project line item — same category, nearest by
+ * spec (voltage/cross-section), reusing the deterministic engine already
+ * shown as "Похожие товары" on the product page. Public, rate-limited.
+ */
+export async function getProductAlternatives(productId: unknown): Promise<CatalogProduct[]> {
+  if (typeof productId !== "string" || !productId) return [];
+
+  const hdrs = await headers();
+  const ip =
+    hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() || hdrs.get("x-real-ip") || "unknown";
+  const limit = rateLimit(`product-alternatives:${ip}`, 60, 60_000);
+  if (!limit.ok) return [];
+
+  const [product] = await productService.getByIds([productId]);
+  if (!product) return [];
+  return productService.getRelated(product);
+}
