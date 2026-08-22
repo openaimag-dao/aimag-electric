@@ -88,4 +88,14 @@ export const companyAdminRepository = {
       })
     );
   },
+
+  /** Every company this user belongs to, with their role in each — a user can be VIEWER in one and COMPANY_ADMIN in another. Powers project visibility/write checks. */
+  membershipsForUser(userId: string) {
+    return withTables(() =>
+      prisma.companyMember.findMany({
+        where: { userId },
+        include: { company: { select: { id: true, name: true } } },
+      })
+    );
+  },
 };

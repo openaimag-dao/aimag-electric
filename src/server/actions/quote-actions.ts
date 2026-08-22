@@ -9,6 +9,7 @@ import { rateLimit } from "@/lib/security/rate-limit";
 import { logger } from "@/lib/logger";
 import { tengeToTiyn } from "@/lib/money";
 import { notificationService } from "@/server/services/notification-service";
+import { currentUser } from "@/server/auth/session";
 
 export interface QuoteActionState {
   ok: boolean;
@@ -41,6 +42,9 @@ export async function submitQuote(input: QuoteInput): Promise<QuoteActionState> 
 
   try {
     const items = parsed.data.items ?? [];
+    // Link the quote to the submitter's account when they're signed in, so it
+    // shows up in "Мои заявки" on /account — this was previously never set.
+    const user = await currentUser();
     const quote = await quoteRepository.create({
       title: parsed.data.title || null,
       company: parsed.data.company,
@@ -48,6 +52,7 @@ export async function submitQuote(input: QuoteInput): Promise<QuoteActionState> 
       phone: parsed.data.phone,
       email: parsed.data.email || null,
       message: parsed.data.message || (items.length > 0 ? "Заявка из проекта (см. позиции)" : ""),
+      ...(user ? { user: { connect: { id: user.id } } } : {}),
       items: items.length
         ? {
             create: items.map((i) => ({
