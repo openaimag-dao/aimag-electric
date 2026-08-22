@@ -36,4 +36,7 @@ export const warehouseAdminRepository = {
   remove(id: string) {
     return prisma.warehouse.delete({ where: { id } });
   },
+  updateStockQuantity(stockId: string, quantity: number) {
+    return prisma.stock.update({ where: { id: stockId }, data: { quantity } });
+  },
 };

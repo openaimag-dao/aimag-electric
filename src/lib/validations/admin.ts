@@ -30,6 +30,11 @@ export const warehouseFormSchema = z.object({
 });
 export type WarehouseFormInput = z.infer<typeof warehouseFormSchema>;
 
+export const stockQuantityFormSchema = z.object({
+  quantity: z.coerce.number().min(0, "Не может быть отрицательным"),
+});
+export type StockQuantityFormInput = z.infer<typeof stockQuantityFormSchema>;
+
 export const companyFormSchema = z.object({
   name: z.string().min(2, "Укажите название"),
   bin: z.string().optional().or(z.literal("")),

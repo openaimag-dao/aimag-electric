@@ -52,7 +52,7 @@ export default async function WarehouseDetailPage({ params }: PageProps) {
 
       <div>
         <h2 className="mb-3 font-display text-lg font-semibold text-primary">Остатки</h2>
-        <WarehouseStockList rows={rows} />
+        <WarehouseStockList warehouseId={warehouse.id} rows={rows} />
       </div>
     </div>
   );
