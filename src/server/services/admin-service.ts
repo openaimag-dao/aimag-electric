@@ -2,6 +2,7 @@ import "server-only";
 
 import { prisma } from "@/lib/prisma";
 import { qualityWhere } from "@/lib/admin/product-quality";
+import { withQuoteColumns } from "@/server/repositories/quote-self-heal";
 
 /** Aggregations for the admin dashboard + reference lists for form selects. */
 export const adminService = {
@@ -28,10 +29,12 @@ export const adminService = {
       prisma.quote.count({ where: { status: "NEW" } }),
       prisma.productDocument.count(),
       prisma.stock.count({ where: { quantity: { lte: 0 } } }),
-      prisma.quote.findMany({
-        orderBy: { createdAt: "desc" },
-        take: 5,
-      }),
+      withQuoteColumns(() =>
+        prisma.quote.findMany({
+          orderBy: { createdAt: "desc" },
+          take: 5,
+        })
+      ),
       prisma.product.findMany({
         orderBy: { popularity: "desc" },
         take: 5,

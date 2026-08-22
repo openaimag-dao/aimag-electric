@@ -16,6 +16,9 @@ export default async function AdminQuotesPage() {
     message: q.message,
     status: q.status,
     createdAt: q.createdAt.toISOString(),
+    approvalToken: q.approvalToken,
+    respondedAt: q.respondedAt ? q.respondedAt.toISOString() : null,
+    responseNote: q.responseNote,
     items: q.items.map((i) => ({
       id: i.id,
       title: i.title,
