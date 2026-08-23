@@ -10,6 +10,7 @@ import {
   FileText,
   AlertTriangle,
   ArrowUpRight,
+  Truck,
 } from "lucide-react";
 
 import { adminService } from "@/server/services/admin-service";
@@ -38,12 +39,9 @@ function formatDate(iso: string) {
 }
 
 export default async function AdminDashboardPage() {
-  const { counters, quotesByStatus, recentQuotes, topProducts } =
-    await adminService.dashboard();
+  const { counters, quotesByStatus, recentQuotes, topProducts } = await adminService.dashboard();
 
-  const statusMap = Object.fromEntries(
-    quotesByStatus.map((q) => [q.status, q.count])
-  );
+  const statusMap = Object.fromEntries(quotesByStatus.map((q) => [q.status, q.count]));
 
   return (
     <div className="space-y-8">
@@ -55,10 +53,30 @@ export default async function AdminDashboardPage() {
       {/* Primary counters */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Товары" value={counters.products} icon={Package} href="/admin/products" />
-        <StatCard label="Категории" value={counters.categories} icon={FolderTree} href="/admin/categories" />
-        <StatCard label="Производители" value={counters.brands} icon={Factory} href="/admin/brands" />
-        <StatCard label="Склады" value={counters.warehouses} icon={Warehouse} href="/admin/warehouses" />
-        <StatCard label="Документы" value={counters.documents} icon={FileText} href="/admin/documents" />
+        <StatCard
+          label="Категории"
+          value={counters.categories}
+          icon={FolderTree}
+          href="/admin/categories"
+        />
+        <StatCard
+          label="Производители"
+          value={counters.brands}
+          icon={Factory}
+          href="/admin/brands"
+        />
+        <StatCard
+          label="Склады"
+          value={counters.warehouses}
+          icon={Warehouse}
+          href="/admin/warehouses"
+        />
+        <StatCard
+          label="Документы"
+          value={counters.documents}
+          icon={FileText}
+          href="/admin/documents"
+        />
         <StatCard label="Пользователи" value={counters.users} icon={Users} href="/admin/users" />
         <StatCard
           label="Новые заявки"
@@ -67,16 +85,26 @@ export default async function AdminDashboardPage() {
           href="/admin/quotes"
           accent
         />
-        <StatCard label="Позиций без остатка" value={counters.lowStock} icon={AlertTriangle} href="/admin/warehouses" />
+        <StatCard
+          label="Заказы в обработку"
+          value={counters.ordersNew}
+          icon={Truck}
+          href="/admin/orders"
+          accent
+        />
+        <StatCard
+          label="Позиций без остатка"
+          value={counters.lowStock}
+          icon={AlertTriangle}
+          href="/admin/warehouses"
+        />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Quotes funnel */}
         <div className="rounded-xl border border-border bg-card p-6">
           <div className="flex items-center justify-between">
-            <h2 className="font-display text-lg font-semibold text-primary">
-              Заявки по статусам
-            </h2>
+            <h2 className="font-display text-lg font-semibold text-primary">Заявки по статусам</h2>
             <Link
               href="/admin/quotes"
               className="inline-flex items-center gap-1 text-sm font-medium text-signal-700 hover:underline"
@@ -96,10 +124,7 @@ export default async function AdminDashboardPage() {
                     <span className="font-medium text-primary">{count}</span>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-secondary">
-                    <div
-                      className="h-full rounded-full bg-signal"
-                      style={{ width: `${pct}%` }}
-                    />
+                    <div className="h-full rounded-full bg-signal" style={{ width: `${pct}%` }} />
                   </div>
                 </div>
               );
@@ -110,9 +135,7 @@ export default async function AdminDashboardPage() {
         {/* Top products */}
         <div className="rounded-xl border border-border bg-card p-6">
           <div className="flex items-center justify-between">
-            <h2 className="font-display text-lg font-semibold text-primary">
-              Популярные товары
-            </h2>
+            <h2 className="font-display text-lg font-semibold text-primary">Популярные товары</h2>
             <Link
               href="/admin/products"
               className="inline-flex items-center gap-1 text-sm font-medium text-signal-700 hover:underline"
@@ -147,9 +170,7 @@ export default async function AdminDashboardPage() {
       {/* Recent quotes */}
       <div className="rounded-xl border border-border bg-card">
         <div className="flex items-center justify-between border-b border-border p-6">
-          <h2 className="font-display text-lg font-semibold text-primary">
-            Последние заявки
-          </h2>
+          <h2 className="font-display text-lg font-semibold text-primary">Последние заявки</h2>
           <Link
             href="/admin/quotes"
             className="inline-flex items-center gap-1 text-sm font-medium text-signal-700 hover:underline"
