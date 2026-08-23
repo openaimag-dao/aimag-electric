@@ -81,14 +81,22 @@ async function CustomerDashboard({ userId }: { userId: string }) {
                 )}
               </div>
             </div>
-            <span
-              className={cn(
-                "shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium",
-                (companyRoleMeta[membership.role] ?? companyRoleMeta.VIEWER).className
-              )}
-            >
-              {(companyRoleMeta[membership.role] ?? companyRoleMeta.VIEWER).label}
-            </span>
+            <div className="flex shrink-0 flex-col items-end gap-2">
+              <span
+                className={cn(
+                  "rounded-full px-2.5 py-0.5 text-xs font-medium",
+                  (companyRoleMeta[membership.role] ?? companyRoleMeta.VIEWER).className
+                )}
+              >
+                {(companyRoleMeta[membership.role] ?? companyRoleMeta.VIEWER).label}
+              </span>
+              <Link
+                href="/account/company"
+                className="inline-flex items-center gap-1 text-xs font-medium text-signal-700 hover:underline"
+              >
+                <Users className="size-3.5" /> Команда
+              </Link>
+            </div>
           </div>
         </section>
       )}
