@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Clock } from "lucide-react";
+import { Clock, Download } from "lucide-react";
 
 import { getPublicQuote } from "@/server/actions/quote-response-actions";
 import { QuoteResponseActions } from "@/components/quote/quote-response-actions";
+import { Button } from "@/components/ui/button";
 import { formatTiyn } from "@/lib/money";
 import { siteConfig } from "@/config/site";
 
@@ -35,6 +36,16 @@ export default async function PublicQuotePage({ params }: PageProps) {
           {quote.title || "Коммерческое предложение"}
         </h1>
         <p className="mt-1 text-center text-sm text-muted-foreground">для «{quote.company}»</p>
+
+        {(quote.status === "SENT" || quote.status === "WON" || quote.status === "LOST") && (
+          <div className="mt-4 flex justify-center">
+            <Button asChild variant="outline" size="sm">
+              <a href={`/kp/${token}/pdf`} target="_blank" rel="noopener noreferrer">
+                <Download className="size-4" /> Скачать PDF
+              </a>
+            </Button>
+          </div>
+        )}
 
         <div className="mt-6 rounded-xl border border-border bg-card">
           {quote.items.length > 0 ? (
