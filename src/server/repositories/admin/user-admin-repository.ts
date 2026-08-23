@@ -14,6 +14,13 @@ export const userAdminRepository = {
   byId(id: string) {
     return prisma.user.findUnique({ where: { id } });
   },
+  /** Narrow lookup for self-service flows (company team invite) — never the full row, no passwordHash. */
+  findByEmail(email: string) {
+    return prisma.user.findUnique({
+      where: { email },
+      select: { id: true, name: true, email: true },
+    });
+  },
   create(data: Prisma.UserCreateInput) {
     return prisma.user.create({ data });
   },

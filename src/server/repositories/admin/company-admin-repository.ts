@@ -90,6 +90,15 @@ export const companyAdminRepository = {
   removeMember(id: string) {
     return withTables(() => prisma.companyMember.delete({ where: { id } }));
   },
+  /** Ownership check for self-service team actions — confirms a member row actually belongs to the company the caller claims. */
+  memberById(id: string) {
+    return withTables(() =>
+      prisma.companyMember.findUnique({
+        where: { id },
+        select: { id: true, companyId: true, userId: true, role: true },
+      })
+    );
+  },
 
   /** The company (with the caller's role) that this portal user belongs to, if any — powers the account dashboard's company card. */
   forUser(userId: string) {
