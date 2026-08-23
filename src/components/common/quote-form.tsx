@@ -20,9 +20,11 @@ interface QuoteFormProps {
   items?: CartItem[];
   /** Project/object name, editable when submitting a full cart. */
   defaultTitle?: string;
+  /** Pre-fill the free-text message, e.g. a search query that had no catalog match. */
+  defaultMessage?: string;
 }
 
-export function QuoteForm({ onSuccess, items, defaultTitle }: QuoteFormProps) {
+export function QuoteForm({ onSuccess, items, defaultTitle, defaultMessage }: QuoteFormProps) {
   const [submitted, setSubmitted] = React.useState(false);
   const [serverError, setServerError] = React.useState<string | null>(null);
   const hasItems = Boolean(items && items.length > 0);
@@ -40,7 +42,7 @@ export function QuoteForm({ onSuccess, items, defaultTitle }: QuoteFormProps) {
       name: "",
       phone: "",
       email: "",
-      message: "",
+      message: defaultMessage ?? "",
     },
   });
 
