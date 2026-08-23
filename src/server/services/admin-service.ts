@@ -17,6 +17,7 @@ export const adminService = {
       quotesNew,
       documents,
       lowStock,
+      ordersNew,
       recentQuotes,
       topProducts,
     ] = await Promise.all([
@@ -29,6 +30,7 @@ export const adminService = {
       prisma.quote.count({ where: { status: "NEW" } }),
       prisma.productDocument.count(),
       prisma.stock.count({ where: { quantity: { lte: 0 } } }),
+      prisma.order.count({ where: { status: "NEW" } }),
       withQuoteColumns(() =>
         prisma.quote.findMany({
           orderBy: { createdAt: "desc" },
@@ -58,6 +60,7 @@ export const adminService = {
         quotesNew,
         documents,
         lowStock,
+        ordersNew,
       },
       quotesByStatus: quotesByStatus.map((q) => ({
         status: q.status as string,
