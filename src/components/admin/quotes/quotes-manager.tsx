@@ -29,6 +29,7 @@ import { ConfirmDelete } from "@/components/admin/confirm-delete";
 import { QuoteStatusBadge, quoteStatusMeta } from "@/components/admin/quote-status-badge";
 import { setQuoteStatus, deleteQuote, createOrderFromQuote } from "@/server/actions/admin";
 import { formatTiyn } from "@/lib/money";
+import { cn } from "@/lib/utils";
 
 export interface QuoteItemRow {
   id: string;
@@ -257,19 +258,30 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
               </div>
             )}
 
-            {viewing.respondedAt && (
-              <div
-                className={
+            {viewing.respondedAt &&
+              (() => {
+                // IN_PROGRESS + respondedAt only happens via the "changes requested"
+                // path (see quote-response-actions.ts) — a fresh, never-sent quote
+                // has no respondedAt at all.
+                const outcome =
                   viewing.status === "WON"
-                    ? "rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-emerald-700"
-                    : "rounded-lg border border-red-200 bg-red-50 p-3 text-red-700"
-                }
-              >
-                Клиент {viewing.status === "WON" ? "одобрил" : "отклонил"} КП{" "}
-                {formatDate(viewing.respondedAt)}
-                {viewing.responseNote && <p className="mt-1">«{viewing.responseNote}»</p>}
-              </div>
-            )}
+                    ? {
+                        verb: "одобрил",
+                        className: "border-emerald-200 bg-emerald-50 text-emerald-700",
+                      }
+                    : viewing.status === "IN_PROGRESS"
+                      ? {
+                          verb: "запросил изменения в",
+                          className: "border-amber-200 bg-amber-50 text-amber-700",
+                        }
+                      : { verb: "отклонил", className: "border-red-200 bg-red-50 text-red-700" };
+                return (
+                  <div className={cn("rounded-lg border p-3", outcome.className)}>
+                    Клиент {outcome.verb} КП {formatDate(viewing.respondedAt)}
+                    {viewing.responseNote && <p className="mt-1">«{viewing.responseNote}»</p>}
+                  </div>
+                );
+              })()}
 
             {viewing.status === "WON" && !viewing.hasOrder && (
               <Button

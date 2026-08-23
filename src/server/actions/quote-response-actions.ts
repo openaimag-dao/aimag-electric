@@ -61,10 +61,10 @@ export interface RespondResult {
   error?: string;
 }
 
-/** Customer approve/reject from the public link — only succeeds while the quote is SENT (not already responded to). */
+/** Customer approve/reject/request-changes from the public link — only succeeds while the quote is SENT (not already responded to). */
 export async function respondToQuote(
   token: string,
-  decision: "approve" | "reject",
+  decision: "approve" | "reject" | "changes",
   note?: string
 ): Promise<RespondResult> {
   if (!token || token.length > 100) return { ok: false, error: "Некорректная ссылка" };
@@ -73,7 +73,9 @@ export async function respondToQuote(
   if (!limit.ok) return { ok: false, error: "Слишком много попыток. Подождите минуту." };
 
   const cleanNote = (note ?? "").trim().slice(0, 500) || null;
-  const status = decision === "approve" ? "WON" : "LOST";
+  // "changes" reopens the deal (IN_PROGRESS) instead of closing it (LOST) — the
+  // customer wants a revised КП, not to walk away.
+  const status = decision === "approve" ? "WON" : decision === "reject" ? "LOST" : "IN_PROGRESS";
 
   try {
     const quote = await quoteRepository.findByToken(token);
@@ -82,9 +84,14 @@ export async function respondToQuote(
     if (!updated) {
       return { ok: false, error: "Это КП уже обработано или ещё не готово к согласованию" };
     }
+    const titleByDecision = {
+      approve: `КП одобрено клиентом: ${quote.company}`,
+      reject: `КП отклонено клиентом: ${quote.company}`,
+      changes: `Клиент запросил изменения в КП: ${quote.company}`,
+    };
     await notificationService.notifyStaff({
       type: "quote.responded",
-      title: `КП ${decision === "approve" ? "одобрено" : "отклонено"} клиентом: ${quote.company}`,
+      title: titleByDecision[decision],
       body: cleanNote ?? undefined,
       link: "/admin/quotes",
     });
