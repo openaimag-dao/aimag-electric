@@ -50,6 +50,7 @@ async function CustomerDashboard({ userId }: { userId: string }) {
   );
 
   const openDeals = deals.filter((d) => d.stage !== "WON" && d.stage !== "LOST").length;
+  const pendingQuotes = quotes.filter((q) => q.status === "SENT").length;
 
   return (
     <div className="space-y-8">
@@ -109,14 +110,26 @@ async function CustomerDashboard({ userId }: { userId: string }) {
 
       <section>
         <h2 className="mb-3 font-display text-lg font-semibold text-primary">Мои заявки</h2>
+        {pendingQuotes > 0 && (
+          <p className="mb-3 rounded-lg border border-purple-200 bg-purple-50 px-3 py-2 text-sm text-purple-800">
+            {pendingQuotes === 1
+              ? "1 КП ожидает вашего решения"
+              : `${pendingQuotes} КП ожидают вашего решения`}
+          </p>
+        )}
         {quotes.length === 0 ? (
           <EmptyState text="У вас пока нет заявок." href="/catalog" cta="Перейти в каталог" />
         ) : (
           <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
             {quotes.map((q) => {
               const meta = quoteStatusMeta[q.status] ?? quoteStatusMeta.NEW;
-              return (
-                <div key={q.id} className="flex items-center justify-between gap-4 p-4">
+              // Only SENT/WON/LOST quotes have a manager-prepared КП to view; NEW/IN_PROGRESS
+              // ones are still being assembled and have nothing to show yet at /kp/[token].
+              const viewable =
+                Boolean(q.approvalToken) &&
+                (q.status === "SENT" || q.status === "WON" || q.status === "LOST");
+              const row = (
+                <div className="flex items-center justify-between gap-4 p-4">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-primary">
                       {q.items.length > 0 ? q.items[0].title : "Заявка"}
@@ -139,6 +152,17 @@ async function CustomerDashboard({ userId }: { userId: string }) {
                     {meta.label}
                   </span>
                 </div>
+              );
+              return viewable ? (
+                <Link
+                  key={q.id}
+                  href={`/kp/${q.approvalToken}`}
+                  className="block transition-colors hover:bg-secondary/40"
+                >
+                  {row}
+                </Link>
+              ) : (
+                <div key={q.id}>{row}</div>
               );
             })}
           </div>
