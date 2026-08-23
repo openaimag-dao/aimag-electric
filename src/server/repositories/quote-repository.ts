@@ -28,7 +28,11 @@ export const quoteRepository = {
     );
   },
   /** Only transitions a quote that is currently SENT — returns false if it was already responded to (or never sent). */
-  async respond(token: string, status: "WON" | "LOST", note: string | null): Promise<boolean> {
+  async respond(
+    token: string,
+    status: "WON" | "LOST" | "IN_PROGRESS",
+    note: string | null
+  ): Promise<boolean> {
     return withQuoteColumns(async () => {
       const result = await prisma.quote.updateMany({
         where: { approvalToken: token, status: "SENT" },
