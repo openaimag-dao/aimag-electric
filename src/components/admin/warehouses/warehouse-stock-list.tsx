@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Check, Loader2, Pencil, X } from "lucide-react";
+import { Check, Loader2, Minus, Pencil, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -53,6 +53,7 @@ function StockQuantityCell({
   const [editing, setEditing] = React.useState(false);
   const [value, setValue] = React.useState(String(quantity));
   const [saving, setSaving] = React.useState(false);
+  const [adjusting, setAdjusting] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
@@ -64,8 +65,7 @@ function StockQuantityCell({
     setEditing(true);
   }
 
-  async function save() {
-    const parsed = Number(value);
+  async function commit(parsed: number, successMessage: string) {
     if (!Number.isFinite(parsed) || parsed < 0) {
       toast.error("Введите корректное число");
       return;
@@ -74,16 +74,30 @@ function StockQuantityCell({
       setEditing(false);
       return;
     }
-    setSaving(true);
     const result = await updateStockQuantity(warehouseId, stockId, { quantity: parsed });
-    setSaving(false);
     if (!result.ok) {
       toast.error(result.error ?? "Не удалось сохранить остаток");
-      return;
+      return false;
     }
     onSaved(parsed);
-    setEditing(false);
-    toast.success("Остаток обновлён");
+    toast.success(successMessage);
+    return true;
+  }
+
+  async function save() {
+    setSaving(true);
+    const ok = await commit(Number(value), "Остаток обновлён");
+    setSaving(false);
+    if (ok) setEditing(false);
+  }
+
+  async function adjust(delta: number) {
+    if (adjusting) return;
+    const next = quantity + delta;
+    if (next < 0) return;
+    setAdjusting(true);
+    await commit(next, delta > 0 ? "Приход добавлен" : "Расход списан");
+    setAdjusting(false);
   }
 
   if (editing) {
@@ -131,17 +145,42 @@ function StockQuantityCell({
   }
 
   return (
-    <button
-      type="button"
-      onClick={startEdit}
-      className={cn(
-        "group inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 font-medium hover:bg-secondary",
-        quantity > 0 ? "text-primary" : "text-red-600"
-      )}
-    >
-      {quantity} {unit}
-      <Pencil className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100" />
-    </button>
+    <div className="flex items-center justify-end gap-1">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="size-7"
+        onClick={() => adjust(-1)}
+        disabled={adjusting || quantity <= 0}
+        aria-label="Списать одну единицу"
+      >
+        <Minus className="size-3.5" />
+      </Button>
+      <button
+        type="button"
+        onClick={startEdit}
+        disabled={adjusting}
+        className={cn(
+          "group inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 font-medium hover:bg-secondary",
+          quantity > 0 ? "text-primary" : "text-red-600"
+        )}
+      >
+        {adjusting ? <Loader2 className="size-3.5 animate-spin" /> : `${quantity} ${unit}`}
+        <Pencil className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100" />
+      </button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="size-7"
+        onClick={() => adjust(1)}
+        disabled={adjusting}
+        aria-label="Добавить одну единицу"
+      >
+        <Plus className="size-3.5" />
+      </Button>
+    </div>
   );
 }
 
