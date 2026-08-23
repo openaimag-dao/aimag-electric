@@ -96,6 +96,29 @@ export const orderAdminRepository = {
     });
   },
 
+  /**
+   * Orders for one customer — CRM customer 360 view. Queries only the Order
+   * table (no `include: { customer }` back-reference) for the same reason
+   * quoteIdsWithOrders() does: a cross-table Prisma include would mix this
+   * table's self-heal with Customer's, unsafely.
+   */
+  byCustomerId(customerId: string) {
+    return withTables(() =>
+      prisma.order.findMany({
+        where: { customerId },
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          number: true,
+          status: true,
+          totalTiyn: true,
+          createdAt: true,
+          items: { select: { qty: true, amountTiyn: true } },
+        },
+      })
+    );
+  },
+
   byId(id: string) {
     return withTables(() =>
       prisma.order.findUnique({
