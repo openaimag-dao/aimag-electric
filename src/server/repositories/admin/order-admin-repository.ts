@@ -66,6 +66,19 @@ const withTables = tableSelfHeal([
   `ALTER TABLE "Order" ADD CONSTRAINT "Order_managerId_fkey" FOREIGN KEY ("managerId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE`,
   `ALTER TABLE "OrderItem" ADD CONSTRAINT "OrderItem_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order"("id") ON DELETE CASCADE ON UPDATE CASCADE`,
   `ALTER TABLE "OrderDocument" ADD CONSTRAINT "OrderDocument_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order"("id") ON DELETE CASCADE ON UPDATE CASCADE`,
+  // schema.prisma types Order.status/OrderDocument.kind as real Postgres
+  // enums, but the table DDL above (and the shipped migration) only ever
+  // created plain TEXT columns — any Prisma query that filters by status
+  // (e.g. an admin dashboard count) makes the query engine cast to the
+  // enum type name, which 500s with "type ... does not exist" until this
+  // runs once. Column-level self-heal, not a table-level one, since the
+  // table already exists on every production DB by the time this matters.
+  `CREATE TYPE "OrderStatus" AS ENUM ('NEW', 'CONFIRMED', 'PROCESSING', 'SHIPPING', 'DELIVERED', 'CANCELLED')`,
+  `ALTER TABLE "Order" ALTER COLUMN "status" DROP DEFAULT`,
+  `ALTER TABLE "Order" ALTER COLUMN "status" TYPE "OrderStatus" USING "status"::"OrderStatus"`,
+  `ALTER TABLE "Order" ALTER COLUMN "status" SET DEFAULT 'NEW'::"OrderStatus"`,
+  `CREATE TYPE "OrderDocumentKind" AS ENUM ('INVOICE', 'CONTRACT', 'ACT', 'SPECIFICATION', 'WAYBILL', 'OTHER')`,
+  `ALTER TABLE "OrderDocument" ALTER COLUMN "kind" TYPE "OrderDocumentKind" USING "kind"::"OrderDocumentKind"`,
 ]);
 
 /** e.g. "ORD-260822-A1B2" — human-readable, no counter/sequence needed (short random suffix avoids collisions). */
@@ -83,6 +96,11 @@ export const orderAdminRepository = {
         include: { items: true, _count: { select: { items: true, documents: true } } },
       })
     );
+  },
+
+  /** Count by status — e.g. the admin dashboard's "new orders" counter. Must go through this file's self-heal, not a bare prisma.order.count(), or a DB that only ever ran the self-heal DDL (TEXT status column, no OrderStatus enum) 500s on the count. */
+  countByStatus(status: OrderStatus) {
+    return withTables(() => prisma.order.count({ where: { status } }));
   },
 
   /** Quote ids that already have an order — used to gate "Создать заказ" without a cross-table Prisma include (that would mix this table's self-heal with quote-self-heal.ts's, unsafely). */
