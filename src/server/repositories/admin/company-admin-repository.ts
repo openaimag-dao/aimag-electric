@@ -50,7 +50,19 @@ export const companyAdminRepository = {
       prisma.company.findUnique({
         where: { id },
         include: {
-          members: { include: { user: true }, orderBy: { createdAt: "asc" } },
+          members: {
+            // Never pull passwordHash/emailVerified into a nested include — this
+            // result reaches the client (getCompany server action), so only
+            // fetch what the UI actually needs, not the full User row.
+            select: {
+              id: true,
+              userId: true,
+              role: true,
+              createdAt: true,
+              user: { select: { name: true, email: true } },
+            },
+            orderBy: { createdAt: "asc" },
+          },
         },
       })
     );
