@@ -9,6 +9,7 @@ import { Search, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatTenge } from "@/lib/money";
 import { searchSuggestions, type SearchSuggestion } from "@/server/actions/search-actions";
+import { QuoteDialog } from "@/components/common/quote-dialog";
 
 interface SearchBarProps {
   className?: string;
@@ -191,8 +192,21 @@ export function SearchBar({ className, onSubmitted }: SearchBarProps) {
             </>
           ) : (
             !loading && (
-              <div className="px-3 py-4 text-center text-sm text-muted-foreground">
-                Ничего не найдено по «{query.trim()}»
+              <div className="px-3 py-4 text-center">
+                <p className="text-sm text-muted-foreground">
+                  Ничего не найдено по «{query.trim()}»
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Есть под заказ или подберём аналог — оставьте запрос инженеру.
+                </p>
+                <div className="mt-3">
+                  <QuoteDialog
+                    triggerLabel="Запросить товар"
+                    variant="outline"
+                    size="sm"
+                    defaultMessage={`Не нашёл в каталоге: "${query.trim()}"`}
+                  />
+                </div>
               </div>
             )
           )}
