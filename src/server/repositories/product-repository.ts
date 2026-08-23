@@ -2,6 +2,7 @@ import "server-only";
 
 import { prisma } from "@/lib/prisma";
 import { productInclude, productListSelect } from "@/server/repositories/types";
+import { rankSearchResults } from "@/lib/search/rank";
 
 /**
  * ProductRepository — the only place that talks to Prisma for products.
@@ -37,9 +38,15 @@ export const productRepository = {
     });
   },
 
-  /** Substring match across title/SKU/brand/category, most popular first. */
-  search(query: string, take = 6) {
-    return prisma.product.findMany({
+  /**
+   * Substring match across title/SKU/brand/category. Fetches a wider
+   * popularity-ordered pool than `take` so an exact/prefix SKU match isn't
+   * clipped out before rankSearchResults can surface it above merely-popular
+   * matches (see rank.ts — a customer searching by article number expects
+   * that exact part first).
+   */
+  async search(query: string, take = 6) {
+    const rows = await prisma.product.findMany({
       where: {
         published: true,
         OR: [
@@ -51,8 +58,9 @@ export const productRepository = {
       },
       select: productListSelect,
       orderBy: { popularity: "desc" },
-      take,
+      take: Math.max(take * 5, 30),
     });
+    return rankSearchResults(rows, query).slice(0, take);
   },
 
   allSlugs() {
