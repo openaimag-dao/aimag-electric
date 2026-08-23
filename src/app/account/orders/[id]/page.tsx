@@ -4,8 +4,10 @@ import { ArrowLeft, Download, FileText } from "lucide-react";
 
 import { getMyOrder } from "@/server/actions/order-actions";
 import { orderStatusMeta, orderDocumentKindMeta } from "@/config/order-meta";
-import { formatTiyn } from "@/lib/money";
+import { QuoteDialog } from "@/components/common/quote-dialog";
+import { formatTiyn, tiynToTenge } from "@/lib/money";
 import { cn } from "@/lib/utils";
+import type { CartItem } from "@/types/cart";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +24,21 @@ export default async function OrderDetailPage({ params }: PageProps) {
   const totalTiyn =
     order.totalTiyn ?? order.items.reduce((sum, i) => sum + (i.amountTiyn ?? 0) * i.qty, 0);
 
+  // Only items still linked to a real catalog product can be honestly
+  // prefilled — an item whose product was later removed has nothing to
+  // re-add (see project-detail-client.tsx for the same filter/map pattern).
+  const reorderItems: CartItem[] = order.items
+    .filter((i) => i.productId && i.slug)
+    .map((i) => ({
+      productId: i.productId!,
+      slug: i.slug!,
+      sku: i.sku ?? "",
+      title: i.title,
+      unit: i.unit,
+      priceTenge: i.amountTiyn !== null ? tiynToTenge(i.amountTiyn) : null,
+      qty: i.qty,
+    }));
+
   return (
     <div className="space-y-6">
       <Link
@@ -34,14 +51,20 @@ export default async function OrderDetailPage({ params }: PageProps) {
       <div className="rounded-xl border border-border bg-card p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="font-display font-mono text-xl font-bold text-primary">{order.number}</h1>
-          <span
-            className={cn(
-              "shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium",
-              meta.className
+          <div className="flex shrink-0 items-center gap-3">
+            <span className={cn("rounded-full px-2.5 py-0.5 text-xs font-medium", meta.className)}>
+              {meta.label}
+            </span>
+            {reorderItems.length > 0 && (
+              <QuoteDialog
+                triggerLabel="Заказать повторно"
+                variant="outline"
+                size="sm"
+                items={reorderItems}
+                defaultTitle={`Повторный заказ ${order.number}`}
+              />
             )}
-          >
-            {meta.label}
-          </span>
+          </div>
         </div>
         {(order.carrier || order.trackingNumber || order.estimatedDelivery) && (
           <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
