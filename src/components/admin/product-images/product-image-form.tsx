@@ -1,14 +1,20 @@
 "use client";
 
+import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, ImageOff } from "lucide-react";
+import { Loader2, ImageOff, Upload } from "lucide-react";
+import { toast } from "sonner";
 import { handleFormResult } from "@/lib/admin/form-submit";
 
 import { Button } from "@/components/ui/button";
 import { Field, Input, NativeSelect } from "@/components/admin/form-fields";
 import { productImageFormSchema, type ProductImageFormInput } from "@/lib/validations/admin";
-import { createProductImage, updateProductImage } from "@/server/actions/admin";
+import {
+  createProductImage,
+  updateProductImage,
+  uploadProductImageFile,
+} from "@/server/actions/admin";
 
 export interface ProductImageRow {
   id: string;
@@ -37,6 +43,7 @@ export function ProductImageForm({
     register,
     handleSubmit,
     watch,
+    setValue,
     setError,
     formState: { errors, isSubmitting },
   } = useForm<ProductImageFormInput>({
@@ -50,6 +57,24 @@ export function ProductImageForm({
   });
 
   const previewUrl = watch("url");
+  const [uploading, setUploading] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  async function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setUploading(true);
+    const formData = new FormData();
+    formData.set("file", file);
+    const result = await uploadProductImageFile(formData);
+    setUploading(false);
+    if (!result.ok || !result.data) {
+      toast.error(result.error ?? "Не удалось загрузить файл");
+      return;
+    }
+    setValue("url", result.data.url, { shouldDirty: true, shouldValidate: true });
+  }
 
   async function onSubmit(values: ProductImageFormInput) {
     const result = isEdit
@@ -74,8 +99,32 @@ export function ProductImageForm({
           ))}
         </NativeSelect>
       </Field>
-      <Field label="Ссылка на фото (URL)" htmlFor="url" error={errors.url} hint="https://...">
-        <Input id="url" {...register("url")} />
+      <Field label="Фото" htmlFor="url" error={errors.url}>
+        <div className="space-y-2">
+          <div className="flex gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileSelected}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+            >
+              {uploading ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Upload className="size-4" />
+              )}
+              {uploading ? "Загрузка…" : "Выбрать фото"}
+            </Button>
+          </div>
+          <Input id="url" placeholder="или вставьте ссылку на фото" {...register("url")} />
+        </div>
       </Field>
       {previewUrl ? (
         // eslint-disable-next-line @next/next/no-img-element -- arbitrary external URL, live preview only
