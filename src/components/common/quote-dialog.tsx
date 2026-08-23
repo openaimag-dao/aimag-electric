@@ -22,6 +22,8 @@ interface QuoteDialogProps {
   className?: string;
   /** Pre-fill the КП with specific product lines (e.g. the product page you're on). */
   items?: CartItem[];
+  /** Pre-fill the project/object name, editable when submitting a full cart. */
+  defaultTitle?: string;
   /** Pre-fill the free-text message, e.g. a search query that had no catalog match. */
   defaultMessage?: string;
 }
@@ -37,6 +39,7 @@ export function QuoteDialog({
   size = "default",
   className,
   items,
+  defaultTitle,
   defaultMessage,
 }: QuoteDialogProps) {
   const [open, setOpen] = React.useState(false);
@@ -57,7 +60,7 @@ export function QuoteDialog({
             Оставьте данные — инженер подберёт продукцию и пришлёт КП с ценами и сроками поставки.
           </DialogDescription>
         </DialogHeader>
-        <QuoteForm items={items} defaultMessage={defaultMessage} />
+        <QuoteForm items={items} defaultTitle={defaultTitle} defaultMessage={defaultMessage} />
       </DialogContent>
     </Dialog>
   );
