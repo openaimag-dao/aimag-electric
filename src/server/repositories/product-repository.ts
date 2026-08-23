@@ -3,6 +3,7 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import { productInclude, productListSelect } from "@/server/repositories/types";
 import { rankSearchResults } from "@/lib/search/rank";
+import { expandSeparatorVariants } from "@/lib/search/normalize";
 
 /**
  * ProductRepository — the only place that talks to Prisma for products.
@@ -44,14 +45,20 @@ export const productRepository = {
    * clipped out before rankSearchResults can surface it above merely-popular
    * matches (see rank.ts — a customer searching by article number expects
    * that exact part first).
+   *
+   * title/sku are also matched against every separator variant of the query
+   * (see normalize.ts) — a cross-section like "4×2.5" is stored with the
+   * multiplication sign, so "4x2.5"/"4х2.5"/"4*2.5" would otherwise find
+   * nothing.
    */
   async search(query: string, take = 6) {
+    const variants = expandSeparatorVariants(query);
     const rows = await prisma.product.findMany({
       where: {
         published: true,
         OR: [
-          { title: { contains: query, mode: "insensitive" } },
-          { sku: { contains: query, mode: "insensitive" } },
+          ...variants.map((v) => ({ title: { contains: v, mode: "insensitive" as const } })),
+          ...variants.map((v) => ({ sku: { contains: v, mode: "insensitive" as const } })),
           { brand: { name: { contains: query, mode: "insensitive" } } },
           { category: { title: { contains: query, mode: "insensitive" } } },
         ],
