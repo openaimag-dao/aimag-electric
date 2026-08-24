@@ -22,7 +22,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Trash2, Eye, Download, Link2, PackagePlus, Loader2 } from "lucide-react";
+import {
+  MoreHorizontal,
+  Trash2,
+  Eye,
+  Download,
+  Link2,
+  PackagePlus,
+  Loader2,
+  AlertTriangle,
+} from "lucide-react";
 import { TableToolbar } from "@/components/admin/table-toolbar";
 import { FormDialog } from "@/components/admin/form-dialog";
 import { ConfirmDelete } from "@/components/admin/confirm-delete";
@@ -38,6 +47,7 @@ export interface QuoteItemRow {
   qty: number;
   unit: string;
   amountTiyn: number | null;
+  note: string | null;
 }
 
 export interface QuoteListRow {
@@ -147,8 +157,14 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
                 </TableCell>
                 <TableCell>
                   {row.items.length > 0 ? (
-                    <span className="text-primary">
+                    <span className="inline-flex items-center gap-1.5 text-primary">
                       {row.items.length} поз. · {formatTiyn(quoteTotalTiyn(row.items))}
+                      {row.items.some((i) => i.note) && (
+                        <AlertTriangle
+                          className="size-3.5 shrink-0 text-amber-600"
+                          aria-label="Есть позиции, требующие проверки"
+                        />
+                      )}
                     </span>
                   ) : (
                     <span className="text-muted-foreground">—</span>
@@ -320,6 +336,12 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
                           <td className="p-2 text-primary">
                             {i.title}
                             {i.sku && <span className="ml-1 text-muted-foreground">({i.sku})</span>}
+                            {i.note && (
+                              <div className="mt-1 flex items-start gap-1 text-amber-700">
+                                <AlertTriangle className="mt-0.5 size-3 shrink-0" />
+                                <span>{i.note}</span>
+                              </div>
+                            )}
                           </td>
                           <td className="whitespace-nowrap p-2 text-muted-foreground">
                             {i.qty} {i.unit}

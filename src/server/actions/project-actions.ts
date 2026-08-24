@@ -186,6 +186,7 @@ export async function saveCartAsProject(input: unknown): Promise<ActionResult<{ 
           qty: i.qty,
           unit: i.unit,
           amountTiyn: i.priceTenge !== null ? tengeToTiyn(i.priceTenge) : null,
+          note: i.note || null,
           order: index,
         })),
       },

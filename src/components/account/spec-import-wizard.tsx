@@ -101,6 +101,10 @@ export function SpecImportWizard() {
           qty: row.qty,
           unit: candidate.product.unit,
           priceTenge: candidate.product.price,
+          note:
+            row.result.tier === "possible"
+              ? `Возможное совпадение по «${row.title}»${row.sku ? ` (арт. ${row.sku})` : ""} — сверьте характеристики перед подтверждением цены`
+              : null,
         };
       })
       .filter((i): i is NonNullable<typeof i> => i !== null);

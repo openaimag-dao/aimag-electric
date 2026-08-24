@@ -63,6 +63,7 @@ export async function submitQuote(input: QuoteInput): Promise<QuoteActionState> 
               qty: i.qty,
               unit: i.unit,
               amountTiyn: i.priceTenge !== null ? tengeToTiyn(i.priceTenge) : null,
+              note: i.note || null,
             })),
           }
         : undefined,

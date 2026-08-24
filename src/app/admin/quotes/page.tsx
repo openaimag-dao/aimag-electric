@@ -30,6 +30,7 @@ export default async function AdminQuotesPage() {
       qty: i.qty,
       unit: i.unit,
       amountTiyn: i.amountTiyn,
+      note: i.note,
     })),
   }));
 

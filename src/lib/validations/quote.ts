@@ -8,6 +8,7 @@ export const quoteItemSchema = z.object({
   qty: z.number().positive().max(1_000_000),
   unit: z.string().min(1).max(20),
   priceTenge: z.number().nonnegative().max(1_000_000_000).nullable(),
+  note: z.string().max(500).nullable().optional(),
 });
 
 export const quoteSchema = z

@@ -39,6 +39,7 @@ export function ProjectDetailClient({ project }: { project: ProjectDetail }) {
       unit: i.unit,
       priceTenge: i.amountTiyn !== null ? tiynToTenge(i.amountTiyn) : null,
       qty: i.qty,
+      note: i.note,
     }));
 
   return (

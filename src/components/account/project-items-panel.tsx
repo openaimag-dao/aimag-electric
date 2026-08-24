@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Loader2, Minus, Plus, Search, Trash2 } from "lucide-react";
+import { AlertTriangle, Loader2, Minus, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { AddProjectItem } from "@/components/account/add-project-item";
@@ -25,6 +25,7 @@ export interface ProjectItemRow {
   qty: number;
   unit: string;
   amountTiyn: number | null;
+  note?: string | null;
 }
 
 export function ProjectItemsPanel({
@@ -134,6 +135,12 @@ export function ProjectItemsPanel({
                         <Search className="size-3" />
                         Найти аналог
                       </button>
+                    )}
+                    {item.note && (
+                      <p className="mt-1 flex items-start gap-1 text-xs text-amber-700">
+                        <AlertTriangle className="mt-0.5 size-3 shrink-0" />
+                        {item.note}
+                      </p>
                     )}
                   </div>
 
