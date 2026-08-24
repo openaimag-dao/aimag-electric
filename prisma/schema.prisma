@@ -81,6 +81,25 @@ model AuditLog {
   @@index([createdAt])
 }
 
+/**
+ * Real, unfabricated search-demand log — every header-search query and every
+ * suggestion click. Powers the admin "top queries" / "no-result queries"
+ * insight; never fed back into ranking (see rank.ts, which stays pure
+ * popularity + relevance, not click data).
+ */
+model SearchLog {
+  id          String   @id @default(cuid())
+  query       String
+  kind        String // "search" | "click"
+  resultCount Int? // set for kind="search"; null for "click"
+  productSlug String? // set for kind="click"
+  createdAt   DateTime @default(now())
+
+  @@index([query])
+  @@index([kind])
+  @@index([createdAt])
+}
+
 enum ProductBadge {
   HIT
   NEW

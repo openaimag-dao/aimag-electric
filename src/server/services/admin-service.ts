@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { qualityWhere } from "@/lib/admin/product-quality";
 import { withQuoteColumns } from "@/server/repositories/quote-self-heal";
 import { orderAdminRepository } from "@/server/repositories/admin/order-admin-repository";
+import { searchLogRepository } from "@/server/repositories/search-log-repository";
 
 /** Aggregations for the admin dashboard + reference lists for form selects. */
 export const adminService = {
@@ -99,6 +100,8 @@ export const adminService = {
       lowStockList,
       recentAudit,
       recentImports,
+      topQueries,
+      topZeroResultQueries,
     ] = await Promise.all([
       prisma.product.count(),
       prisma.product.count({ where: qualityWhere("no-image") }),
@@ -121,6 +124,8 @@ export const adminService = {
         orderBy: { createdAt: "desc" },
         take: 5,
       }),
+      searchLogRepository.topQueries(30, 8),
+      searchLogRepository.topZeroResultQueries(30, 8),
     ]);
 
     // Average gap rate across the 5 checks, inverted — a single honest number, not a fabricated score.
@@ -151,6 +156,8 @@ export const adminService = {
         summary: a.summary,
         createdAt: a.createdAt.toISOString(),
       })),
+      topQueries,
+      topZeroResultQueries,
     };
   },
 
