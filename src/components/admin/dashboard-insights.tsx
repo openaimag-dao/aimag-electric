@@ -8,6 +8,8 @@ import {
   Upload,
   Tag,
   ListChecks,
+  Search,
+  SearchX,
 } from "lucide-react";
 
 import { adminService } from "@/server/services/admin-service";
@@ -34,7 +36,8 @@ const actionLabels: Record<string, string> = {
 
 /** Server component: data-quality + operations widgets for the dashboard. */
 export async function DashboardInsights() {
-  const { quality, lowStock, recentAudit, recentImports } = await adminService.dashboardInsights();
+  const { quality, lowStock, recentAudit, recentImports, topQueries, topZeroResultQueries } =
+    await adminService.dashboardInsights();
 
   return (
     <div className="space-y-6">
@@ -141,6 +144,55 @@ export async function DashboardInsights() {
                       {a.actor ?? "система"} · {formatDate(a.createdAt)}
                     </p>
                   </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
+      {/* Search demand */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="rounded-xl border border-border bg-card p-5">
+          <div className="mb-3 flex items-center gap-2">
+            <Search className="size-4 text-signal-700" />
+            <h3 className="font-display font-semibold text-primary">
+              Популярные запросы (30 дней)
+            </h3>
+          </div>
+          {topQueries.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Запросов пока нет.</p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {topQueries.map((q, i) => (
+                <li key={i} className="flex items-center justify-between gap-3 py-2 text-sm">
+                  <span className="min-w-0 truncate text-primary">{q.query}</span>
+                  <span className="shrink-0 font-mono text-xs text-muted-foreground">
+                    {q.count}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="rounded-xl border border-border bg-card p-5">
+          <div className="mb-3 flex items-center gap-2">
+            <SearchX className="size-4 text-amber-600" />
+            <h3 className="font-display font-semibold text-primary">
+              Запросы без результата (30 дней)
+            </h3>
+          </div>
+          {topZeroResultQueries.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Все запросы находят товары.</p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {topZeroResultQueries.map((q, i) => (
+                <li key={i} className="flex items-center justify-between gap-3 py-2 text-sm">
+                  <span className="min-w-0 truncate text-primary">{q.query}</span>
+                  <span className="shrink-0 font-mono text-xs font-semibold text-amber-600">
+                    {q.count}
+                  </span>
                 </li>
               ))}
             </ul>

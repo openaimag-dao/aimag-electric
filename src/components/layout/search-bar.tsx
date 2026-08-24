@@ -8,7 +8,11 @@ import { Search, Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { formatTenge } from "@/lib/money";
-import { searchSuggestions, type SearchSuggestion } from "@/server/actions/search-actions";
+import {
+  searchSuggestions,
+  logSearchClick,
+  type SearchSuggestion,
+} from "@/server/actions/search-actions";
 import { QuoteDialog } from "@/components/common/quote-dialog";
 
 interface SearchBarProps {
@@ -71,6 +75,7 @@ export function SearchBar({ className, onSubmitted }: SearchBarProps) {
   }
 
   function goToProduct(slug: string) {
+    void logSearchClick(query.trim(), slug);
     router.push(`/catalog/${slug}`);
     setOpen(false);
     onSubmitted?.();
@@ -149,6 +154,7 @@ export function SearchBar({ className, onSubmitted }: SearchBarProps) {
                   role="option"
                   aria-selected={i === activeIndex}
                   onClick={() => {
+                    void logSearchClick(query.trim(), r.slug);
                     setOpen(false);
                     onSubmitted?.();
                   }}
