@@ -8,4 +8,6 @@ export interface CartItem {
   /** Catalog price in тенге at the moment it was added; null = "по запросу". */
   priceTenge: number | null;
   qty: number;
+  /** Free-text flag carried through to the quote/order line, e.g. "possible" spec-import match needing technical verification before a price is quoted. */
+  note?: string | null;
 }

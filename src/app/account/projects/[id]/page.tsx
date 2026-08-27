@@ -46,6 +46,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
       qty: i.qty,
       unit: i.unit,
       amountTiyn: i.amountTiyn,
+      note: i.note,
     })),
   };
 
