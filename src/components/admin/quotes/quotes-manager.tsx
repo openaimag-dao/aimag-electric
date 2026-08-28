@@ -88,6 +88,7 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
   const [deleting, setDeleting] = React.useState<QuoteListRow | undefined>();
   const [pending, setPending] = React.useState<string | null>(null);
   const [creatingOrder, setCreatingOrder] = React.useState(false);
+  const [reviewOnly, setReviewOnly] = React.useState(false);
 
   async function handleCreateOrder(quoteId: string) {
     setCreatingOrder(true);
@@ -102,11 +103,15 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
     router.push(`/admin/orders/${result.data.id}`);
   }
 
-  const filtered = rows.filter((r) =>
-    `${r.company} ${r.name} ${r.phone} ${r.email ?? ""}`
-      .toLowerCase()
-      .includes(query.toLowerCase().trim())
-  );
+  const reviewCount = rows.filter((r) => r.items.some((i) => i.note)).length;
+
+  const filtered = rows
+    .filter((r) =>
+      `${r.company} ${r.name} ${r.phone} ${r.email ?? ""}`
+        .toLowerCase()
+        .includes(query.toLowerCase().trim())
+    )
+    .filter((r) => !reviewOnly || r.items.some((i) => i.note));
 
   async function changeStatus(id: string, status: string) {
     setPending(id);
@@ -134,6 +139,17 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
         placeholder="Поиск по компании, контакту, телефону…"
         count={rows.length}
       />
+
+      {reviewCount > 0 && (
+        <Button
+          variant={reviewOnly ? "signal" : "outline"}
+          size="sm"
+          onClick={() => setReviewOnly((v) => !v)}
+        >
+          <AlertTriangle className="size-4" />
+          {reviewOnly ? "Показать все" : `Требуют проверки (${reviewCount})`}
+        </Button>
+      )}
 
       <div className="rounded-xl border border-border bg-card">
         <Table>
