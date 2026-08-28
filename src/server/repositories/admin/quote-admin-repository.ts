@@ -28,6 +28,12 @@ export const quoteAdminRepository = {
   remove(id: string) {
     return withQuoteColumns(() => prisma.quote.delete({ where: { id } }));
   },
+  /** Staff-set line price when preparing a КП — the amount echoed back to the customer was previously frozen at whatever the cart had at submission time. */
+  updateItemPrice(itemId: string, amountTiyn: number | null) {
+    return withQuoteColumns(() =>
+      prisma.quoteItem.update({ where: { id: itemId }, data: { amountTiyn } })
+    );
+  },
   countByStatus() {
     return withQuoteColumns(() => prisma.quote.groupBy({ by: ["status"], _count: true }));
   },
