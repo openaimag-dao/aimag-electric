@@ -84,7 +84,16 @@ export function PurchasePanel({
               sku: product.sku,
               title: product.title,
               unit: product.unit,
-              priceTenge: product.price,
+              // A quote requested straight from this panel is a single,
+              // immediate submission — safe to quote at the viewer's company
+              // price. AddToCartButton below deliberately still uses the
+              // catalog price: the cart is persisted and mergeable across
+              // several other add-to-cart entry points (catalog grid,
+              // compare, account) that don't resolve company pricing yet, so
+              // applying it only here would let whichever entry point a
+              // customer touches first silently decide their price — see
+              // ROADMAP.md for the deferred cart-wide follow-up.
+              priceTenge: companyPriceTenge ?? product.price,
               qty: 1,
             },
           ]}
