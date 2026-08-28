@@ -7,10 +7,18 @@ import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { ProductPrice } from "@/components/catalog/product-price";
 import { AvailabilityBadge } from "@/components/catalog/availability-badge";
 import { WhatsAppButton } from "@/components/product/whatsapp-button";
+import { formatTenge } from "@/lib/money";
 import type { ProductDetail } from "@/types/product-detail";
 
 /** Right-hand purchase panel: price, availability, lead time, and 3 CTAs. */
-export function PurchasePanel({ product }: { product: ProductDetail }) {
+export function PurchasePanel({
+  product,
+  companyPriceTenge = null,
+}: {
+  product: ProductDetail;
+  /** This company's negotiated reference price for this product, if the viewer is a logged-in member of a company that has one set — never fabricated, only ever a real staff-entered CompanyPrice row. */
+  companyPriceTenge?: number | null;
+}) {
   const primaryDoc = product.documents[0];
 
   const facts = [
@@ -32,6 +40,12 @@ export function PurchasePanel({ product }: { product: ProductDetail }) {
         {product.price !== null && (
           <p className="mt-1 text-xs text-muted-foreground">
             Цена указана без НДС. Точную стоимость под объём — в КП.
+          </p>
+        )}
+        {companyPriceTenge !== null && (
+          <p className="mt-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+            Ваша цена по договору:{" "}
+            <span className="font-semibold">{formatTenge(companyPriceTenge)}</span>
           </p>
         )}
       </div>

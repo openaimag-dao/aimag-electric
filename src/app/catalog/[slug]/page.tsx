@@ -9,7 +9,9 @@ import { siteConfig } from "@/config/site";
 import { availabilityLabels } from "@/config/catalog-sort";
 import { productService } from "@/server/services";
 import { buildProductJsonLd, averageRating } from "@/lib/product-jsonld";
-import { formatTenge } from "@/lib/money";
+import { formatTenge, tiynToTenge } from "@/lib/money";
+import { currentUser } from "@/server/auth/session";
+import { companyAdminRepository, companyPriceAdminRepository } from "@/server/repositories/admin";
 import { ProductGallery } from "@/components/product/product-gallery";
 import { PurchasePanel } from "@/components/product/purchase-panel";
 import { SectionNav } from "@/components/product/section-nav";
@@ -69,6 +71,22 @@ export default async function ProductPage({ params }: PageProps) {
   const analogs =
     product.availability === "in_stock" ? [] : await productService.getAnalogsInStock(product);
   const avgRating = averageRating(product.reviews);
+
+  // A logged-in company member's negotiated reference price for this
+  // product, if staff has set one — real data only, never guessed: resolved
+  // through the same Quote.userId -> CompanyMember -> Company path used in
+  // /admin/quotes, so an anonymous visitor or a user on no company simply
+  // sees no company price, which is correct, not a bug.
+  const user = await currentUser();
+  const membership = user ? await companyAdminRepository.forUser(user.id) : null;
+  const companyPrices = membership
+    ? await companyPriceAdminRepository.forCompaniesAndProducts(
+        [membership.companyId],
+        [product.id]
+      )
+    : [];
+  const companyPriceTenge =
+    companyPrices.length > 0 ? tiynToTenge(companyPrices[0].amountTiyn) : null;
 
   const sections = [
     { id: "description", label: "Описание" },
@@ -141,7 +159,7 @@ export default async function ProductPage({ params }: PageProps) {
                   </Link>
                 </p>
               </div>
-              <PurchasePanel product={product} />
+              <PurchasePanel product={product} companyPriceTenge={companyPriceTenge} />
               <AnalogsCallout products={analogs} />
             </div>
           </div>
