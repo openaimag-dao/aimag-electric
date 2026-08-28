@@ -31,13 +31,21 @@ import {
   PackagePlus,
   Loader2,
   AlertTriangle,
+  Check,
+  X,
+  Pencil,
 } from "lucide-react";
 import { TableToolbar } from "@/components/admin/table-toolbar";
 import { FormDialog } from "@/components/admin/form-dialog";
 import { ConfirmDelete } from "@/components/admin/confirm-delete";
 import { QuoteStatusBadge, quoteStatusMeta } from "@/components/admin/quote-status-badge";
-import { setQuoteStatus, deleteQuote, createOrderFromQuote } from "@/server/actions/admin";
-import { formatTiyn } from "@/lib/money";
+import {
+  setQuoteStatus,
+  deleteQuote,
+  createOrderFromQuote,
+  updateQuoteItemPrice,
+} from "@/server/actions/admin";
+import { formatTiyn, tiynToTenge, tengeToTiyn } from "@/lib/money";
 import { cn } from "@/lib/utils";
 
 export interface QuoteItemRow {
@@ -89,6 +97,42 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
   const [pending, setPending] = React.useState<string | null>(null);
   const [creatingOrder, setCreatingOrder] = React.useState(false);
   const [reviewOnly, setReviewOnly] = React.useState(false);
+  const [editingPriceId, setEditingPriceId] = React.useState<string | null>(null);
+  const [priceDraft, setPriceDraft] = React.useState("");
+  const [savingPrice, setSavingPrice] = React.useState(false);
+
+  function startEditPrice(item: QuoteItemRow) {
+    setEditingPriceId(item.id);
+    setPriceDraft(item.amountTiyn !== null ? String(tiynToTenge(item.amountTiyn)) : "");
+  }
+
+  async function handleSavePrice(itemId: string) {
+    const trimmed = priceDraft.trim();
+    let priceTenge: number | null = null;
+    if (trimmed !== "") {
+      const n = Number(trimmed.replace(",", "."));
+      if (!Number.isFinite(n) || n < 0) {
+        toast.error("Некорректная цена");
+        return;
+      }
+      priceTenge = n;
+    }
+    setSavingPrice(true);
+    const result = await updateQuoteItemPrice(itemId, priceTenge);
+    setSavingPrice(false);
+    if (!result.ok) {
+      toast.error(result.error ?? "Не удалось изменить цену");
+      return;
+    }
+    const amountTiyn = priceTenge !== null ? tengeToTiyn(priceTenge) : null;
+    setViewing((prev) =>
+      prev
+        ? { ...prev, items: prev.items.map((i) => (i.id === itemId ? { ...i, amountTiyn } : i)) }
+        : prev
+    );
+    setEditingPriceId(null);
+    toast.success("Цена обновлена");
+  }
 
   async function handleCreateOrder(quoteId: string) {
     setCreatingOrder(true);
@@ -363,9 +407,59 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
                             {i.qty} {i.unit}
                           </td>
                           <td className="whitespace-nowrap p-2 text-right font-medium text-primary">
-                            {i.amountTiyn !== null
-                              ? formatTiyn(i.amountTiyn * i.qty)
-                              : "по запросу"}
+                            {editingPriceId === i.id ? (
+                              <div className="flex items-center justify-end gap-1">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="0.01"
+                                  autoFocus
+                                  value={priceDraft}
+                                  onChange={(e) => setPriceDraft(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") handleSavePrice(i.id);
+                                    if (e.key === "Escape") setEditingPriceId(null);
+                                  }}
+                                  placeholder="по запросу"
+                                  disabled={savingPrice}
+                                  className="w-24 rounded border border-input px-1.5 py-0.5 text-right text-xs"
+                                />
+                                <button
+                                  type="button"
+                                  aria-label="Сохранить цену"
+                                  onClick={() => handleSavePrice(i.id)}
+                                  disabled={savingPrice}
+                                  className="hover:text-signal-800 text-signal-700 disabled:opacity-50"
+                                >
+                                  {savingPrice ? (
+                                    <Loader2 className="size-3.5 animate-spin" />
+                                  ) : (
+                                    <Check className="size-3.5" />
+                                  )}
+                                </button>
+                                <button
+                                  type="button"
+                                  aria-label="Отменить"
+                                  onClick={() => setEditingPriceId(null)}
+                                  disabled={savingPrice}
+                                  className="text-muted-foreground hover:text-red-600 disabled:opacity-50"
+                                >
+                                  <X className="size-3.5" />
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => startEditPrice(i)}
+                                title="Изменить цену за единицу"
+                                className="inline-flex items-center gap-1 hover:text-signal-700 hover:underline"
+                              >
+                                {i.amountTiyn !== null
+                                  ? formatTiyn(i.amountTiyn * i.qty)
+                                  : "по запросу"}
+                                <Pencil className="size-3 text-muted-foreground" />
+                              </button>
+                            )}
                           </td>
                         </tr>
                       ))}
