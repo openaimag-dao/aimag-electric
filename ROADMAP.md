@@ -35,17 +35,16 @@ off-platform. This was also the blocker on per-company contract pricing
 without a price-editing UI to show it in.
 
 **Fix shipped:** `quoteAdminRepository.updateItemPrice(itemId, amountTiyn)`
-
-- a staff-gated `updateQuoteItemPrice` server action
-  (`admin/quote-actions.ts`, validates non-negative finite price), wired into
-  an inline editor in the quote item breakdown table in `quotes-manager.tsx`
-  — click the price (pencil-adorned) to reveal a unit-price input with
-  save/cancel (Enter/Escape also work), local dialog state patches
-  immediately on save so the open quote reflects the new price without a
-  full refetch. `QuoteItem.amountTiyn` is a real applied-migration column
-  (`20260820000000_quote_items_pricing`), not a self-heal-only field, so no
-  new DDL was needed. Verified: typecheck clean, lint has only the same
-  pre-existing warnings, 42/42 tests pass, production build succeeds.
+plus a staff-gated `updateQuoteItemPrice` server action
+(`admin/quote-actions.ts`, validates non-negative finite price), wired into
+an inline editor in the quote item breakdown table in `quotes-manager.tsx`:
+click the price (pencil-adorned) to reveal a unit-price input with
+save/cancel (Enter/Escape also work); local dialog state patches
+immediately on save so the open quote reflects the new price without a
+full refetch. `QuoteItem.amountTiyn` is a real applied-migration column
+(`20260820000000_quote_items_pricing`), not a self-heal-only field, so no
+new DDL was needed. Verified: typecheck clean, lint has only the same
+pre-existing warnings, 42/42 tests pass, production build succeeds.
 
 **Deliberately out of scope this cycle:** actually building per-company
 contract pricing (Phase 7) — now unblocked, but a `CompanyPrice`
