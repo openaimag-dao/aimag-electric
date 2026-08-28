@@ -4,6 +4,7 @@ import * as React from "react";
 
 import { buildFacets, queryCatalog, activeFilterCount } from "@/lib/catalog";
 import { useCatalogFilters } from "@/hooks/use-catalog-filters";
+import { logCatalogSearch } from "@/server/actions/search-actions";
 import { FilterSidebar } from "@/components/catalog/filter-sidebar";
 import { MobileFilterDrawer } from "@/components/catalog/mobile-filter-drawer";
 import { SortSelect } from "@/components/catalog/sort-select";
@@ -33,6 +34,17 @@ export function CatalogView({ products, categoryNames, attributeDefs }: CatalogV
     [products, categoryNames, attributeDefs, filters]
   );
   const activeCount = activeFilterCount(filters);
+
+  // `q` only ever changes via a full navigation from the header search box
+  // (never live-typed on this page), so logging once per distinct query text
+  // — not on every unrelated filter/page tweak — mirrors a real search event.
+  const loggedQueryRef = React.useRef<string | null>(null);
+  React.useEffect(() => {
+    const q = filters.q.trim();
+    if (!q || loggedQueryRef.current === q) return;
+    loggedQueryRef.current = q;
+    logCatalogSearch(q, total);
+  }, [filters.q, total]);
 
   const from = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const to = Math.min(page * PAGE_SIZE, total);

@@ -21,52 +21,52 @@ infra/security audit this build on.
 | 8   | Customer Portal                | **Complete**                | Dashboard, projects, quotes (with a direct link to the prepared КП + PDF download), orders (with delivery/documents + reorder), company team management.                                                                                                                                   |
 | 9   | CRM & Automation               | **Mostly complete**         | Customers/deals/activities, quote-status notifications to staff, audit trail, review-flagged quotes now filterable on `/admin/quotes` — added this cycle. No lead-assignment automation yet.                                                                                               |
 | 10  | Marketplace / Supplier Network | **Not started (by design)** | Long-term phase; correctly deferred until real order volume + supplier data exist.                                                                                                                                                                                                         |
-| 11  | Data Intelligence              | **Partial**                 | Header-search demand now logged (query + result count + click-through) with an admin "top queries" / "no-result queries" widget — added this cycle. Full-catalog-page `?q=` search and quote/order conversion funnels still untracked.                                                     |
+| 11  | Data Intelligence              | **Partial**                 | Both header-search and catalog-page (`/catalog?q=`) search demand now logged into the same "top queries" / "no-result queries" admin widget — catalog-page logging added this cycle. Quote/order conversion funnels still untracked.                                                       |
 | 12  | AI Sales Agent                 | **Not started (by design)** | Depends on Phase 5 existing first.                                                                                                                                                                                                                                                         |
 
 ## This cycle's work
 
-**Bottleneck (from last cycle's "next priority"):** per-company contract
-pricing had no way to surface — the quote item price editor shipped last
-cycle was the missing prerequisite, and it now exists.
+**Bottleneck (from last cycle's "next priority"):** only header-search
+demand was logged into `SearchLog` — a customer landing on `/catalog?q=...`
+(from the header's "show all results", a bookmark, or a shared link) left
+no trace, so the admin "top queries" / "no-result queries" widget was
+blind to a real share of search volume and, worse, to catalog-page
+searches that find nothing.
 
-**Fix shipped:** a new self-healed `CompanyPrice` table (companyId +
-productId → `amountTiyn`, unique per pair) with full admin CRUD — a
-"Договорные цены" panel on `/admin/companies/[id]` (add/edit/remove,
-mirroring the existing team-members panel) lets staff set a reference
-price per product for a company. That price surfaces as a clickable
-suggestion ("Цена компании: N ₸") in the quote item price editor on
-`/admin/quotes`, filling the input on click — never applied automatically.
+**Fix shipped:** a new `logCatalogSearch(query, resultCount)` server
+action (`search-actions.ts`) that writes into the _same_ `SearchLog` table
+with the _same_ `kind: "search"` as header search — so it shows up in the
+existing `topQueries`/`topZeroResultQueries` admin widget with no new UI.
+Wired into `CatalogView` via a `useEffect` keyed on `filters.q`: since `q`
+only ever enters the catalog page through a full navigation (there is no
+live search box on the catalog page itself — confirmed no component reads
+`filters.q` for typing, only `active-filter-chips.tsx` displays it as a
+removable chip), logging once per distinct query text is a real "settled
+search" event, not a some over-eager per-keystroke log. A `useRef` guard
+prevents re-logging the same query when an unrelated filter (category,
+page) changes while `q` stays put.
 
-Resolving _which_ company a quote belongs to only ever goes through the
-real `Quote.userId → CompanyMember → Company` relation (a new batched
-`companyAdminRepository.forUsers()` lookup) — matching the codebase's
-existing rule that `Quote` has no direct company relation and nothing
-about a company association is ever guessed from free-text labels. A
-quote from a guest checkout or a user not on any company simply gets no
-suggestion, which is the correct, silent behavior, not a bug.
-
-Deliberately did **not** touch `derivePrice()` or any public catalog/read
-path — `CompanyPrice` is admin-only data surfaced in one admin view this
-cycle, not a pricing engine wired into checkout. Verified: typecheck
-clean, lint has only the same pre-existing warnings, 42/42 tests pass,
-production build succeeds.
+Deliberately scoped to _just_ the logging — no new admin UI (reuses the
+existing widget), no attempt to distinguish "came from header" vs "came
+from catalog page" (the existing `SearchLog` schema has no source column;
+adding one is a separate, low-value change unless that split is ever
+actually needed). Verified: typecheck clean, lint has only the same
+pre-existing warnings, 42/42 tests pass, production build succeeds.
 
 ## Known issues / deferred
 
 - Phase 4: matching has no structured technical-parameter comparison yet.
-- Phase 11: `/catalog?q=` page search (client-side filtering) isn't logged yet, only header-search. No quote/order conversion funnel yet.
 - Phase 9: no lead-assignment automation.
 - Phase 7: `CompanyPrice` is a suggestion in the admin quote editor only — it does not yet flow into the public catalog/product price shown to a logged-in company member, nor into order totals. That's a materially larger change (threading per-request company context through `derivePrice()`'s hot, currently context-free read path) and needs real usage of the admin-side suggestion first to justify it.
+- Phase 11: quote/order conversion funnel (does a search → lead to a quote → an order) is still untracked — `SearchLog` only knows about search+click, not what happens downstream.
 
 ## Next priority
 
-Phase 11: log `/catalog?q=` page search (the client-side filter box on the
-catalog page itself), reusing the `SearchLog` table and
-`logSearchClick`/`searchSuggestions` infra already built for header
-search — currently only header-search demand is tracked, so catalog-page
-query volume and no-result terms are invisible to the "top queries" admin
-widget. Alternative if a bigger swing is wanted instead: start wiring
+Phase 11: quote/order conversion tracking — connect a submitted quote back
+to the search query (if any) that led to it, so the admin widget can show
+not just "what people search for" but "what search actually converts,"
+the natural next layer once both search surfaces are logged. Alternative
+if that proves too loosely-coupled to wire cleanly: start wiring
 `CompanyPrice` into the actual customer-facing price a logged-in company
-member sees (the real payoff of this cycle's table), scoped tightly to
-just the product detail page rather than the whole catalog grid.
+member sees (Phase 7's real payoff), scoped tightly to just the product
+detail page rather than the whole catalog grid.

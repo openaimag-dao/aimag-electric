@@ -55,6 +55,31 @@ export async function searchSuggestions(query: string): Promise<SearchSuggestion
   return suggestions;
 }
 
+/**
+ * Records a catalog-page search (`/catalog?q=...`) as the same `kind: "search"`
+ * signal header search logs, so it shows up in the existing admin "top
+ * queries" / "no-result queries" widgets without a separate one. The catalog
+ * page filters client-side over an already-loaded product list, so unlike
+ * `searchSuggestions` above it doesn't need to fetch anything — the caller
+ * already has the query and its result count, this just records them.
+ */
+export async function logCatalogSearch(query: string, resultCount: number): Promise<void> {
+  const q = query.trim().slice(0, 100);
+  if (!q) return;
+
+  const hdrs = await headers();
+  const ip =
+    hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() || hdrs.get("x-real-ip") || "unknown";
+  const limit = rateLimit(`search-catalog:${ip}`, 40, 60_000);
+  if (!limit.ok) return;
+
+  try {
+    await searchLogRepository.logSearch(q, resultCount);
+  } catch (e) {
+    logger.error("search.log_catalog_failed", { error: String(e) });
+  }
+}
+
 /** Records that a suggestion (or "show all results") was actually clicked — the click-through half of the same demand signal. Fire-and-forget from the client; a lost beacon just means one fewer data point, never a broken click. */
 export async function logSearchClick(query: string, productSlug: string): Promise<void> {
   const q = query.trim().slice(0, 100);
