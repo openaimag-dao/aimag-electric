@@ -2,11 +2,21 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Phone, Mail, MapPin, Hash, Building2 } from "lucide-react";
 
-import { companyAdminRepository, userAdminRepository } from "@/server/repositories/admin";
+import {
+  companyAdminRepository,
+  userAdminRepository,
+  companyPriceAdminRepository,
+} from "@/server/repositories/admin";
 import {
   CompanyMembersPanel,
   type CompanyMemberRow,
 } from "@/components/admin/companies/company-members-panel";
+import {
+  CompanyPricesPanel,
+  type CompanyPriceRow,
+} from "@/components/admin/companies/company-prices-panel";
+import { adminService } from "@/server/services/admin-service";
+import { tiynToTenge } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
 
@@ -16,9 +26,11 @@ interface PageProps {
 
 export default async function CompanyDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const [company, users] = await Promise.all([
+  const [company, users, companyPrices, refs] = await Promise.all([
     companyAdminRepository.byId(id),
     userAdminRepository.list(),
+    companyPriceAdminRepository.listForCompany(id),
+    adminService.refs(),
   ]);
   if (!company) notFound();
 
@@ -28,6 +40,14 @@ export default async function CompanyDetailPage({ params }: PageProps) {
     role: m.role,
     user: { name: m.user.name, email: m.user.email },
   }));
+
+  const prices: CompanyPriceRow[] = companyPrices.map((p) => ({
+    id: p.id,
+    productId: p.productId,
+    amountTenge: tiynToTenge(p.amountTiyn),
+    product: { title: p.product.title, sku: p.product.sku, unit: p.product.unit },
+  }));
+  const products = refs.products.map((p) => ({ id: p.id, label: `${p.title} (${p.sku})` }));
 
   return (
     <div className="space-y-6">
@@ -94,6 +114,11 @@ export default async function CompanyDetailPage({ params }: PageProps) {
             label: u.name ? `${u.name} (${u.email})` : u.email,
           }))}
         />
+      </div>
+
+      <div>
+        <h2 className="mb-3 font-display text-lg font-semibold text-primary">Договорные цены</h2>
+        <CompanyPricesPanel companyId={company.id} initialPrices={prices} products={products} />
       </div>
     </div>
   );

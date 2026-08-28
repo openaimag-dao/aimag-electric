@@ -110,6 +110,21 @@ export const companyAdminRepository = {
     );
   },
 
+  /**
+   * The (first) company each of these users belongs to, batched — powers
+   * resolving "this quote's company" for every quote on the admin quotes
+   * page in one query instead of one `forUser` per quote.
+   */
+  forUsers(userIds: string[]) {
+    if (userIds.length === 0) return Promise.resolve([]);
+    return withTables(() =>
+      prisma.companyMember.findMany({
+        where: { userId: { in: userIds } },
+        include: { company: { select: { id: true, name: true } } },
+      })
+    );
+  },
+
   /** Every company this user belongs to, with their role in each — a user can be VIEWER in one and COMPANY_ADMIN in another. Powers project visibility/write checks. */
   membershipsForUser(userId: string) {
     return withTables(() =>

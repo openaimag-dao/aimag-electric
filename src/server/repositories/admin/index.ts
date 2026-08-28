@@ -2,6 +2,10 @@ export { categoryAdminRepository } from "./category-admin-repository";
 export { brandAdminRepository } from "./brand-admin-repository";
 export { warehouseAdminRepository } from "./warehouse-admin-repository";
 export { companyAdminRepository } from "./company-admin-repository";
+export {
+  companyPriceAdminRepository,
+  type CompanyPriceAdminRow,
+} from "./company-price-admin-repository";
 export { orderAdminRepository } from "./order-admin-repository";
 export { userAdminRepository } from "./user-admin-repository";
 export { productAdminRepository, type ProductAdminRow } from "./product-admin-repository";
