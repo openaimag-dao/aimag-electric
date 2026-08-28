@@ -2,6 +2,7 @@ export * from "./category-actions";
 export * from "./brand-actions";
 export * from "./warehouse-actions";
 export * from "./company-actions";
+export * from "./company-price-actions";
 export * from "./order-actions";
 export * from "./product-actions";
 export * from "./price-actions";

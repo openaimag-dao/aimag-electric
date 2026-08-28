@@ -45,7 +45,7 @@ import {
   createOrderFromQuote,
   updateQuoteItemPrice,
 } from "@/server/actions/admin";
-import { formatTiyn, tiynToTenge, tengeToTiyn } from "@/lib/money";
+import { formatTiyn, formatTenge, tiynToTenge, tengeToTiyn } from "@/lib/money";
 import { cn } from "@/lib/utils";
 
 export interface QuoteItemRow {
@@ -56,12 +56,16 @@ export interface QuoteItemRow {
   unit: string;
   amountTiyn: number | null;
   note: string | null;
+  /** This company's reference price for the item's product, if resolved — a suggestion shown while editing, never applied automatically. */
+  suggestedPriceTenge: number | null;
 }
 
 export interface QuoteListRow {
   id: string;
   title: string | null;
   company: string;
+  /** The company this quote was confidently resolved to (via the submitter's account), if any — distinct from the free-text `company` label above. */
+  resolvedCompanyName: string | null;
   name: string;
   phone: string;
   email: string | null;
@@ -408,44 +412,56 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
                           </td>
                           <td className="whitespace-nowrap p-2 text-right font-medium text-primary">
                             {editingPriceId === i.id ? (
-                              <div className="flex items-center justify-end gap-1">
-                                <input
-                                  type="number"
-                                  min="0"
-                                  step="0.01"
-                                  autoFocus
-                                  value={priceDraft}
-                                  onChange={(e) => setPriceDraft(e.target.value)}
-                                  onKeyDown={(e) => {
-                                    if (e.key === "Enter") handleSavePrice(i.id);
-                                    if (e.key === "Escape") setEditingPriceId(null);
-                                  }}
-                                  placeholder="по запросу"
-                                  disabled={savingPrice}
-                                  className="w-24 rounded border border-input px-1.5 py-0.5 text-right text-xs"
-                                />
-                                <button
-                                  type="button"
-                                  aria-label="Сохранить цену"
-                                  onClick={() => handleSavePrice(i.id)}
-                                  disabled={savingPrice}
-                                  className="hover:text-signal-800 text-signal-700 disabled:opacity-50"
-                                >
-                                  {savingPrice ? (
-                                    <Loader2 className="size-3.5 animate-spin" />
-                                  ) : (
-                                    <Check className="size-3.5" />
-                                  )}
-                                </button>
-                                <button
-                                  type="button"
-                                  aria-label="Отменить"
-                                  onClick={() => setEditingPriceId(null)}
-                                  disabled={savingPrice}
-                                  className="text-muted-foreground hover:text-red-600 disabled:opacity-50"
-                                >
-                                  <X className="size-3.5" />
-                                </button>
+                              <div className="flex flex-col items-end gap-1">
+                                <div className="flex items-center justify-end gap-1">
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    autoFocus
+                                    value={priceDraft}
+                                    onChange={(e) => setPriceDraft(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") handleSavePrice(i.id);
+                                      if (e.key === "Escape") setEditingPriceId(null);
+                                    }}
+                                    placeholder="по запросу"
+                                    disabled={savingPrice}
+                                    className="w-24 rounded border border-input px-1.5 py-0.5 text-right text-xs"
+                                  />
+                                  <button
+                                    type="button"
+                                    aria-label="Сохранить цену"
+                                    onClick={() => handleSavePrice(i.id)}
+                                    disabled={savingPrice}
+                                    className="hover:text-signal-800 text-signal-700 disabled:opacity-50"
+                                  >
+                                    {savingPrice ? (
+                                      <Loader2 className="size-3.5 animate-spin" />
+                                    ) : (
+                                      <Check className="size-3.5" />
+                                    )}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    aria-label="Отменить"
+                                    onClick={() => setEditingPriceId(null)}
+                                    disabled={savingPrice}
+                                    className="text-muted-foreground hover:text-red-600 disabled:opacity-50"
+                                  >
+                                    <X className="size-3.5" />
+                                  </button>
+                                </div>
+                                {i.suggestedPriceTenge !== null && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setPriceDraft(String(i.suggestedPriceTenge))}
+                                    className="font-normal text-muted-foreground hover:text-signal-700 hover:underline"
+                                    title={`Цена для «${viewing.resolvedCompanyName}» — нажмите, чтобы подставить`}
+                                  >
+                                    Цена компании: {formatTenge(i.suggestedPriceTenge)}
+                                  </button>
+                                )}
                               </div>
                             ) : (
                               <button

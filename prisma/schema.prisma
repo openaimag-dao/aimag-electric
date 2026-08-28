@@ -174,12 +174,13 @@ model Product {
   brandId    String
   brand      Brand    @relation(fields: [brandId], references: [id], onDelete: Restrict)
 
-  images    ProductImage[]
-  documents ProductDocument[]
-  values    AttributeValue[]
-  stock     Stock[]
-  prices    Price[]
-  reviews   Review[]
+  images        ProductImage[]
+  documents     ProductDocument[]
+  values        AttributeValue[]
+  stock         Stock[]
+  prices        Price[]
+  reviews       Review[]
+  companyPrices CompanyPrice[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -639,10 +640,35 @@ model Company {
   members       CompanyMember[]
   projects      Project[]
   orders        Order[]
+  prices        CompanyPrice[]
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 
   @@index([name])
+}
+
+/**
+ * A per-company reference price for a product — staff sets this once, then it
+ * surfaces as a suggested (never auto-applied) starting value when pricing a
+ * quote line for a customer confirmed to belong to this company. Resolving
+ * "this quote's company" only ever goes through the real Quote.userId →
+ * CompanyMember relation (see admin/quotes/page.tsx) — never guessed from the
+ * quote's free-text `company` label, for the same reason Quote itself has no
+ * direct company relation (see the comment on Quote below).
+ */
+model CompanyPrice {
+  id         String   @id @default(cuid())
+  companyId  String
+  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  amountTiyn Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([companyId, productId])
+  @@index([companyId])
+  @@index([productId])
 }
 
 /**
