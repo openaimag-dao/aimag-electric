@@ -42,7 +42,7 @@ only ever enters the catalog page through a full navigation (there is no
 live search box on the catalog page itself — confirmed no component reads
 `filters.q` for typing, only `active-filter-chips.tsx` displays it as a
 removable chip), logging once per distinct query text is a real "settled
-search" event, not a some over-eager per-keystroke log. A `useRef` guard
+search" event, not an over-eager per-keystroke log. A `useRef` guard
 prevents re-logging the same query when an unrelated filter (category,
 page) changes while `q` stays put.
 
