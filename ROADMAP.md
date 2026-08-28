@@ -9,69 +9,68 @@ infra/security audit this build on.
 
 ## Phase status
 
-| #   | Phase                          | Status                      | Notes                                                                                                                                                                                                                                                                                                                           |
-| --- | ------------------------------ | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Product Foundation             | **Complete**                | RBAC, rate limiting, security headers, audit log, branded error pages, DB self-heal, CI (typecheck/lint/format/test/build), Vitest coverage.                                                                                                                                                                                    |
-| 2   | Catalog Operating System       | **Complete**                | Full product master data (SKU/brand/category/images/docs/specs/pricing/stock), admin CRUD with bulk edit/publish/delete (confirmed), Catalog Health data-quality dashboard, related products + analog suggestions.                                                                                                              |
-| 3   | Procurement Engine             | **Mostly complete**         | Projects (BOM), deterministic "Загрузить ТЗ" spec-import matcher (SKU/title, exact/possible/not_found tiers, customer-confirmed before writing), Project → Quote, Quote → Order, Order → repeat purchase.                                                                                                                       |
-| 4   | Engineering Intelligence       | **Partial**                 | Matching is SKU/title/manufacturer similarity only — no structured technical-parameter comparison (voltage/current/dimensions) or explicit "differs on X" / "needs engineer review" output.                                                                                                                                     |
-| 5   | AI Procurement Copilot         | **Missing**                 | No AI system anywhere in the codebase. Not started — large scope, needs explicit product decision before building (real catalog grounding, no invented specs/prices).                                                                                                                                                           |
-| 6   | Supplier & Availability Engine | **N/A for now**             | Single-supplier business (AIMAG's own warehouses/stock) — no multi-supplier data exists to compare. Correctly not faked.                                                                                                                                                                                                        |
-| 7   | B2B Commercial Engine          | **Mostly complete**         | Company/Customer/Deal/Quote/Order pipeline, company self-service team management, negotiation loop, staff-editable quote line prices, and `CompanyPrice` now surfaced both when staff price a quote AND on the product page for a logged-in company member — added this cycle. No contract pricing in cart/checkout totals yet. |
-| 8   | Customer Portal                | **Complete**                | Dashboard, projects, quotes (with a direct link to the prepared КП + PDF download), orders (with delivery/documents + reorder), company team management.                                                                                                                                                                        |
-| 9   | CRM & Automation               | **Mostly complete**         | Customers/deals/activities, quote-status notifications to staff, audit trail, review-flagged quotes now filterable on `/admin/quotes` — added this cycle. No lead-assignment automation yet.                                                                                                                                    |
-| 10  | Marketplace / Supplier Network | **Not started (by design)** | Long-term phase; correctly deferred until real order volume + supplier data exist.                                                                                                                                                                                                                                              |
-| 11  | Data Intelligence              | **Partial**                 | Both header-search and catalog-page (`/catalog?q=`) search demand now logged into the same "top queries" / "no-result queries" admin widget — catalog-page logging added this cycle. Quote/order conversion funnels still untracked.                                                                                            |
-| 12  | AI Sales Agent                 | **Not started (by design)** | Depends on Phase 5 existing first.                                                                                                                                                                                                                                                                                              |
+| #   | Phase                          | Status                      | Notes                                                                                                                                                                                                                                                                                                                                                                                       |
+| --- | ------------------------------ | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Product Foundation             | **Complete**                | RBAC, rate limiting, security headers, audit log, branded error pages, DB self-heal, CI (typecheck/lint/format/test/build), Vitest coverage.                                                                                                                                                                                                                                                |
+| 2   | Catalog Operating System       | **Complete**                | Full product master data (SKU/brand/category/images/docs/specs/pricing/stock), admin CRUD with bulk edit/publish/delete (confirmed), Catalog Health data-quality dashboard, related products + analog suggestions.                                                                                                                                                                          |
+| 3   | Procurement Engine             | **Mostly complete**         | Projects (BOM), deterministic "Загрузить ТЗ" spec-import matcher (SKU/title, exact/possible/not_found tiers, customer-confirmed before writing), Project → Quote, Quote → Order, Order → repeat purchase.                                                                                                                                                                                   |
+| 4   | Engineering Intelligence       | **Partial**                 | Matching is SKU/title/manufacturer similarity only — no structured technical-parameter comparison (voltage/current/dimensions) or explicit "differs on X" / "needs engineer review" output.                                                                                                                                                                                                 |
+| 5   | AI Procurement Copilot         | **Missing**                 | No AI system anywhere in the codebase. Not started — large scope, needs explicit product decision before building (real catalog grounding, no invented specs/prices).                                                                                                                                                                                                                       |
+| 6   | Supplier & Availability Engine | **N/A for now**             | Single-supplier business (AIMAG's own warehouses/stock) — no multi-supplier data exists to compare. Correctly not faked.                                                                                                                                                                                                                                                                    |
+| 7   | B2B Commercial Engine          | **Mostly complete**         | Company/Customer/Deal/Quote/Order pipeline, company self-service team management, negotiation loop, staff-editable quote line prices, and `CompanyPrice` surfaced to staff, shown to the customer, and now actually quoted when a company member requests a KП straight from the product page — added this cycle. Cart and every other add-to-cart entry point still use the catalog price. |
+| 8   | Customer Portal                | **Complete**                | Dashboard, projects, quotes (with a direct link to the prepared КП + PDF download), orders (with delivery/documents + reorder), company team management.                                                                                                                                                                                                                                    |
+| 9   | CRM & Automation               | **Mostly complete**         | Customers/deals/activities, quote-status notifications to staff, audit trail, review-flagged quotes now filterable on `/admin/quotes` — added this cycle. No lead-assignment automation yet.                                                                                                                                                                                                |
+| 10  | Marketplace / Supplier Network | **Not started (by design)** | Long-term phase; correctly deferred until real order volume + supplier data exist.                                                                                                                                                                                                                                                                                                          |
+| 11  | Data Intelligence              | **Partial**                 | Both header-search and catalog-page (`/catalog?q=`) search demand now logged into the same "top queries" / "no-result queries" admin widget — catalog-page logging added this cycle. Quote/order conversion funnels still untracked.                                                                                                                                                        |
+| 12  | AI Sales Agent                 | **Not started (by design)** | Depends on Phase 5 existing first.                                                                                                                                                                                                                                                                                                                                                          |
 
 ## This cycle's work
 
 **Bottleneck (from last cycle's "next priority"):** last cycle's stated
-next priority was quote/order conversion tracking — connecting a
-submitted quote back to the search query that led to it. Investigated
-first, and it doesn't hold up honestly: `SearchLog` has no session/user
-column, `submitQuote` captures no referrer or query context, and grepping
-the whole product/search/quote path (`search-bar.tsx`, `product-card.tsx`,
-`quote-dialog.tsx`, `submitQuote`) turned up zero existing session or
-query-carrying signal to attribute a quote to a search with. Building it
-for real would mean inventing new tracking infrastructure — a session
-cookie or threading `?q=` through every product link into the quote
-form and a new schema column — which is a multi-file, schema-changing
-feature, not the "next priority" scope the roadmap entry implied.
-Deprioritized rather than faked with a made-up attribution.
+next priority was making `CompanyPrice` actually apply, not just display,
+when a company member adds to cart or requests a quote — proposed as a
+small swap of `priceTenge: product.price` for `companyPriceTenge ??
+product.price` in `purchase-panel.tsx`'s two CTAs. Investigated the blast
+radius before touching either one, since this is real money a customer
+is charged/quoted, not a display tweak.
 
-**Picked instead (the roadmap's own stated fallback):** finished
-`CompanyPrice`'s actual payoff — last cycle it only ever appeared as a
-staff-facing suggestion in the quote editor; a logged-in company member
-never saw their own negotiated price anywhere. The product detail page
-(`/catalog/[slug]`) now resolves the viewer's company the same way
-`/admin/quotes` does (`currentUser()` → `companyAdminRepository.forUser()`
-→ `companyPriceAdminRepository.forCompaniesAndProducts()`, the exact
-precedent already used by `/account` and `/account/company`) and, if a
-reference price exists for this product, shows "Ваша цена по договору:
-N ₸" in the purchase panel alongside the catalog price — never replacing
-or feeding it into cart/checkout totals, which stay untouched this cycle.
-An anonymous visitor or a company member with no price set simply sees
-nothing extra, which is correct, not a gap. `derivePrice()` and every
-other catalog read path remain untouched — this is one lookup added to
-one page. Verified: typecheck clean, lint has only the same pre-existing
-warnings, 42/42 tests pass, production build succeeds.
+**What the investigation found:** the `QuoteDialog` half is genuinely
+safe — a KП requested from the product page is one immediate submission
+(`submitQuote` → `QuoteItem.amountTiyn`, unmodified) with no persistence
+or merge step. The `AddToCartButton` half is not: `CartItem`s are
+persisted to `localStorage`, and `cart-provider.tsx`'s `addItem` silently
+**keeps the first price written** when the same product is added twice —
+so if only the product-page button read the company price, a customer
+who happened to add the same product from `/catalog`'s grid,
+`/compare`, or an account item-add flow first (none of which resolve
+`companyPriceTenge` today) would silently lock in the _catalog_ price for
+that cart line, with no indication which entry point "won." That's a
+real inconsistency in what the customer is actually charged, not a
+cosmetic gap — worth catching before shipping, not after.
+
+**Fix shipped:** narrowed to just the safe half — `purchase-panel.tsx`'s
+`QuoteDialog` now quotes at `companyPriceTenge ?? product.price` when a
+company member requests a KП directly from the product page. Left
+`AddToCartButton` on `product.price` deliberately, with a comment
+pointing at this reasoning and at the deferred follow-up below.
+`derivePrice()` and every other catalog read path remain untouched.
+Verified: typecheck clean, lint has only the same pre-existing warnings,
+42/42 tests pass, production build succeeds.
 
 ## Known issues / deferred
 
 - Phase 4: matching has no structured technical-parameter comparison yet.
 - Phase 9: no lead-assignment automation.
-- Phase 7: `CompanyPrice` is now visible to both staff and the customer, but still doesn't flow into cart/checkout totals or order pricing — a company member sees "your contract price" as information, but adding to cart / placing an order still uses the catalog price. Making the negotiated price actually apply at checkout is the natural next step, but is a bigger, more consequential change (money actually charged) that deserves its own careful cycle.
-- Phase 11: quote/order conversion funnel is still untracked, and — per this cycle's investigation — isn't cheaply trackable without new session infrastructure; not attempting a fake/partial version of it.
+- Phase 7: `CompanyPrice` still doesn't flow into cart/checkout — applying it there needs either (a) resolving `companyPriceTenge` consistently at every add-to-cart entry point (catalog grid `product-card.tsx`, `/compare`, account item-add flows) so the same product always carries the same price into the cart, or (b) fixing `cart-provider.tsx`'s `addItem` silently keeping the first-written price on a merge — likely both, which is why it's deferred rather than done half-way.
+- Phase 11: quote/order conversion funnel is still untracked, and — per an earlier cycle's investigation — isn't cheaply trackable without new session infrastructure; not attempting a fake/partial version of it.
 
 ## Next priority
 
-Phase 7: make a company's `CompanyPrice` actually apply when that
-member adds the product to cart / requests a quote, not just display as
-information on the product page. This is the natural conclusion of the
-last two cycles (staff can set it, staff can see it when quoting, the
-customer can now see it) but touches money customers are actually
-charged, so scope it carefully: likely just `AddToCartButton`/`QuoteDialog`
-on the product page reading the same `companyPriceTenge` already resolved
-this cycle and using it as the item's `priceTenge` instead of the catalog
-price — not a change to `derivePrice()` or any other read path.
+Phase 7: extend `CompanyPrice` to the cart, correctly this time — fix
+`cart-provider.tsx`'s `addItem` so a merged cart line uses a consistent
+price (not silently whichever was written first), and resolve
+`companyPriceTenge` at the other add-to-cart entry points found this
+cycle (`product-card.tsx`, `/compare`, account item-add) so a company
+member gets the same price for the same product no matter where they add
+it from. Larger than one file, so worth its own careful cycle rather
+than a rushed follow-on to this one.
