@@ -56,6 +56,8 @@ export default async function AdminQuotesPage() {
       respondedAt: q.respondedAt ? q.respondedAt.toISOString() : null,
       responseNote: q.responseNote,
       hasOrder: quoteIdsWithOrders.has(q.id),
+      customerId: q.customer?.id ?? null,
+      ownerName: q.customer?.owner?.name ?? q.customer?.owner?.email ?? null,
       items: q.items.map((i) => ({
         id: i.id,
         title: i.title,
