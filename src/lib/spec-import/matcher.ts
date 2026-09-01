@@ -13,6 +13,9 @@ export interface MatchableProduct {
   sku: string;
   title: string;
   manufacturer: string;
+  /** Real structured attrs, when the catalog has them — never inferred from text on this side. */
+  cores?: number | null;
+  crossSection?: number | null;
 }
 
 export interface SpecRowInput {
@@ -26,6 +29,8 @@ export interface MatchCandidateResult<T extends MatchableProduct> {
   score: number;
   matchedFields: string[];
   differentFields: string[];
+  /** Set only when the file's title embeds a cable size that contradicts the matched product's real cores/crossSection — never a guess. */
+  technicalWarning: string | null;
 }
 
 export interface RowMatchResult<T extends MatchableProduct> {
@@ -67,6 +72,27 @@ function titleSimilarity(a: string, b: string): number {
   return union === 0 ? 0 : intersection / union;
 }
 
+interface DimensionSignal {
+  cores: number;
+  crossSection: number;
+}
+
+/**
+ * Extracts an embedded "<cores>x<crossSection>" cable-size token from raw
+ * free text (e.g. "Кабель ВВГ 3х2.5" -> {cores:3, crossSection:2.5}). Runs
+ * on the untouched string, not normalize()'s output, since normalize()
+ * strips the decimal separator crossSection needs. Returns null when no
+ * such token is present — never invents a size.
+ */
+function extractDimensions(title: string): DimensionSignal | null {
+  const match = title.match(/(\d+)\s*[xх×*]\s*(\d+(?:[.,]\d+)?)/i);
+  if (!match) return null;
+  const cores = Number(match[1]);
+  const crossSection = Number(match[2].replace(",", "."));
+  if (!Number.isFinite(cores) || !Number.isFinite(crossSection)) return null;
+  return { cores, crossSection };
+}
+
 function scoreCandidate<T extends MatchableProduct>(
   row: SpecRowInput,
   product: T
@@ -86,8 +112,19 @@ function scoreCandidate<T extends MatchableProduct>(
     (mExact ? matchedFields : differentFields).push("Производитель");
   }
 
+  let technicalWarning: string | null = null;
+  const rowDims = extractDimensions(row.title);
+  if (
+    rowDims &&
+    product.cores != null &&
+    product.crossSection != null &&
+    (rowDims.cores !== product.cores || rowDims.crossSection !== product.crossSection)
+  ) {
+    technicalWarning = `В файле: ${rowDims.cores}×${rowDims.crossSection} мм², у товара: ${product.cores}×${product.crossSection} мм² — сверьте сечение`;
+  }
+
   const score = skuExact ? Math.max(tScore, EXACT_THRESHOLD) : tScore;
-  return { product, score, matchedFields, differentFields };
+  return { product, score, matchedFields, differentFields, technicalWarning };
 }
 
 /** Rank real candidates for one spec row and classify into a tier. Never invents a candidate. */

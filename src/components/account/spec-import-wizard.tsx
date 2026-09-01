@@ -93,6 +93,12 @@ export function SpecImportWizard() {
         if (!productId) return null;
         const candidate = row.result.candidates.find((c) => c.product.id === productId);
         if (!candidate) return null;
+        const notes = [
+          row.result.tier === "possible"
+            ? `Возможное совпадение по «${row.title}»${row.sku ? ` (арт. ${row.sku})` : ""} — сверьте характеристики перед подтверждением цены`
+            : null,
+          candidate.technicalWarning,
+        ].filter((n): n is string => Boolean(n));
         return {
           productId: candidate.product.id,
           slug: candidate.product.slug,
@@ -101,10 +107,7 @@ export function SpecImportWizard() {
           qty: row.qty,
           unit: candidate.product.unit,
           priceTenge: candidate.product.price,
-          note:
-            row.result.tier === "possible"
-              ? `Возможное совпадение по «${row.title}»${row.sku ? ` (арт. ${row.sku})` : ""} — сверьте характеристики перед подтверждением цены`
-              : null,
+          note: notes.length > 0 ? notes.join(" · ") : null,
         };
       })
       .filter((i): i is NonNullable<typeof i> => i !== null);
@@ -218,32 +221,42 @@ export function SpecImportWizard() {
               ) : (
                 <div className="mt-3 space-y-1.5">
                   {row.result.candidates.map((c) => (
-                    <label
-                      key={c.product.id}
-                      className="flex cursor-pointer items-center gap-2 rounded-md p-1.5 hover:bg-secondary/50"
-                    >
-                      <input
-                        type="radio"
-                        name={`row-${row.row}`}
-                        checked={selections[row.row] === c.product.id}
-                        onChange={() =>
-                          setSelections((prev) => ({ ...prev, [row.row]: c.product.id }))
-                        }
-                        className="size-4"
-                      />
-                      <Link
-                        href={`/catalog/${c.product.slug}`}
-                        target="_blank"
-                        className="text-sm text-primary hover:text-signal-700 hover:underline"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {c.product.title}
-                      </Link>
-                      <span className="text-xs text-muted-foreground">
-                        {c.product.sku} ·{" "}
-                        {c.product.price !== null ? formatTenge(c.product.price) : "по запросу"}
-                      </span>
-                    </label>
+                    <div key={c.product.id}>
+                      <label className="flex cursor-pointer items-center gap-2 rounded-md p-1.5 hover:bg-secondary/50">
+                        <input
+                          type="radio"
+                          name={`row-${row.row}`}
+                          checked={selections[row.row] === c.product.id}
+                          onChange={() =>
+                            setSelections((prev) => ({ ...prev, [row.row]: c.product.id }))
+                          }
+                          className="size-4"
+                        />
+                        <Link
+                          href={`/catalog/${c.product.slug}`}
+                          target="_blank"
+                          className="text-sm text-primary hover:text-signal-700 hover:underline"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {c.product.title}
+                        </Link>
+                        <span className="text-xs text-muted-foreground">
+                          {c.product.sku} ·{" "}
+                          {c.product.price !== null ? formatTenge(c.product.price) : "по запросу"}
+                        </span>
+                        {c.differentFields.length > 0 && (
+                          <span className="text-xs text-amber-700">
+                            Отличается: {c.differentFields.join(", ")}
+                          </span>
+                        )}
+                      </label>
+                      {c.technicalWarning && (
+                        <p className="ml-6 flex items-center gap-1.5 text-xs text-amber-700">
+                          <AlertCircle className="size-3.5 shrink-0" />
+                          {c.technicalWarning}
+                        </p>
+                      )}
+                    </div>
                   ))}
                   <label className="flex cursor-pointer items-center gap-2 rounded-md p-1.5 text-sm text-muted-foreground hover:bg-secondary/50">
                     <input
