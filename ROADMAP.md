@@ -9,82 +9,82 @@ infra/security audit this build on.
 
 ## Phase status
 
-| #   | Phase                          | Status                      | Notes                                                                                                                                                                                                                                                                                                                                                                         |
-| --- | ------------------------------ | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Product Foundation             | **Complete**                | RBAC, rate limiting, security headers, audit log, branded error pages, DB self-heal, CI (typecheck/lint/format/test/build), Vitest coverage.                                                                                                                                                                                                                                  |
-| 2   | Catalog Operating System       | **Complete**                | Full product master data (SKU/brand/category/images/docs/specs/pricing/stock), admin CRUD with bulk edit/publish/delete (confirmed), Catalog Health data-quality dashboard, related products + analog suggestions.                                                                                                                                                            |
-| 3   | Procurement Engine             | **Mostly complete**         | Projects (BOM), deterministic "Загрузить ТЗ" spec-import matcher (SKU/title, exact/possible/not_found tiers, customer-confirmed before writing), Project → Quote, Quote → Order, Order → repeat purchase.                                                                                                                                                                     |
-| 4   | Engineering Intelligence       | **Partial**                 | SKU/title/manufacturer matching plus a first structured check — cable dimension (cores×cross-section) mismatches between a spec file's title text and the matched product's real attrs are now flagged explicitly, added this cycle. Voltage/current diffing and general "differs on X" for non-cable categories still need the sheet parser extended with technical columns. |
-| 5   | AI Procurement Copilot         | **Missing**                 | No AI system anywhere in the codebase. Not started — large scope, needs explicit product decision before building (real catalog grounding, no invented specs/prices).                                                                                                                                                                                                         |
-| 6   | Supplier & Availability Engine | **N/A for now**             | Single-supplier business (AIMAG's own warehouses/stock) — no multi-supplier data exists to compare. Correctly not faked.                                                                                                                                                                                                                                                      |
-| 7   | B2B Commercial Engine          | **Mostly complete**         | Company/Customer/Deal/Quote/Order pipeline, company self-service team management, negotiation loop, staff-editable quote line prices, and `CompanyPrice` now applied consistently across every cart/quote entry point, including the main `/catalog` grid — added this cycle.                                                                                                 |
-| 8   | Customer Portal                | **Complete**                | Dashboard, projects, quotes (with a direct link to the prepared КП + PDF download), orders (with delivery/documents + reorder), company team management.                                                                                                                                                                                                                      |
-| 9   | CRM & Automation               | **Mostly complete**         | Customers/deals/activities, quote-status notifications to staff, audit trail, review-flagged quotes now filterable on `/admin/quotes` — added this cycle. No lead-assignment automation yet.                                                                                                                                                                                  |
-| 10  | Marketplace / Supplier Network | **Not started (by design)** | Long-term phase; correctly deferred until real order volume + supplier data exist.                                                                                                                                                                                                                                                                                            |
-| 11  | Data Intelligence              | **Partial**                 | Both header-search and catalog-page (`/catalog?q=`) search demand now logged into the same "top queries" / "no-result queries" admin widget — catalog-page logging added this cycle. Quote/order conversion funnels still untracked.                                                                                                                                          |
-| 12  | AI Sales Agent                 | **Not started (by design)** | Depends on Phase 5 existing first.                                                                                                                                                                                                                                                                                                                                            |
+| #   | Phase                          | Status                      | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| --- | ------------------------------ | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Product Foundation             | **Complete**                | RBAC, rate limiting, security headers, audit log, branded error pages, DB self-heal, CI (typecheck/lint/format/test/build), Vitest coverage.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| 2   | Catalog Operating System       | **Complete**                | Full product master data (SKU/brand/category/images/docs/specs/pricing/stock), admin CRUD with bulk edit/publish/delete (confirmed), Catalog Health data-quality dashboard, related products + analog suggestions.                                                                                                                                                                                                                                                                                                                                                            |
+| 3   | Procurement Engine             | **Mostly complete**         | Projects (BOM), deterministic "Загрузить ТЗ" spec-import matcher (SKU/title, exact/possible/not_found tiers, customer-confirmed before writing), Project → Quote, Quote → Order, Order → repeat purchase.                                                                                                                                                                                                                                                                                                                                                                     |
+| 4   | Engineering Intelligence       | **Partial**                 | SKU/title/manufacturer matching plus structured checks: cable dimension (cores×cross-section, from title text) and voltage (from an optional file column) mismatches against the matched product's real attrs are now flagged explicitly. Current/amperage diffing is not built and won't be — no product in the catalog carries a current attribute at all, so there is no real data to diff against; adding one would mean inventing a spec, not matching one. General "differs on X" for non-cable categories with no `NxM` title notation still needs more source signal. |
+| 5   | AI Procurement Copilot         | **Missing**                 | No AI system anywhere in the codebase. Not started — large scope, needs explicit product decision before building (real catalog grounding, no invented specs/prices).                                                                                                                                                                                                                                                                                                                                                                                                         |
+| 6   | Supplier & Availability Engine | **N/A for now**             | Single-supplier business (AIMAG's own warehouses/stock) — no multi-supplier data exists to compare. Correctly not faked.                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| 7   | B2B Commercial Engine          | **Mostly complete**         | Company/Customer/Deal/Quote/Order pipeline, company self-service team management, negotiation loop, staff-editable quote line prices, and `CompanyPrice` now applied consistently across every cart/quote entry point, including the main `/catalog` grid — added this cycle.                                                                                                                                                                                                                                                                                                 |
+| 8   | Customer Portal                | **Complete**                | Dashboard, projects, quotes (with a direct link to the prepared КП + PDF download), orders (with delivery/documents + reorder), company team management.                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| 9   | CRM & Automation               | **Mostly complete**         | Customers/deals/activities, quote-status notifications to staff, audit trail, review-flagged quotes now filterable on `/admin/quotes` — added this cycle. No lead-assignment automation yet.                                                                                                                                                                                                                                                                                                                                                                                  |
+| 10  | Marketplace / Supplier Network | **Not started (by design)** | Long-term phase; correctly deferred until real order volume + supplier data exist.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| 11  | Data Intelligence              | **Partial**                 | Both header-search and catalog-page (`/catalog?q=`) search demand now logged into the same "top queries" / "no-result queries" admin widget — catalog-page logging added this cycle. Quote/order conversion funnels still untracked.                                                                                                                                                                                                                                                                                                                                          |
+| 12  | AI Sales Agent                 | **Not started (by design)** | Depends on Phase 5 existing first.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 ## This cycle's work
 
-**Bottleneck (from last cycle's "next priority"):** Phase 4's structured
-technical-parameter comparison. The stated plan was to scope the sheet
-parser extension first (`spec-match-service.ts`'s `SpecFileRow` has no
-technical fields, only sku/title/qty/unit/manufacturer), since that
-seemed like the necessary first step before any diffing could exist.
-Investigated before building, since "extend the parser" looked like the
-obvious first slice but is also the biggest, riskiest piece (open-ended
-column-mapping with no fixed schema).
+**Bottleneck (from last cycle's "next priority"):** Phase 4's voltage/current
+diffing, the deferred half of last cycle's dimension-diffing slice.
+`parse-sheet.ts`'s column mapping is generic — any `ColumnSpec` added to
+`SPEC_IMPORT_COLUMNS` is picked up with zero parser changes — so this
+was smaller than it first looked once traced.
 
-**Investigation found a smaller, real slice that doesn't touch the
-parser at all.** The catalog side already has genuine structured
-`cores`/`crossSection` attrs per product (real DB data via
-`CatalogProductDTO`), and cable/wire/splice product titles already embed
-the same values as literal text (`"Кабель ВВГнг(А)-LS 2×1.5"`). A
-customer's spec-file row also carries free-text `title` today, already
-parsed, no new column needed. So a title-embedded cable-size token
-(`"3х2.5"`-style) can be diffed against the matched product's real attrs
-without inventing anything — it only ever asserts a mismatch when both
-sides have a real parseable value.
+**Voltage: shipped, real data on both sides.** `product.voltage` (кВ) is
+already a first-class structured attribute on every product
+(`CatalogProductDTO.voltage`), so adding an optional "Напряжение" column
+to the upload schema gives the matcher a second real value to diff
+against it — same honest pattern as last cycle's dimension check: only
+fires when both the file and the matched product have a real value.
 
-**Fix shipped — the honest small slice:**
+**Current: investigated and explicitly not built.** Checked whether any
+product carries a current/amperage attribute anywhere in the real
+catalog data (`catalog-data.ts`'s `ATTRIBUTE_DEFS`, the DB `Attribute`
+seed) — none exists; only `material`, `cores`, `crossSection`, `voltage`
+are defined. Adding a "Ток" file column to diff against would have
+nothing real on the catalog side to compare it to, i.e. it would either
+silently do nothing or require inventing a spec value — both wrong.
+Correctly not built; would need a real `Attribute` + seeded values on
+products first, which is a data-modeling decision for AIMAG, not a code
+change.
 
-- `spec-import/matcher.ts`: `MatchableProduct` gained optional
-  `cores`/`crossSection`; a new `extractDimensions()` regex reads a raw
-  `<cores>x<crossSection>` token straight from the row's title (not
-  through `normalize()`, which strips the decimal point the
-  cross-section needs); `scoreCandidate` now sets a `technicalWarning`
-  string on the result when the extracted size and the matched product's
-  real attrs both exist and disagree.
-- `spec-import-wizard.tsx`: renders that warning under each candidate,
-  and — free, since the matcher already computed it but nothing rendered
-  it — also now shows `differentFields` inline. Both notes are folded
-  into the created project item's `note` field too, so the mismatch
-  survives into the actual BOM line, not just the review screen.
-- `matcher.test.ts`: three new cases (mismatch flagged, no signal on
-  either side stays silent, matching sizes stay silent).
+**Fix shipped:**
 
-**Deliberately not this cycle:** voltage/current diffing, and dimension
-diffing for categories whose titles don't embed `NxM` notation
-(`armatura-sip`, `izolyatory`, `avtomaty`) — both genuinely need the
-sheet parser extended with technical columns (there's already an
-`attr:`-prefixed passthrough convention in the admin product importer's
-`parse-sheet.ts` to model that on), which is real, separate work.
+- `spec-import-columns.ts`: new optional `voltage` column (aliases
+  "напряжение", "u", "uном", etc.).
+- `spec-import-actions.ts`: parses the column's raw cell text into a
+  number (tolerant of a trailing unit like "10 кВ"), `null` when absent
+  or unparseable — never defaults to a guessed value.
+- `spec-match-service.ts`: `SpecFileRow` carries `voltage: number | null`
+  through to the matcher.
+- `spec-import/matcher.ts`: `SpecRowInput`/`MatchableProduct` gained
+  `voltage`; `scoreCandidate` now collects both the dimension warning and
+  a voltage warning into a list and joins them into `technicalWarning` —
+  a product can now surface either, both, or neither, all in the one
+  field the wizard already renders.
+- `spec-import-wizard.tsx`: upload-screen hint text now mentions the
+  optional column.
+- `matcher.test.ts`: three new cases (voltage mismatch flagged, silent
+  with no file value, both warnings combine).
+
 Verified: typecheck clean, lint has only the same pre-existing warnings,
-45/45 tests pass, production build succeeds.
+48/48 tests pass, production build succeeds.
 
 ## Known issues / deferred
 
-- Phase 4: voltage/current diffing, and dimension diffing for non-cable categories, still need `SPEC_IMPORT_COLUMNS`/`parse-sheet.ts` extended to optionally capture technical columns from an uploaded file (modeled on the existing `attr:` passthrough convention in the admin importer) — no downstream consumer for those columns exists yet, so building the parser extension alone would ship no visible value; do it together with whatever diffing will consume it.
+- Phase 4: dimension diffing still only covers categories whose titles embed `NxM` notation (cable/wire/splice) — fittings/insulators/breakers have no such signal and would need a different source (likely a file column, same as voltage). Current/amperage diffing needs a real `Attribute` + seeded values first (see above) — a data decision, not scoped as engineering work.
 - Phase 9: no lead-assignment automation.
 - Phase 7 (smaller): `addProjectItem`/`saveCartAsProject` (the Project/BOM flow, separate from the cart) still trust whatever `priceTenge` the client sends verbatim, with no server-side re-check against catalog or company price — pre-existing, not introduced this cycle, but worth hardening later. Not fixed now because a naive fix would also break legitimate freeform (no-`productId`) BOM lines, which have no catalog price to re-resolve against.
 - Phase 11: quote/order conversion funnel is still untracked, and — per an earlier cycle's investigation — isn't cheaply trackable without new session infrastructure; not attempting a fake/partial version of it.
 
 ## Next priority
 
-Phase 4 continued: voltage/current diffing. Needs `SPEC_IMPORT_COLUMNS`
-(`src/config/spec-import-columns.ts`) and `parse-sheet.ts` extended to
-optionally recognize technical-parameter columns in an uploaded file
-(voltage, current — modeled on the existing `attr:` passthrough
-convention already used by the admin product importer), then the same
-`scoreCandidate` mismatch-flagging pattern extended to those fields.
-Scope the column-mapping side carefully — it's the open-ended part.
+Phase 4's structured comparison is now reasonably complete for the data
+that actually exists (dimensions + voltage). The next real gap is
+smaller-scoped: Phase 7's `addProjectItem`/`saveCartAsProject`
+price-trust issue (see Known issues above) — worth a focused look at
+whether a narrow fix (re-check only rows that carry a real `productId`,
+leave freeform BOM lines alone) is honestly buildable in one cycle before
+picking a bigger phase.

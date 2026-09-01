@@ -69,6 +69,10 @@ export async function matchSpecificationFile(
   const specRows: SpecFileRow[] = parsed.rows
     .map((r, i): SpecFileRow => {
       const qty = Number(String(r.quantity ?? "").replace(",", "."));
+      const voltageMatch = String(r.voltage ?? "")
+        .replace(",", ".")
+        .match(/-?\d+(\.\d+)?/);
+      const voltage = voltageMatch ? Number(voltageMatch[0]) : null;
       return {
         row: i + 2, // +1 for the header row, +1 for 1-based numbering
         sku: (r.sku ?? "").trim(),
@@ -76,6 +80,7 @@ export async function matchSpecificationFile(
         qty: Number.isFinite(qty) && qty > 0 ? qty : 1,
         unit: (r.unit ?? "").trim() || "шт",
         manufacturer: (r.manufacturer ?? "").trim(),
+        voltage: voltage !== null && Number.isFinite(voltage) ? voltage : null,
       };
     })
     .filter((r) => r.title.length > 0);
