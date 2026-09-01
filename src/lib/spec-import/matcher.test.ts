@@ -48,6 +48,34 @@ describe("spec-import matcher", () => {
     expect(result.candidates).toHaveLength(0);
   });
 
+  it("flags a mismatch between the file's embedded cable size and the matched product's real attrs", () => {
+    const sized: MatchableProduct = { ...cable, cores: 4, crossSection: 95 };
+    const result = matchRow({ sku: "", title: "Кабель ВБбШв 4х120", manufacturer: "" }, [
+      sized,
+      other,
+    ]);
+    expect(result.candidates[0].technicalWarning).toBe(
+      "В файле: 4×120 мм², у товара: 4×95 мм² — сверьте сечение"
+    );
+  });
+
+  it("stays silent when the file has no embedded size or the product has no structured attrs", () => {
+    const result = matchRow(
+      { sku: "vbbshv-4x120", title: "какой-то другой текст", manufacturer: "" },
+      [cable, other]
+    );
+    expect(result.candidates[0].technicalWarning).toBeNull();
+  });
+
+  it("does not flag a mismatch when the embedded size matches the product's real attrs", () => {
+    const sized: MatchableProduct = { ...cable, cores: 4, crossSection: 120 };
+    const result = matchRow({ sku: "", title: "Кабель ВБбШв 4x120", manufacturer: "" }, [
+      sized,
+      other,
+    ]);
+    expect(result.candidates[0].technicalWarning).toBeNull();
+  });
+
   it("never returns more than 3 candidates", () => {
     const many: MatchableProduct[] = Array.from({ length: 10 }, (_, i) => ({
       id: `p${i}`,
