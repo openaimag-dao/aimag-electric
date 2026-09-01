@@ -4,8 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { projectRepository, ProjectAccessError } from "@/server/repositories/project-repository";
 import { companyAdminRepository } from "@/server/repositories/admin";
-import { productService } from "@/server/services/product-service";
-import { companyPricesForCurrentUser } from "@/server/services/company-price-service";
+import { resolveCatalogPrices } from "@/server/services/company-price-service";
 import { requireUser } from "@/lib/security/rbac";
 import {
   projectFormSchema,
@@ -15,25 +14,6 @@ import {
 } from "@/lib/validations/project";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
 import { tengeToTiyn } from "@/lib/money";
-
-/**
- * Authoritative price per product id — the viewer's negotiated company
- * price when one is set, else the current catalog price — for whichever
- * of the given ids are real, published products. Never the client-sent
- * price: this is money that ends up on a staff-reviewed quote, so a real
- * productId always gets the real price, ignoring whatever priceTenge the
- * caller attached. An id that doesn't resolve to a product is simply
- * absent from the result (caller treats that as "по запросу").
- */
-async function resolveCatalogPrices(productIds: string[]): Promise<Map<string, number | null>> {
-  const unique = Array.from(new Set(productIds));
-  if (unique.length === 0) return new Map();
-  const [products, companyPrices] = await Promise.all([
-    productService.getByIds(unique),
-    companyPricesForCurrentUser(unique),
-  ]);
-  return new Map(products.map((p) => [p.id, companyPrices.get(p.id) ?? p.price]));
-}
 
 /** companyIds this user can see projects for (any role), and can edit projects for (any role except VIEWER). */
 async function projectScope(userId: string) {

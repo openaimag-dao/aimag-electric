@@ -10,6 +10,7 @@ import { logger } from "@/lib/logger";
 import { tengeToTiyn } from "@/lib/money";
 import { notificationService } from "@/server/services/notification-service";
 import { currentUser } from "@/server/auth/session";
+import { resolveCatalogPrices } from "@/server/services/company-price-service";
 
 export interface QuoteActionState {
   ok: boolean;
@@ -45,6 +46,10 @@ export async function submitQuote(input: QuoteInput): Promise<QuoteActionState> 
     // Link the quote to the submitter's account when they're signed in, so it
     // shows up in "Мои заявки" on /account — this was previously never set.
     const user = await currentUser();
+    // Every item here carries a real productId (enforced by quoteItemSchema),
+    // so every price is re-derived server-side in one bulk lookup — the
+    // client-sent priceTenge is never trusted, same as the Project/BOM flow.
+    const prices = await resolveCatalogPrices(items.map((i) => i.productId));
     const quote = await quoteRepository.create({
       title: parsed.data.title || null,
       company: parsed.data.company,
@@ -56,15 +61,18 @@ export async function submitQuote(input: QuoteInput): Promise<QuoteActionState> 
       ...(user ? { user: { connect: { id: user.id } } } : {}),
       items: items.length
         ? {
-            create: items.map((i) => ({
-              productId: i.productId,
-              sku: i.sku || null,
-              title: i.title,
-              qty: i.qty,
-              unit: i.unit,
-              amountTiyn: i.priceTenge !== null ? tengeToTiyn(i.priceTenge) : null,
-              note: i.note || null,
-            })),
+            create: items.map((i) => {
+              const priceTenge = prices.get(i.productId) ?? null;
+              return {
+                productId: i.productId,
+                sku: i.sku || null,
+                title: i.title,
+                qty: i.qty,
+                unit: i.unit,
+                amountTiyn: priceTenge != null ? tengeToTiyn(priceTenge) : null,
+                note: i.note || null,
+              };
+            }),
           }
         : undefined,
     });
