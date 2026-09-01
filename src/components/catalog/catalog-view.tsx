@@ -5,6 +5,7 @@ import * as React from "react";
 import { buildFacets, queryCatalog, activeFilterCount } from "@/lib/catalog";
 import { useCatalogFilters } from "@/hooks/use-catalog-filters";
 import { logCatalogSearch } from "@/server/actions/search-actions";
+import { getProductsByIds } from "@/server/actions/product-lookup-actions";
 import { FilterSidebar } from "@/components/catalog/filter-sidebar";
 import { MobileFilterDrawer } from "@/components/catalog/mobile-filter-drawer";
 import { SortSelect } from "@/components/catalog/sort-select";
@@ -34,6 +35,36 @@ export function CatalogView({ products, categoryNames, attributeDefs }: CatalogV
     [products, categoryNames, attributeDefs, filters]
   );
   const activeCount = activeFilterCount(filters);
+
+  // The catalog grid loads every published product once, unpaginated — see
+  // catalog-service.ts — so a logged-in company member's negotiated
+  // CompanyPrice can't be bulk-resolved for all of them without wasting
+  // work on rows no one will scroll to. Resolve it only for the current
+  // page's ids instead, reusing the same lookup /compare uses.
+  const visibleIds = React.useMemo(() => items.map((p) => p.id), [items]);
+  const [companyPrices, setCompanyPrices] = React.useState<Map<string, number | null>>(new Map());
+  React.useEffect(() => {
+    if (visibleIds.length === 0) return;
+    let cancelled = false;
+    getProductsByIds(visibleIds).then((rows) => {
+      if (cancelled) return;
+      setCompanyPrices((prev) => {
+        const next = new Map(prev);
+        for (const row of rows) next.set(row.id, row.companyPriceTenge ?? null);
+        return next;
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [visibleIds]);
+  const displayItems = React.useMemo(
+    () =>
+      items.map((p) =>
+        companyPrices.has(p.id) ? { ...p, companyPriceTenge: companyPrices.get(p.id) } : p
+      ),
+    [items, companyPrices]
+  );
 
   // `q` only ever changes via a full navigation from the header search box
   // (never live-typed on this page), so logging once per distinct query text
@@ -94,7 +125,7 @@ export function CatalogView({ products, categoryNames, attributeDefs }: CatalogV
         ) : (
           <>
             <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-              {items.map((product, i) => (
+              {displayItems.map((product, i) => (
                 <ProductCard key={product.id} product={product} priority={i === 0} />
               ))}
             </div>
