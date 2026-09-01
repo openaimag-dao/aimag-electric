@@ -77,6 +77,10 @@ export interface QuoteListRow {
   responseNote: string | null;
   hasOrder: boolean;
   items: QuoteItemRow[];
+  /** CRM Customer this quote auto-linked to (exact phone/email match, or a newly created lead) — null only if the link itself failed. */
+  customerId: string | null;
+  /** The customer's assigned manager (round-robin on first link), if any. */
+  ownerName: string | null;
 }
 
 function quoteTotalTiyn(items: QuoteItemRow[]): number {
@@ -218,6 +222,9 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
                 <TableCell>
                   <div className="text-sm text-primary">{row.name}</div>
                   <div className="text-xs text-muted-foreground">{row.phone}</div>
+                  {row.ownerName && (
+                    <div className="mt-0.5 text-xs text-signal-700">→ {row.ownerName}</div>
+                  )}
                 </TableCell>
                 <TableCell>
                   {row.items.length > 0 ? (
@@ -314,6 +321,17 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
                 <a href={`mailto:${viewing.email}`} className="text-signal-700">
                   {viewing.email}
                 </a>
+              </div>
+            )}
+            {viewing.customerId && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Клиент в CRM</span>
+                <Link
+                  href={`/admin/crm/customers/${viewing.customerId}`}
+                  className="text-signal-700 hover:underline"
+                >
+                  {viewing.ownerName ? `Ответственный: ${viewing.ownerName}` : "Открыть карточку"}
+                </Link>
               </div>
             )}
             <div className="flex justify-between">

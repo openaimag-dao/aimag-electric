@@ -11,6 +11,7 @@ import { tengeToTiyn } from "@/lib/money";
 import { notificationService } from "@/server/services/notification-service";
 import { currentUser } from "@/server/auth/session";
 import { resolveCatalogPrices } from "@/server/services/company-price-service";
+import { crmService } from "@/server/services/crm-service";
 
 export interface QuoteActionState {
   ok: boolean;
@@ -50,6 +51,24 @@ export async function submitQuote(input: QuoteInput): Promise<QuoteActionState> 
     // so every price is re-derived server-side in one bulk lookup — the
     // client-sent priceTenge is never trusted, same as the Project/BOM flow.
     const prices = await resolveCatalogPrices(items.map((i) => i.productId));
+
+    // Link to (or create) a CRM Customer by exact phone/email match, and
+    // assign an owner via round-robin if the resolved customer doesn't have
+    // one yet. Enrichment, not core: a failure here must never block the
+    // quote itself from being submitted.
+    let customerId: string | null = null;
+    try {
+      const customer = await crmService.linkCustomerForQuote({
+        company: parsed.data.company,
+        name: parsed.data.name,
+        phone: parsed.data.phone,
+        email: parsed.data.email || null,
+      });
+      customerId = customer.id;
+    } catch (e) {
+      logger.error("quote.customer_link_failed", { error: String(e) });
+    }
+
     const quote = await quoteRepository.create({
       title: parsed.data.title || null,
       company: parsed.data.company,
@@ -59,6 +78,7 @@ export async function submitQuote(input: QuoteInput): Promise<QuoteActionState> 
       message: parsed.data.message || (items.length > 0 ? "Заявка из проекта (см. позиции)" : ""),
       approvalToken: crypto.randomUUID(),
       ...(user ? { user: { connect: { id: user.id } } } : {}),
+      ...(customerId ? { customer: { connect: { id: customerId } } } : {}),
       items: items.length
         ? {
             create: items.map((i) => {
@@ -83,6 +103,10 @@ export async function submitQuote(input: QuoteInput): Promise<QuoteActionState> 
     });
     revalidatePath("/admin/quotes");
     revalidatePath("/admin");
+    if (customerId) {
+      revalidatePath("/admin/crm/customers");
+      revalidatePath(`/admin/crm/customers/${customerId}`);
+    }
     await notificationService.notifyStaff({
       type: "quote.created",
       title: `Новая заявка: ${parsed.data.company}`,

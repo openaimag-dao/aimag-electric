@@ -19,74 +19,68 @@ infra/security audit this build on.
 | 6   | Supplier & Availability Engine | **N/A for now**             | Single-supplier business (AIMAG's own warehouses/stock) — no multi-supplier data exists to compare. Correctly not faked.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | 7   | B2B Commercial Engine          | **Mostly complete**         | Company/Customer/Deal/Quote/Order pipeline, company self-service team management, negotiation loop, staff-editable quote line prices, `CompanyPrice` applied consistently across every cart/quote entry point including the main `/catalog` grid, and now every write path that turns a real catalog product into money on a project or a quote (`addProjectItem`, `saveCartAsProject`, `submitQuote` — added this cycle) re-derives the price server-side instead of trusting the client.                                                                                                                          |
 | 8   | Customer Portal                | **Complete**                | Dashboard, projects, quotes (with a direct link to the prepared КП + PDF download), orders (with delivery/documents + reorder), company team management.                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| 9   | CRM & Automation               | **Mostly complete**         | Customers/deals/activities, quote-status notifications to staff, audit trail, review-flagged quotes now filterable on `/admin/quotes` — added this cycle. No lead-assignment automation yet.                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| 9   | CRM & Automation               | **Mostly complete**         | Customers/deals/activities, quote-status notifications to staff, audit trail, review-flagged quotes filterable on `/admin/quotes`, and — added this cycle, per explicit user direction — every submitted quote now auto-links to a CRM Customer by exact phone/email match (creating a LEAD if none matches) and auto-assigns an owner via round-robin (least-loaded ADMIN/MANAGER) if the customer has none yet, surfaced on `/admin/quotes`.                                                                                                                                                                      |
 | 10  | Marketplace / Supplier Network | **Not started (by design)** | Long-term phase; correctly deferred until real order volume + supplier data exist.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | 11  | Data Intelligence              | **Partial**                 | Both header-search and catalog-page (`/catalog?q=`) search demand now logged into the same "top queries" / "no-result queries" admin widget — catalog-page logging added this cycle. Quote/order conversion funnels still untracked.                                                                                                                                                                                                                                                                                                                                                                                |
 | 12  | AI Sales Agent                 | **Not started (by design)** | Depends on Phase 5 existing first.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 ## This cycle's work
 
-**Bottleneck (from last cycle's "next priority"):** no single obvious
-next item stood out after the price-trust work closed. Investigated the
-roadmap's own two candidates — Phase 4's remaining non-cable dimension
-signal, and Phase 9's lead-assignment automation — before picking
-either, since both were flagged as under-explored.
-
-**Phase 9 (lead-assignment automation): investigated, not a clean
-slice.** `Customer.ownerId`/`Deal.ownerId` already exist and are
-manually assignable today via a two-click dropdown
-(`customer-form.tsx`, `deal-form.tsx`) populated from real
-ADMIN/MANAGER users — so the "assignment" plumbing isn't missing.
-What's actually missing is that an incoming `Quote` never links to a
-Customer/Deal at all (`Quote.customerId` exists in the schema but no
-write path ever sets it) — automating "assignment" meaningfully would
-mean first deciding whether/how quotes should auto-link to CRM records,
-which is a product decision, not an engineering gap. Deferred; reframed
-in Known issues below as a question for the user rather than a task.
-
-**Phase 4 (non-cable dimension diffing): real, scoped, honest slice —
-shipped.** Checked every non-cable category's actual seeded attrs:
-`izolyatory`/`avtomaty`/`vysokovoltnoe` have no `crossSection` value at
-all (only `voltage`, already covered), and `mufty` titles already embed
-an `NxM` token (already covered by `extractDimensions`). Only
-`armatura-sip` (fittings) has real, distinguishing `crossSection` values
-(16/25/35/70/95 mm²) with titles that are a single number
-("Зажим анкерный ЗАБ 16"), which the title-regex path can't parse.
+**Bottleneck (from last cycle's "next priority"):** Phase 9's
+lead-assignment question. Last cycle investigated and found the
+plumbing (`Customer.ownerId`) already exists but nothing ever linked an
+incoming `Quote` to a `Customer`, and stopped to ask the user rather
+than guess at the product decision. The user answered directly: yes,
+auto-link by phone/email, and auto-assign round-robin.
 
 **Fix shipped:**
 
-- `spec-import-columns.ts`: new optional "Сечение" file column, mirrors
-  the existing "Напряжение" column exactly.
-- `spec-import-actions.ts`: extracted the voltage-parsing logic into a
-  shared `parseOptionalNumber()` (tolerant of a trailing unit and a
-  comma decimal) and reused it for the new column — no behavior change
-  for voltage.
-- `spec-match-service.ts`/`matcher.ts`: `SpecFileRow`/`SpecRowInput`
-  gained `crossSection`; `scoreCandidate` diffs it against the matched
-  product's real `crossSection` — but only when the title didn't already
-  supply a size via `extractDimensions()`, so cable/wire/splice rows
-  never get a second, redundant "сверьте сечение" warning.
-- `matcher.test.ts`: three new cases (fitting-style mismatch flagged,
-  silent with no column value, title-embedded size takes priority over
-  the column so no duplicate warning).
+- `crm-service.ts`: new `linkCustomerForQuote()` — looks up an existing
+  `Customer` by exact `phone` or `email` match; creates a new `LEAD`
+  Customer when neither matches. Exact string match only, no phone-format
+  normalization or fuzzy dedup — documented as the explicit trade-off of
+  matching on contact details with no stronger identity signal available
+  (a customer who changed company but kept the same number links to
+  their old record). Never reassigns an owner an existing customer
+  already has.
+- `crm-service.ts`: new `nextRoundRobinOwner()` — picks the ADMIN/MANAGER
+  currently owning the fewest customers (ties broken by account age).
+  This is a self-balancing rotation, not a literal A→B→C→A cursor: it
+  needs no separate counter/cursor state, self-corrects for existing
+  manual assignments, and stays correct if staff are added/removed —
+  judged the more robust reading of "round-robin" for this use case.
+- `quote-actions.ts`: `submitQuote` now calls `linkCustomerForQuote` for
+  every quote (item-based or message-only — both always carry
+  company/name/phone) and connects the resulting Customer to the Quote.
+  Wrapped in its own try/catch: a linking failure is logged but never
+  blocks the quote itself from submitting — this is enrichment, not the
+  core action.
+- `quote-admin-repository.ts`/`/admin/quotes`: the linked customer and
+  assigned owner are now surfaced — a "→ manager name" line under the
+  contact in the quotes table, and a "Клиент в CRM" link (to the
+  customer's card, showing the assigned manager) in the quote detail
+  view. Without this the auto-linking would be invisible plumbing staff
+  couldn't act on.
 
 Verified: typecheck clean, lint has only the same pre-existing warnings,
-51/51 tests pass, production build succeeds.
+51/51 tests pass, production build succeeds. No new tests — same
+reasoning as recent cycles (`crm-service.ts` is DB-backed with no
+existing test coverage to extend, consistent with the rest of the
+service layer); verified by reading the resulting logic and every call
+site instead.
 
 ## Known issues / deferred
 
-- Phase 4: current/amperage diffing needs a real `Attribute` + seeded values first — a data decision, not scoped as engineering work.
-- Phase 9: lead-assignment automation isn't a ready engineering task — the manual owner/assignee plumbing already exists on Customer/Deal, but nothing ever links an incoming Quote to a Customer/Deal in the first place. The real next question (worth asking the user/product owner directly, not scoping blind) is: should a new quote auto-link to an existing Customer by phone/email, and should that Customer's `ownerId` auto-assign (e.g. round-robin) if unset?
+- Phase 4: current/amperage diffing needs a real `Attribute` + seeded values first — a data decision, not scoped as engineering work. Dimension diffing for non-cable, non-`armatura-sip` categories still has no signal source.
+- Phase 9 (smaller, found this cycle): `linkCustomerForQuote`'s phone/email match is exact-string only — no normalization (spacing, `+7` vs `8` prefix, etc.), so two formats of the same real number won't link to the same customer. Not fixed now since normalizing phone numbers correctly needs a real format decision (E.164? Kazakhstan-specific?) rather than a guessed regex.
 - Phase 11: quote/order conversion funnel is still untracked, and — per an earlier cycle's investigation — isn't cheaply trackable without new session infrastructure; not attempting a fake/partial version of it.
 
 ## Next priority
 
-Phase 9's lead-assignment question (see Known issues above) needs a
-product decision before it can be scoped as engineering work — ask the
-user directly rather than guessing. Absent that, re-read the Phase
-status table for the next "Partial"/"Mostly complete" gap: Phase 11's
-conversion-funnel tracking is the least-explored remaining item, though
-an earlier cycle already found no cheap honest signal to build it on —
-worth a fresh look with a specific narrower question (e.g. just
-quote→order, not the full funnel) rather than repeating the same
-investigation.
+Re-read the Phase status table for the next "Partial"/"Mostly complete"
+gap. Phase 11's conversion-funnel tracking is the least-explored
+remaining item, though an earlier cycle already found no cheap honest
+signal to build it on — worth a fresh look with a specific narrower
+question (e.g. just quote→order, not the full funnel) rather than
+repeating the same investigation. The phone-normalization gap noted
+above (Known issues) is a smaller alternative if that's too large.

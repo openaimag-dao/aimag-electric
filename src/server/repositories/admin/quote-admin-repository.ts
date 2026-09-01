@@ -10,7 +10,13 @@ export const quoteAdminRepository = {
     return withQuoteColumns(() =>
       prisma.quote.findMany({
         orderBy: { createdAt: "desc" },
-        include: { items: true, _count: { select: { items: true } } },
+        include: {
+          items: true,
+          _count: { select: { items: true } },
+          customer: {
+            select: { id: true, owner: { select: { id: true, name: true, email: true } } },
+          },
+        },
       })
     );
   },
