@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 
 import { projectRepository, ProjectAccessError } from "@/server/repositories/project-repository";
 import { companyAdminRepository } from "@/server/repositories/admin";
+import { productService } from "@/server/services/product-service";
+import { companyPricesForCurrentUser } from "@/server/services/company-price-service";
 import { requireUser } from "@/lib/security/rbac";
 import {
   projectFormSchema,
@@ -13,6 +15,25 @@ import {
 } from "@/lib/validations/project";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
 import { tengeToTiyn } from "@/lib/money";
+
+/**
+ * Authoritative price per product id — the viewer's negotiated company
+ * price when one is set, else the current catalog price — for whichever
+ * of the given ids are real, published products. Never the client-sent
+ * price: this is money that ends up on a staff-reviewed quote, so a real
+ * productId always gets the real price, ignoring whatever priceTenge the
+ * caller attached. An id that doesn't resolve to a product is simply
+ * absent from the result (caller treats that as "по запросу").
+ */
+async function resolveCatalogPrices(productIds: string[]): Promise<Map<string, number | null>> {
+  const unique = Array.from(new Set(productIds));
+  if (unique.length === 0) return new Map();
+  const [products, companyPrices] = await Promise.all([
+    productService.getByIds(unique),
+    companyPricesForCurrentUser(unique),
+  ]);
+  return new Map(products.map((p) => [p.id, companyPrices.get(p.id) ?? p.price]));
+}
 
 /** companyIds this user can see projects for (any role), and can edit projects for (any role except VIEWER). */
 async function projectScope(userId: string) {
@@ -118,15 +139,25 @@ export async function addProjectItem(projectId: string, input: unknown): Promise
   const v = validate(projectItemInputSchema, input);
   if (!v.success) return v.result;
   const { writableCompanyIds } = await projectScope(user.id);
+  const productId = v.data.productId || null;
+  // A real catalog product always gets the real price. Only a genuinely
+  // freeform line (no productId — no current UI creates one, but the
+  // schema still allows it) has no catalog price to check against, so it
+  // keeps whatever price the caller sent.
+  let priceTenge = v.data.priceTenge ?? null;
+  if (productId) {
+    const prices = await resolveCatalogPrices([productId]);
+    priceTenge = prices.get(productId) ?? null;
+  }
   try {
     await projectRepository.addItem(projectId, user.id, writableCompanyIds, {
-      productId: v.data.productId || null,
+      productId,
       slug: v.data.slug || null,
       sku: v.data.sku || null,
       title: v.data.title,
       qty: v.data.qty,
       unit: v.data.unit || "шт",
-      amountTiyn: v.data.priceTenge != null ? tengeToTiyn(v.data.priceTenge) : null,
+      amountTiyn: priceTenge != null ? tengeToTiyn(priceTenge) : null,
       note: v.data.note || null,
     });
     revalidate(projectId);
@@ -172,23 +203,30 @@ export async function saveCartAsProject(input: unknown): Promise<ActionResult<{ 
   if (!v.success) return v.result;
   const { writableCompanyIds } = await projectScope(user.id);
   const companyId = writableCompanyIds.length === 1 ? writableCompanyIds[0] : null;
+  // Every item here carries a real productId (enforced by the schema
+  // above), so every price is re-derived server-side — the client-sent
+  // priceTenge is never trusted.
+  const prices = await resolveCatalogPrices(v.data.items.map((i) => i.productId));
   try {
     const project = await projectRepository.create({
       title: v.data.title,
       owner: { connect: { id: user.id } },
       ...(companyId ? { company: { connect: { id: companyId } } } : {}),
       items: {
-        create: v.data.items.map((i, index) => ({
-          productId: i.productId,
-          slug: i.slug || null,
-          sku: i.sku || null,
-          title: i.title,
-          qty: i.qty,
-          unit: i.unit,
-          amountTiyn: i.priceTenge !== null ? tengeToTiyn(i.priceTenge) : null,
-          note: i.note || null,
-          order: index,
-        })),
+        create: v.data.items.map((i, index) => {
+          const priceTenge = prices.get(i.productId) ?? null;
+          return {
+            productId: i.productId,
+            slug: i.slug || null,
+            sku: i.sku || null,
+            title: i.title,
+            qty: i.qty,
+            unit: i.unit,
+            amountTiyn: priceTenge != null ? tengeToTiyn(priceTenge) : null,
+            note: i.note || null,
+            order: index,
+          };
+        }),
       },
     });
     revalidate();
