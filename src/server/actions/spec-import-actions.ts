@@ -22,6 +22,16 @@ export interface SpecMatchSummary {
   notFound: number;
 }
 
+/** Parses a raw cell value into a number, tolerant of a trailing unit ("10 кВ", "16 мм2") and a comma decimal — null when absent or unparseable, never a guess. */
+function parseOptionalNumber(raw: unknown): number | null {
+  const match = String(raw ?? "")
+    .replace(",", ".")
+    .match(/-?\d+(\.\d+)?/);
+  if (!match) return null;
+  const n = Number(match[0]);
+  return Number.isFinite(n) ? n : null;
+}
+
 /**
  * "Загрузить ТЗ": parses an .xlsx/.xls/.csv the user uploads and matches
  * each row against real published catalog products (deterministic — SKU
@@ -69,10 +79,6 @@ export async function matchSpecificationFile(
   const specRows: SpecFileRow[] = parsed.rows
     .map((r, i): SpecFileRow => {
       const qty = Number(String(r.quantity ?? "").replace(",", "."));
-      const voltageMatch = String(r.voltage ?? "")
-        .replace(",", ".")
-        .match(/-?\d+(\.\d+)?/);
-      const voltage = voltageMatch ? Number(voltageMatch[0]) : null;
       return {
         row: i + 2, // +1 for the header row, +1 for 1-based numbering
         sku: (r.sku ?? "").trim(),
@@ -80,7 +86,8 @@ export async function matchSpecificationFile(
         qty: Number.isFinite(qty) && qty > 0 ? qty : 1,
         unit: (r.unit ?? "").trim() || "шт",
         manufacturer: (r.manufacturer ?? "").trim(),
-        voltage: voltage !== null && Number.isFinite(voltage) ? voltage : null,
+        voltage: parseOptionalNumber(r.voltage),
+        crossSection: parseOptionalNumber(r.crossSection),
       };
     })
     .filter((r) => r.title.length > 0);

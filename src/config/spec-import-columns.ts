@@ -35,4 +35,11 @@ export const SPEC_IMPORT_COLUMNS: ColumnSpec[] = [
     hint: "кВ, опционально — сверим с товаром в каталоге",
     aliases: ["voltage", "напряжение", "напряжение, кв", "u", "uном"],
   },
+  {
+    key: "crossSection",
+    label: "Сечение",
+    required: false,
+    hint: "мм², опционально — сверим с товаром в каталоге",
+    aliases: ["crosssection", "сечение", "сечение, мм2", "сечение, мм²"],
+  },
 ];

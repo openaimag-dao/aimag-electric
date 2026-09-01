@@ -107,6 +107,49 @@ describe("spec-import matcher", () => {
     );
   });
 
+  it("flags a mismatch between the file's cross-section column and the matched product's real attrs, for a title with no embedded size", () => {
+    const clamp: MatchableProduct = {
+      id: "p3",
+      sku: "ZAB-16",
+      title: "Зажим анкерный ЗАБ 16",
+      manufacturer: "",
+      crossSection: 16,
+    };
+    const result = matchRow(
+      { sku: "", title: "Зажим анкерный ЗАБ 16", manufacturer: "", crossSection: 25 },
+      [clamp, other]
+    );
+    expect(result.candidates[0].technicalWarning).toBe(
+      "В файле: 25 мм², у товара: 16 мм² — сверьте сечение"
+    );
+  });
+
+  it("does not flag a cross-section mismatch when the file has no cross-section column value", () => {
+    const clamp: MatchableProduct = {
+      id: "p3",
+      sku: "ZAB-16",
+      title: "Зажим анкерный ЗАБ 16",
+      manufacturer: "",
+      crossSection: 16,
+    };
+    const result = matchRow({ sku: "", title: "Зажим анкерный ЗАБ 16", manufacturer: "" }, [
+      clamp,
+      other,
+    ]);
+    expect(result.candidates[0].technicalWarning).toBeNull();
+  });
+
+  it("prefers the title-embedded size over the cross-section column, so cable rows never get a duplicate warning", () => {
+    const sized: MatchableProduct = { ...cable, cores: 4, crossSection: 95 };
+    const result = matchRow(
+      { sku: "", title: "Кабель ВБбШв 4х120", manufacturer: "", crossSection: 999 },
+      [sized, other]
+    );
+    expect(result.candidates[0].technicalWarning).toBe(
+      "В файле: 4×120 мм², у товара: 4×95 мм² — сверьте сечение"
+    );
+  });
+
   it("never returns more than 3 candidates", () => {
     const many: MatchableProduct[] = Array.from({ length: 10 }, (_, i) => ({
       id: `p${i}`,
