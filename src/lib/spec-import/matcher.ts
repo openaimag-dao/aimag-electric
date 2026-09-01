@@ -16,12 +16,15 @@ export interface MatchableProduct {
   /** Real structured attrs, when the catalog has them — never inferred from text on this side. */
   cores?: number | null;
   crossSection?: number | null;
+  voltage?: number | null;
 }
 
 export interface SpecRowInput {
   sku: string;
   title: string;
   manufacturer: string;
+  /** From the file's own "Напряжение" column, when present — never guessed from title text. */
+  voltage?: number | null;
 }
 
 export interface MatchCandidateResult<T extends MatchableProduct> {
@@ -29,7 +32,7 @@ export interface MatchCandidateResult<T extends MatchableProduct> {
   score: number;
   matchedFields: string[];
   differentFields: string[];
-  /** Set only when the file's title embeds a cable size that contradicts the matched product's real cores/crossSection — never a guess. */
+  /** Set only when the file has real technical data (title-embedded cable size, or a Напряжение column value) that contradicts the matched product's real attrs — never a guess. */
   technicalWarning: string | null;
 }
 
@@ -112,7 +115,8 @@ function scoreCandidate<T extends MatchableProduct>(
     (mExact ? matchedFields : differentFields).push("Производитель");
   }
 
-  let technicalWarning: string | null = null;
+  const warnings: string[] = [];
+
   const rowDims = extractDimensions(row.title);
   if (
     rowDims &&
@@ -120,8 +124,18 @@ function scoreCandidate<T extends MatchableProduct>(
     product.crossSection != null &&
     (rowDims.cores !== product.cores || rowDims.crossSection !== product.crossSection)
   ) {
-    technicalWarning = `В файле: ${rowDims.cores}×${rowDims.crossSection} мм², у товара: ${product.cores}×${product.crossSection} мм² — сверьте сечение`;
+    warnings.push(
+      `В файле: ${rowDims.cores}×${rowDims.crossSection} мм², у товара: ${product.cores}×${product.crossSection} мм² — сверьте сечение`
+    );
   }
+
+  if (row.voltage != null && product.voltage != null && row.voltage !== product.voltage) {
+    warnings.push(
+      `В файле: ${row.voltage} кВ, у товара: ${product.voltage} кВ — сверьте напряжение`
+    );
+  }
+
+  const technicalWarning = warnings.length > 0 ? warnings.join(" · ") : null;
 
   const score = skuExact ? Math.max(tScore, EXACT_THRESHOLD) : tScore;
   return { product, score, matchedFields, differentFields, technicalWarning };

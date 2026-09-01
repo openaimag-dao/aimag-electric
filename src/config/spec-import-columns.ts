@@ -28,4 +28,11 @@ export const SPEC_IMPORT_COLUMNS: ColumnSpec[] = [
     required: false,
     aliases: ["manufacturer", "производитель", "бренд"],
   },
+  {
+    key: "voltage",
+    label: "Напряжение",
+    required: false,
+    hint: "кВ, опционально — сверим с товаром в каталоге",
+    aliases: ["voltage", "напряжение", "напряжение, кв", "u", "uном"],
+  },
 ];

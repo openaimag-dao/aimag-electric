@@ -76,6 +76,37 @@ describe("spec-import matcher", () => {
     expect(result.candidates[0].technicalWarning).toBeNull();
   });
 
+  it("flags a mismatch between the file's voltage column and the matched product's real attrs", () => {
+    const rated: MatchableProduct = { ...cable, voltage: 10 };
+    const result = matchRow(
+      { sku: "vbbshv-4x120", title: "какой-то другой текст", manufacturer: "", voltage: 6 },
+      [rated, other]
+    );
+    expect(result.candidates[0].technicalWarning).toBe(
+      "В файле: 6 кВ, у товара: 10 кВ — сверьте напряжение"
+    );
+  });
+
+  it("does not flag a voltage mismatch when the file has no voltage column value", () => {
+    const rated: MatchableProduct = { ...cable, voltage: 10 };
+    const result = matchRow(
+      { sku: "vbbshv-4x120", title: "какой-то другой текст", manufacturer: "" },
+      [rated, other]
+    );
+    expect(result.candidates[0].technicalWarning).toBeNull();
+  });
+
+  it("combines a dimension warning and a voltage warning when both mismatch", () => {
+    const rated: MatchableProduct = { ...cable, cores: 4, crossSection: 95, voltage: 10 };
+    const result = matchRow(
+      { sku: "", title: "Кабель ВБбШв 4х120", manufacturer: "", voltage: 6 },
+      [rated, other]
+    );
+    expect(result.candidates[0].technicalWarning).toBe(
+      "В файле: 4×120 мм², у товара: 4×95 мм² — сверьте сечение · В файле: 6 кВ, у товара: 10 кВ — сверьте напряжение"
+    );
+  });
+
   it("never returns more than 3 candidates", () => {
     const many: MatchableProduct[] = Array.from({ length: 10 }, (_, i) => ({
       id: `p${i}`,
