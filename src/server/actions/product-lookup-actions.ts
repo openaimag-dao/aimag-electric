@@ -4,9 +4,7 @@ import { headers } from "next/headers";
 
 import { productService } from "@/server/services/product-service";
 import { rateLimit } from "@/lib/security/rate-limit";
-import { currentUser } from "@/server/auth/session";
-import { companyAdminRepository, companyPriceAdminRepository } from "@/server/repositories/admin";
-import { tiynToTenge } from "@/lib/money";
+import { companyPricesForCurrentUser } from "@/server/services/company-price-service";
 import type { CatalogProduct } from "@/types/catalog";
 
 const MAX_IDS = 24;
@@ -14,19 +12,8 @@ const MAX_IDS = 24;
 /** Attaches each product's companyPriceTenge for the viewer's company, if any is set — shared by every list built from getProductsByIds (favorites, compare, recently viewed). */
 async function withCompanyPrices(products: CatalogProduct[]): Promise<CatalogProduct[]> {
   if (products.length === 0) return products;
-  const user = await currentUser();
-  const membership = user ? await companyAdminRepository.forUser(user.id) : null;
-  if (!membership) return products;
-
-  const companyPrices = await companyPriceAdminRepository.forCompaniesAndProducts(
-    [membership.companyId],
-    products.map((p) => p.id)
-  );
-  if (companyPrices.length === 0) return products;
-
-  const byProductId = new Map(
-    companyPrices.map((cp) => [cp.productId, tiynToTenge(cp.amountTiyn)])
-  );
+  const byProductId = await companyPricesForCurrentUser(products.map((p) => p.id));
+  if (byProductId.size === 0) return products;
   return products.map((p) => ({ ...p, companyPriceTenge: byProductId.get(p.id) ?? null }));
 }
 
