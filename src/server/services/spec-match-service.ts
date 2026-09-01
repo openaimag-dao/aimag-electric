@@ -13,6 +13,8 @@ export interface SpecFileRow {
   manufacturer: string;
   /** Parsed from the file's own "Напряжение" column, when present. */
   voltage: number | null;
+  /** Parsed from the file's own "Сечение" column, when present. */
+  crossSection: number | null;
 }
 
 export interface MatchedSpecRow extends SpecFileRow {
@@ -34,7 +36,13 @@ export async function matchSpecRows(rows: SpecFileRow[]): Promise<MatchedSpecRow
     const query = row.sku || row.title;
     const candidates = query ? await catalogService.searchSuggestions(query, CANDIDATE_POOL) : [];
     const result = matchRow(
-      { sku: row.sku, title: row.title, manufacturer: row.manufacturer, voltage: row.voltage },
+      {
+        sku: row.sku,
+        title: row.title,
+        manufacturer: row.manufacturer,
+        voltage: row.voltage,
+        crossSection: row.crossSection,
+      },
       candidates
     );
     out.push({ ...row, result });

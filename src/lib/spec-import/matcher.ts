@@ -25,6 +25,8 @@ export interface SpecRowInput {
   manufacturer: string;
   /** From the file's own "Напряжение" column, when present — never guessed from title text. */
   voltage?: number | null;
+  /** From the file's own "Сечение" column, when present — covers products whose title doesn't embed an "NxM" cable-size token (e.g. armature/fittings), unlike extractDimensions(). */
+  crossSection?: number | null;
 }
 
 export interface MatchCandidateResult<T extends MatchableProduct> {
@@ -126,6 +128,20 @@ function scoreCandidate<T extends MatchableProduct>(
   ) {
     warnings.push(
       `В файле: ${rowDims.cores}×${rowDims.crossSection} мм², у товара: ${product.cores}×${product.crossSection} мм² — сверьте сечение`
+    );
+  } else if (
+    // Only when the title didn't already supply a size — avoids a second,
+    // redundant "сверьте сечение" warning on cable/wire/splice rows that
+    // already get the combined cores×crossSection check above. This is what
+    // covers categories like armature/fittings, whose titles are a single
+    // number ("Зажим анкерный ЗАБ 16"), not an "NxM" token.
+    !rowDims &&
+    row.crossSection != null &&
+    product.crossSection != null &&
+    row.crossSection !== product.crossSection
+  ) {
+    warnings.push(
+      `В файле: ${row.crossSection} мм², у товара: ${product.crossSection} мм² — сверьте сечение`
     );
   }
 
