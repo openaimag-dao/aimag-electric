@@ -72,21 +72,29 @@ export default async function ProductPage({ params }: PageProps) {
     product.availability === "in_stock" ? [] : await productService.getAnalogsInStock(product);
   const avgRating = averageRating(product.reviews);
 
-  // A logged-in company member's negotiated reference price for this
-  // product, if staff has set one — real data only, never guessed: resolved
-  // through the same Quote.userId -> CompanyMember -> Company path used in
-  // /admin/quotes, so an anonymous visitor or a user on no company simply
-  // sees no company price, which is correct, not a bug.
+  // A logged-in company member's negotiated reference price, if staff has
+  // set one — real data only, never guessed: resolved through the same
+  // Quote.userId -> CompanyMember -> Company path used in /admin/quotes, so
+  // an anonymous visitor or a user on no company simply sees no company
+  // price, which is correct, not a bug. One bulk lookup covers the current
+  // product plus every related product below, rather than N queries.
   const user = await currentUser();
   const membership = user ? await companyAdminRepository.forUser(user.id) : null;
-  const companyPrices = membership
-    ? await companyPriceAdminRepository.forCompaniesAndProducts(
-        [membership.companyId],
-        [product.id]
-      )
-    : [];
-  const companyPriceTenge =
-    companyPrices.length > 0 ? tiynToTenge(companyPrices[0].amountTiyn) : null;
+  const companyPriceByProductId = new Map<string, number>();
+  if (membership) {
+    const companyPrices = await companyPriceAdminRepository.forCompaniesAndProducts(
+      [membership.companyId],
+      [product.id, ...related.map((r) => r.id)]
+    );
+    for (const cp of companyPrices) {
+      companyPriceByProductId.set(cp.productId, tiynToTenge(cp.amountTiyn));
+    }
+  }
+  const companyPriceTenge = companyPriceByProductId.get(product.id) ?? null;
+  const relatedWithCompanyPrices = related.map((r) => ({
+    ...r,
+    companyPriceTenge: companyPriceByProductId.get(r.id) ?? null,
+  }));
 
   const sections = [
     { id: "description", label: "Описание" },
@@ -217,7 +225,7 @@ export default async function ProductPage({ params }: PageProps) {
             Из категории «{product.category}» с близкими параметрами.
           </p>
           <div className="mt-8">
-            <RelatedProducts products={related} />
+            <RelatedProducts products={relatedWithCompanyPrices} />
           </div>
         </section>
 

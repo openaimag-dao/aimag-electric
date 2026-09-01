@@ -4,9 +4,31 @@ import { headers } from "next/headers";
 
 import { productService } from "@/server/services/product-service";
 import { rateLimit } from "@/lib/security/rate-limit";
+import { currentUser } from "@/server/auth/session";
+import { companyAdminRepository, companyPriceAdminRepository } from "@/server/repositories/admin";
+import { tiynToTenge } from "@/lib/money";
 import type { CatalogProduct } from "@/types/catalog";
 
 const MAX_IDS = 24;
+
+/** Attaches each product's companyPriceTenge for the viewer's company, if any is set — shared by every list built from getProductsByIds (favorites, compare, recently viewed). */
+async function withCompanyPrices(products: CatalogProduct[]): Promise<CatalogProduct[]> {
+  if (products.length === 0) return products;
+  const user = await currentUser();
+  const membership = user ? await companyAdminRepository.forUser(user.id) : null;
+  if (!membership) return products;
+
+  const companyPrices = await companyPriceAdminRepository.forCompaniesAndProducts(
+    [membership.companyId],
+    products.map((p) => p.id)
+  );
+  if (companyPrices.length === 0) return products;
+
+  const byProductId = new Map(
+    companyPrices.map((cp) => [cp.productId, tiynToTenge(cp.amountTiyn)])
+  );
+  return products.map((p) => ({ ...p, companyPriceTenge: byProductId.get(p.id) ?? null }));
+}
 
 /**
  * Resolves a client-held list of product ids (favorites, compare, recently
@@ -27,7 +49,8 @@ export async function getProductsByIds(ids: unknown): Promise<CatalogProduct[]> 
   const limit = rateLimit(`product-lookup:${ip}`, 60, 60_000);
   if (!limit.ok) return [];
 
-  return productService.getByIds(clean);
+  const products = await productService.getByIds(clean);
+  return withCompanyPrices(products);
 }
 
 /**
@@ -46,5 +69,6 @@ export async function getProductAlternatives(productId: unknown): Promise<Catalo
 
   const [product] = await productService.getByIds([productId]);
   if (!product) return [];
-  return productService.getRelated(product);
+  const related = await productService.getRelated(product);
+  return withCompanyPrices(related);
 }

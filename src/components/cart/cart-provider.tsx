@@ -54,7 +54,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems((prev) => {
       const existing = prev.find((i) => i.productId === item.productId);
       if (existing) {
-        return prev.map((i) => (i.productId === item.productId ? { ...i, qty: i.qty + qty } : i));
+        // Last write wins on every field, not just qty — otherwise the
+        // price (and e.g. a company's negotiated price) stays frozen at
+        // whatever the first add-to-cart happened to resolve, even if a
+        // later add from a page that knows better (e.g. after login)
+        // would have quoted the same product differently.
+        return prev.map((i) =>
+          i.productId === item.productId ? { ...item, qty: i.qty + qty } : i
+        );
       }
       return [...prev, { ...item, qty }];
     });
