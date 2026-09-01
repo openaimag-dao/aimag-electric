@@ -150,7 +150,7 @@ export function ComparePageClient({ attributeDefs }: { attributeDefs: AttributeD
                           sku: p.sku,
                           title: p.title,
                           unit: p.unit,
-                          priceTenge: p.price,
+                          priceTenge: p.companyPriceTenge ?? p.price,
                         }}
                       />
                     </div>

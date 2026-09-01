@@ -66,7 +66,7 @@ export function ProjectItemsPanel({
       title: product.title,
       qty: 1,
       unit: product.unit,
-      priceTenge: product.price,
+      priceTenge: product.companyPriceTenge ?? product.price,
     });
     setAddingAlternativeId(null);
     if (!result.ok) {

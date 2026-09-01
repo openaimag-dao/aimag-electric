@@ -8,6 +8,7 @@ import { ProductPrice } from "@/components/catalog/product-price";
 import { AvailabilityBadge } from "@/components/catalog/availability-badge";
 import { FavoriteButton } from "@/components/catalog/favorite-button";
 import { CompareToggleButton } from "@/components/catalog/compare-toggle-button";
+import { formatTenge } from "@/lib/money";
 import type { CatalogProduct } from "@/types/catalog";
 
 /**
@@ -88,6 +89,11 @@ export function ProductCard({
         <div className="mt-4 flex items-end justify-between gap-2 pt-1">
           <ProductPrice price={product.price} unit={product.unit} className="text-lg" />
         </div>
+        {product.companyPriceTenge != null && (
+          <p className="mt-1 text-xs font-medium text-emerald-700">
+            Ваша цена: {formatTenge(product.companyPriceTenge)}
+          </p>
+        )}
 
         <div className="mt-4 grid grid-cols-2 gap-2">
           <Button asChild variant="outline" size="sm">
@@ -103,7 +109,7 @@ export function ProductCard({
               sku: product.sku,
               title: product.title,
               unit: product.unit,
-              priceTenge: product.price,
+              priceTenge: product.companyPriceTenge ?? product.price,
             }}
           />
         </div>
