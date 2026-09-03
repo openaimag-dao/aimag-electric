@@ -130,6 +130,23 @@ export default async function AdminDashboardPage() {
               );
             })}
           </div>
+          <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-sm">
+            <span className="text-muted-foreground">Конверсия КП → заказ</span>
+            <span className="font-medium text-primary">
+              {counters.quotesWithOrder} из {counters.quotesTotal}
+              {counters.quotesTotal > 0 &&
+                ` (${Math.round((counters.quotesWithOrder / counters.quotesTotal) * 100)}%)`}
+            </span>
+          </div>
+          {counters.quotesWonNoOrder > 0 && (
+            <Link
+              href="/admin/quotes"
+              className="mt-2 flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700 hover:underline"
+            >
+              <AlertTriangle className="size-3.5 shrink-0" />
+              {counters.quotesWonNoOrder} одобрено, но заказ ещё не создан
+            </Link>
+          )}
         </div>
 
         {/* Top products */}
