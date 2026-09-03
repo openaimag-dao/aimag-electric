@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 import {
@@ -99,6 +99,8 @@ function formatDate(iso: string) {
 
 export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [query, setQuery] = React.useState("");
   const [viewing, setViewing] = React.useState<QuoteListRow | undefined>();
   const [deleting, setDeleting] = React.useState<QuoteListRow | undefined>();
@@ -108,6 +110,20 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
   const [editingPriceId, setEditingPriceId] = React.useState<string | null>(null);
   const [priceDraft, setPriceDraft] = React.useState("");
   const [savingPrice, setSavingPrice] = React.useState(false);
+
+  // Deep-link support: /admin/quotes?quote=<id> (used from the CRM customer
+  // page) opens that quote's dialog on load.
+  React.useEffect(() => {
+    const quoteId = searchParams.get("quote");
+    if (!quoteId) return;
+    const row = rows.find((r) => r.id === quoteId);
+    if (row) setViewing(row);
+  }, [searchParams, rows]);
+
+  function closeViewing() {
+    setViewing(undefined);
+    if (searchParams.get("quote")) router.replace(pathname);
+  }
 
   function startEditPrice(item: QuoteItemRow) {
     setEditingPriceId(item.id);
@@ -290,7 +306,7 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
 
       <FormDialog
         open={Boolean(viewing)}
-        onOpenChange={(o) => !o && setViewing(undefined)}
+        onOpenChange={(o) => !o && closeViewing()}
         title="Заявка на КП"
       >
         {viewing && (
