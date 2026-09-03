@@ -177,13 +177,14 @@ export default async function CustomerDetailPage({ params }: PageProps) {
             <h2 className="mb-3 font-display text-lg font-semibold text-primary">Заявки</h2>
             <div className="space-y-2">
               {customer.quotes.map((q: QuoteRel) => (
-                <div
+                <Link
                   key={q.id}
-                  className="flex items-center justify-between gap-2 rounded-lg border border-border bg-card p-3"
+                  href={`/admin/quotes?quote=${q.id}`}
+                  className="flex items-center justify-between gap-2 rounded-lg border border-border bg-card p-3 transition-colors hover:border-signal/60"
                 >
                   <p className="truncate text-sm text-primary">{q.name}</p>
                   <QuoteStatusBadge status={q.status} />
-                </div>
+                </Link>
               ))}
               {customer.quotes.length === 0 && (
                 <p className="text-sm text-muted-foreground">Заявок нет.</p>
