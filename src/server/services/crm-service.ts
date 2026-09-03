@@ -1,7 +1,10 @@
 import "server-only";
 
+import type { Customer } from "@prisma/client";
+
 import { prisma } from "@/lib/prisma";
 import { tiynToTenge } from "@/lib/money";
+import { normalizePhone } from "@/lib/phone";
 
 const STAGE_ORDER = ["NEW", "QUALIFIED", "PROPOSAL", "NEGOTIATION", "WON", "LOST"] as const;
 
@@ -27,16 +30,18 @@ export const crmService = {
 
   /**
    * Resolves the Customer a new quote should link to: an existing one
-   * matched by exact phone or email, or a freshly created LEAD when
-   * neither matches. Assigns an owner (round-robin by current load among
+   * matched by phone or email, or a freshly created LEAD when neither
+   * matches. Assigns an owner (round-robin by current load among
    * ADMIN/MANAGER staff) only when the resolved customer doesn't already
    * have one — never reassigns an existing owner.
    *
-   * Exact string match only — no phone-format normalization, no fuzzy
-   * matching. A customer who changed company but kept the same number
-   * will link to their old record; this is the literal trade-off of
-   * matching on contact details rather than a stronger identity signal
-   * this app doesn't have.
+   * Phone matching compares the last 10 digits (the real KZ/RU subscriber
+   * number) so `+7 701 234 56 78`, `8 701 234 56 78` and `87012345678`
+   * all link to the same customer regardless of spacing or trunk prefix.
+   * Email matching is case-insensitive. Still not fuzzy: a customer who
+   * changed company but kept the same number will link to their old
+   * record — the literal trade-off of matching on contact details rather
+   * than a stronger identity signal this app doesn't have.
    */
   async linkCustomerForQuote(input: {
     company: string;
@@ -45,13 +50,24 @@ export const crmService = {
     email: string | null;
   }) {
     const phone = input.phone.trim();
-    const email = input.email?.trim() || null;
+    const email = input.email?.trim().toLowerCase() || null;
+    const normalizedPhone = normalizePhone(phone);
 
-    let customer = await prisma.customer.findFirst({
-      where: {
-        OR: [...(phone ? [{ phone }] : []), ...(email ? [{ email }] : [])],
-      },
-    });
+    let customer: Customer | null = null;
+    if (normalizedPhone) {
+      const rows = await prisma.$queryRaw<Customer[]>`
+        SELECT * FROM "Customer"
+        WHERE phone IS NOT NULL
+          AND right(regexp_replace(phone, '\D', '', 'g'), 10) = ${normalizedPhone}
+        LIMIT 1
+      `;
+      customer = rows[0] ?? null;
+    }
+    if (!customer && email) {
+      customer = await prisma.customer.findFirst({
+        where: { email: { equals: email, mode: "insensitive" } },
+      });
+    }
 
     if (!customer) {
       customer = await prisma.customer.create({
