@@ -22,6 +22,8 @@ export const adminService = {
       ordersNew,
       recentQuotes,
       topProducts,
+      quotesWithOrder,
+      quotesWonNoOrder,
     ] = await Promise.all([
       prisma.product.count(),
       prisma.category.count(),
@@ -44,6 +46,8 @@ export const adminService = {
         take: 5,
         include: { brand: true, category: true },
       }),
+      withQuoteColumns(() => prisma.quote.count({ where: { order: { isNot: null } } })),
+      withQuoteColumns(() => prisma.quote.count({ where: { status: "WON", order: { is: null } } })),
     ]);
 
     const quotesByStatus = await prisma.quote.groupBy({
@@ -63,6 +67,10 @@ export const adminService = {
         documents,
         lowStock,
         ordersNew,
+        /** КП, у которых уже есть связанный заказ (Order.quoteId) — реальная конверсия, не оценка. */
+        quotesWithOrder,
+        /** Одобренные (WON) КП без заказа — конкретный, действенный пробел: заказ ещё нужно создать. */
+        quotesWonNoOrder,
       },
       quotesByStatus: quotesByStatus.map((q) => ({
         status: q.status as string,
