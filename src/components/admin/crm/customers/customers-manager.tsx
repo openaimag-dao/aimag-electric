@@ -1,6 +1,9 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { X } from "lucide-react";
 
 import {
   Table,
@@ -32,13 +35,7 @@ interface Ref {
   label: string;
 }
 
-export function CustomersManager({
-  rows,
-  managers,
-}: {
-  rows: CustomerListRow[];
-  managers: Ref[];
-}) {
+export function CustomersManager({ rows, managers }: { rows: CustomerListRow[]; managers: Ref[] }) {
   const {
     query,
     setQuery,
@@ -57,6 +54,18 @@ export function CustomersManager({
     (r) => `${r.company} ${r.contact ?? ""} ${r.phone ?? ""} ${r.email ?? ""} ${r.bin ?? ""}`
   );
 
+  // ?owner=<id> (from the staff dashboard's "Мои клиенты" stat) pre-filters
+  // the table to that manager's customers.
+  const searchParams = useSearchParams();
+  const ownerFilterId = searchParams.get("owner");
+  const ownerFilterName = ownerFilterId
+    ? (managers.find((m) => m.id === ownerFilterId)?.label ?? null)
+    : null;
+  const visible = React.useMemo(
+    () => (ownerFilterId ? filtered.filter((r) => r.ownerId === ownerFilterId) : filtered),
+    [filtered, ownerFilterId]
+  );
+
   return (
     <div className="space-y-4">
       <TableToolbar
@@ -67,6 +76,21 @@ export function CustomersManager({
         placeholder="Поиск по компании, контакту, БИН…"
         count={rows.length}
       />
+
+      {ownerFilterId && (
+        <div className="flex items-center justify-between gap-2 rounded-lg bg-secondary/60 px-3 py-2 text-sm">
+          <span className="text-primary">
+            Клиенты:{" "}
+            <span className="font-medium">{ownerFilterName ?? "неизвестный менеджер"}</span>
+          </span>
+          <Link
+            href="/admin/crm/customers"
+            className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary"
+          >
+            <X className="size-3.5" /> Показать всех
+          </Link>
+        </div>
+      )}
 
       <div className="rounded-xl border border-border bg-card">
         <Table>
@@ -81,7 +105,7 @@ export function CustomersManager({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.map((row) => {
+            {visible.map((row) => {
               const meta = customerStatusMeta[row.status] ?? customerStatusMeta.LEAD;
               return (
                 <TableRow key={row.id}>
@@ -96,25 +120,29 @@ export function CustomersManager({
                   </TableCell>
                   <TableCell>
                     <div className="text-sm text-primary">{row.contact ?? "—"}</div>
-                    <div className="text-xs text-muted-foreground">{row.phone ?? row.email ?? ""}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {row.phone ?? row.email ?? ""}
+                    </div>
                   </TableCell>
                   <TableCell>
-                    <span className={cn("inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium", meta.className)}>
+                    <span
+                      className={cn(
+                        "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
+                        meta.className
+                      )}
+                    >
                       {meta.label}
                     </span>
                   </TableCell>
                   <TableCell className="text-muted-foreground">{row.ownerName ?? "—"}</TableCell>
                   <TableCell className="text-center">{row.dealCount}</TableCell>
                   <TableCell>
-                    <RowActions
-                      onEdit={() => openEdit(row)}
-                      onDelete={() => setDeleting(row)}
-                    />
+                    <RowActions onEdit={() => openEdit(row)} onDelete={() => setDeleting(row)} />
                   </TableCell>
                 </TableRow>
               );
             })}
-            {filtered.length === 0 && (
+            {visible.length === 0 && (
               <TableRow>
                 <TableCell colSpan={6} className="text-center text-muted-foreground">
                   Клиентов не найдено.

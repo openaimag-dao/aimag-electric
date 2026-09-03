@@ -211,7 +211,12 @@ async function StaffDashboard({ userId }: { userId: string }) {
   return (
     <div className="space-y-8">
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard icon={Users} label="Мои клиенты" value={ownedCustomers} />
+        <StatCard
+          icon={Users}
+          label="Мои клиенты"
+          value={ownedCustomers}
+          href={`/admin/crm/customers?owner=${userId}`}
+        />
         <StatCard icon={Briefcase} label="Мои сделки в работе" value={ownedDeals.length} />
         <StatCard icon={CheckSquare} label="Открытые задачи" value={openTasks} />
       </div>
@@ -266,18 +271,30 @@ function StatCard({
   icon: Icon,
   label,
   value,
+  href,
 }: {
   icon: typeof FileText;
   label: string;
   value: number;
+  href?: string;
 }) {
-  return (
-    <div className="rounded-xl border border-border bg-card p-4">
+  const content = (
+    <>
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Icon className="size-4" /> {label}
       </div>
       <div className="mt-2 font-display text-2xl font-bold text-primary">{value}</div>
-    </div>
+    </>
+  );
+  return href ? (
+    <Link
+      href={href}
+      className="block rounded-xl border border-border bg-card p-4 transition-colors hover:border-signal/60"
+    >
+      {content}
+    </Link>
+  ) : (
+    <div className="rounded-xl border border-border bg-card p-4">{content}</div>
   );
 }
 
