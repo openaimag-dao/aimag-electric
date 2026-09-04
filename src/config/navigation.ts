@@ -15,10 +15,10 @@ export const footerNav: { title: string; items: NavItem[] }[] = [
   {
     title: "Продукция",
     items: [
-      { label: "Кабели", href: "/catalog/kabeli" },
-      { label: "Провода", href: "/catalog/provoda" },
-      { label: "Арматура СИП", href: "/catalog/armatura-sip" },
-      { label: "Высоковольтное оборудование", href: "/catalog/vysokovoltnoe" },
+      { label: "Кабели", href: "/catalog?cat=kabeli" },
+      { label: "Провода", href: "/catalog?cat=provoda" },
+      { label: "Арматура СИП", href: "/catalog?cat=armatura-sip" },
+      { label: "Высоковольтное оборудование", href: "/catalog?cat=vysokovoltnoe" },
     ],
   },
   {

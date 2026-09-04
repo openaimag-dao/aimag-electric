@@ -40,7 +40,14 @@ export default async function OrderDetailPage({ params }: PageProps) {
             <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
               {order.customer && <span>Клиент: {order.customer.company}</span>}
               {order.user && <span>Портал: {order.user.name ?? order.user.email}</span>}
-              {order.quote && <span>КП: {order.quote.title ?? order.quote.company}</span>}
+              {order.quote && (
+                <Link
+                  href={`/admin/quotes?quote=${order.quote.id}`}
+                  className="hover:text-signal-700 hover:underline"
+                >
+                  КП: {order.quote.title ?? order.quote.company}
+                </Link>
+              )}
             </div>
           </div>
           <OrderStatusSelect orderId={order.id} status={order.status} />
