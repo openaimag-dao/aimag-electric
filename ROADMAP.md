@@ -67,9 +67,28 @@ zero images with a non-null, non-empty `url`.
 Verified: typecheck clean, lint has only the same pre-existing warnings,
 55/55 tests pass, production build succeeds.
 
+**Follow-up (same cycle):** user asked to source and upload photos, or
+otherwise sink no-photo products to the end of the catalog. Declined the
+first half explicitly — matching a found web image to a specific SKU
+without a way to verify it's the right product/manufacturer/spec is
+exactly the kind of fabricated data this build has avoided all session
+(a wrong photo is worse for a B2B buyer than no photo). Built the second
+half: `queryCatalog` in `lib/catalog.ts` now sorts products with no real
+photo (`CatalogProduct.image === null`) to the end of the results,
+regardless of which sort key (`popular`/`price_asc`/`price_desc`/`new`/
+`title`) is selected — implemented as a primary comparator ahead of the
+existing per-key sorter, so within each has-photo/no-photo group the
+chosen sort still applies normally. 3 new unit tests in the new
+`lib/catalog.test.ts` (sinks regardless of sort key; chosen sort still
+applies within each group; an all-photo or all-no-photo catalog sorts
+normally with no behavior change).
+
+Verified again: typecheck clean, lint unchanged, 58/58 tests pass (3
+new), production build succeeds.
+
 ## Known issues / deferred
 
-- Phase 2: all 43 products lack real photos — needs real photography from the user/supplier, not something this session can produce. Upload path already exists and works (`/admin/product-images`); blocked purely on source images, not engineering.
+- Phase 2: all 43 products lack real photos — needs real photography from the user/supplier, not something this session can produce. Upload path already exists and works (`/admin/product-images`); blocked purely on source images, not engineering. No-photo products now sort to the end of `/catalog` regardless of sort order, so this doesn't degrade the browsing experience while photos are missing.
 - Phase 4: current/amperage diffing needs a real `Attribute` + seeded values first — a data decision, not scoped as engineering work. Confirmed twice now: no non-cable category has any structured attribute data, and there's no admin pipeline to populate one either. Stop re-checking this each cycle.
 - Phase 9: phone/email matching is still not fuzzy — a customer who changed company but kept the same number links to their old record. Considered the literal trade-off of matching on contact details rather than a stronger identity signal this app doesn't have; not attempting fuzzy matching without one.
 - Phase 11: the fuller funnel (search → quote, not just quote → order) is still untracked, and — per an earlier cycle's investigation — isn't cheaply trackable without new session infrastructure; not attempting a fake/partial version of it.

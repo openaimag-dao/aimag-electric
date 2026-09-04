@@ -72,7 +72,11 @@ export interface CatalogResult {
 /** Filter → sort → paginate. Page is clamped into range. */
 export function queryCatalog(all: CatalogProduct[], filters: CatalogFilters): CatalogResult {
   const filtered = all.filter((p) => matches(p, filters));
-  filtered.sort(sorters[filters.sort]);
+  const sortByKey = sorters[filters.sort];
+  // Products with no real photo sink to the end regardless of the chosen
+  // sort — a missing photo is a data gap, not something the customer asked
+  // to sort by, so it shouldn't push a real match off the first page.
+  filtered.sort((a, b) => (a.image ? 0 : 1) - (b.image ? 0 : 1) || sortByKey(a, b));
 
   const total = filtered.length;
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
