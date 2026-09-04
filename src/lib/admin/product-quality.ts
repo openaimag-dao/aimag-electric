@@ -23,7 +23,10 @@ export const QUALITY_FILTER_LABELS: Record<ProductQualityFilter, string> = {
 export function qualityWhere(filter: ProductQualityFilter): Prisma.ProductWhereInput {
   switch (filter) {
     case "no-image":
-      return { images: { none: {} } };
+      // Not just "zero image rows" — a product can have ProductImage rows
+      // that are placeholders with no real url yet (e.g. freshly seeded
+      // data), which should still count as missing a photo.
+      return { images: { none: { AND: [{ url: { not: null } }, { NOT: { url: "" } }] } } };
     case "no-price":
       return { prices: { none: { kind: "BASE", amount: { not: null } } } };
     case "no-specs":
