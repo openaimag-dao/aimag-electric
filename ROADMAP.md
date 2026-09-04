@@ -26,40 +26,49 @@ infra/security audit this build on.
 
 ## This cycle's work
 
-**Bottleneck (from last cycle's "next priority"):** another admin/portal
-UX rough edge, in the same spirit as last cycle's quote deep-link. Found
-one directly downstream of the round-robin owner assignment shipped two
-cycles ago: the staff dashboard (`/account`) shows a "Мои клиенты" count
-for the signed-in manager, but it was a dead-end stat — no way to see
-_which_ customers those are without leaving the page and manually
-searching `/admin/crm/customers`.
+**Interleaved with this cycle (not a roadmap phase):** the site went live
+on its own domain (`aimag.kz`/`www.aimag.kz`, NS delegated to Vercel) and
+got Vercel Analytics + GA4 + Яндекс.Метрика (webvisor + ecommerce) wired
+in via env-var-gated config, plus Google Search Console and
+Яндекс.Вебмастер ownership verification and sitemap submission — all
+per explicit user direction, real IDs/tokens only, nothing fabricated.
+Doesn't map to the 12-phase table so isn't reflected there, but is real
+shipped infrastructure work worth recording.
+
+**Bottleneck (from last roadmap cycle's "next priority"):** another
+admin/portal UX pass, continuing the streak of quote deep-link (PR #69)
+and owner-filtered customer list (PR #70). Found two more dead-end data
+points with the exact same fix shape — a value shown as plain text where
+the id needed for the existing `/admin/quotes?quote=<id>` deep link was
+already being fetched, just never wired to a `Link`.
 
 **Fix shipped:**
 
-- `customers-manager.tsx`: `/admin/crm/customers` now supports
-  `?owner=<id>`, filtering the table to that manager's customers and
-  showing a dismissible "Клиенты: <manager name>" banner (same
-  URL-param-as-filter pattern as last cycle's quote deep-link).
-- `account/page.tsx`: the staff dashboard's "Мои клиенты" `StatCard` is
-  now a link to `/admin/crm/customers?owner=<the signed-in manager's
-id>`; `StatCard` gained an optional `href` (renders as a link when
-  given, a plain div otherwise — `"Мои сделки в работе"` and `"Открытые
-задачи"` are unchanged).
+- `admin/orders/[id]/page.tsx`: the order detail page showed "КП:
+  <title>" as plain text even though `orderAdminRepository.byId()`
+  already selects the linked quote's `id` — now a link straight to that
+  quote's dialog on `/admin/quotes`.
+- `admin/page.tsx`: the dashboard's "Последние заявки" (recent quotes)
+  table had unclickable rows despite `q.id` already being in the data —
+  the company-name cell now links the same way.
 
 Verified: typecheck clean, lint has only the same pre-existing warnings,
 55/55 tests pass, production build succeeds.
 
 ## Known issues / deferred
 
-- Phase 4: current/amperage diffing needs a real `Attribute` + seeded values first — a data decision, not scoped as engineering work. Confirmed twice now (two cycles ago): no non-cable category has any structured attribute data, and there's no admin pipeline to populate one either. Stop re-checking this each cycle.
+- Phase 4: current/amperage diffing needs a real `Attribute` + seeded values first — a data decision, not scoped as engineering work. Confirmed twice now: no non-cable category has any structured attribute data, and there's no admin pipeline to populate one either. Stop re-checking this each cycle.
 - Phase 9: phone/email matching is still not fuzzy — a customer who changed company but kept the same number links to their old record. Considered the literal trade-off of matching on contact details rather than a stronger identity signal this app doesn't have; not attempting fuzzy matching without one.
 - Phase 11: the fuller funnel (search → quote, not just quote → order) is still untracked, and — per an earlier cycle's investigation — isn't cheaply trackable without new session infrastructure; not attempting a fake/partial version of it.
+- Backend/infra items from `docs/AUDIT_REPORT.md` remain open but are not admin/portal UX candidates: in-memory (not Redis-backed) rate limiting, CSP nonce hardening, no cursor-based pagination for the catalog at scale, no email/Telegram delivery for staff notifications (in-app only today), E2E tests not run in CI. Re-checked this cycle — still accurate, still out of scope for a single small UX fix.
 
 ## Next priority
 
-No single obvious next item stands out. Re-read the Phase status table
-for the next well-scoped candidate. The admin/portal UX pass (Phase
-2/3/8) has now yielded two small, real fixes in a row (quote deep-link,
-owner-filtered customer list) — worth one more pass before assuming it's
-exhausted; otherwise fall back to a fresh read of `docs/AUDIT_REPORT.md`
-for anything from the July 2026 audit that hasn't been addressed yet.
+The dashboard's "Заканчивающиеся остатки" (low-stock) widget
+(`dashboard-insights.tsx`, sourced from `adminService.dashboardInsights()`
+in `admin-service.ts`) shows product/warehouse rows as dead-end text —
+the underlying `prisma.stock.findMany` already joins `product` and
+`warehouse` but the query only selects `title`/`sku`/`code`, not the ids
+needed to link to the product or `/admin/warehouses/[id]`. Slightly
+bigger than this cycle's two fixes (one query field + one component),
+still real existing data, no schema change. Good next candidate.

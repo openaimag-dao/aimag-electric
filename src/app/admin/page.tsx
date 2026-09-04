@@ -207,7 +207,14 @@ export default async function AdminDashboardPage() {
           <TableBody>
             {recentQuotes.map((q) => (
               <TableRow key={q.id}>
-                <TableCell className="font-medium text-primary">{q.company}</TableCell>
+                <TableCell className="font-medium text-primary">
+                  <Link
+                    href={`/admin/quotes?quote=${q.id}`}
+                    className="hover:text-signal-700 hover:underline"
+                  >
+                    {q.company}
+                  </Link>
+                </TableCell>
                 <TableCell className="text-muted-foreground">{q.name}</TableCell>
                 <TableCell>
                   <QuoteStatusBadge status={q.status} />
