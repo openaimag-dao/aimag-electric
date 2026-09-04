@@ -35,28 +35,41 @@ per explicit user direction, real IDs/tokens only, nothing fabricated.
 Doesn't map to the 12-phase table so isn't reflected there, but is real
 shipped infrastructure work worth recording.
 
-**Bottleneck (from last roadmap cycle's "next priority"):** another
-admin/portal UX pass, continuing the streak of quote deep-link (PR #69)
-and owner-filtered customer list (PR #70). Found two more dead-end data
-points with the exact same fix shape — a value shown as plain text where
-the id needed for the existing `/admin/quotes?quote=<id>` deep link was
-already being fetched, just never wired to a `Link`.
+**Bottleneck (from last roadmap cycle's "next priority"):** admin/portal
+UX pass continued (quote deep-link on order detail + dashboard recent
+quotes, PR #73), plus a user-reported bug: 4 footer category links
+(Кабели/Провода/Арматура СИП/Высоковольтное) 404'd — they pointed at
+`/catalog/[slug]` (the product-detail route) instead of the real
+`/catalog?cat=<slug>` category filter. Fixed in the same PR.
 
-**Fix shipped:**
+**Follow-up investigation (this cycle):** user asked to make sure all
+products show photos and to fill in any pages that render empty.
+Investigated before touching anything — confirmed all 43 seeded products
+genuinely have no real photo (`ProductImage.url` is `null` on every row;
+`prisma/seed.ts` creates the rows as intentional placeholders). This is
+not fabricatable — real product photography has to come from the user or
+their supplier; the admin already has a working upload path
+(`/admin/product-images`, real Vercel Blob storage, URL-paste or
+file-upload) for whenever real photos are available. No other genuinely
+broken/empty page found — all nav/footer links resolve to real routes
+with real content; `izolyatory` and `vysokovoltnoe` categories are sparse
+(1 product each) but not empty, same root cause (more real catalog data
+needed, not a code bug).
 
-- `admin/orders/[id]/page.tsx`: the order detail page showed "КП:
-  <title>" as plain text even though `orderAdminRepository.byId()`
-  already selects the linked quote's `id` — now a link straight to that
-  quote's dialog on `/admin/quotes`.
-- `admin/page.tsx`: the dashboard's "Последние заявки" (recent quotes)
-  table had unclickable rows despite `q.id` already being in the data —
-  the company-name cell now links the same way.
+**Fix shipped (real bug found during that investigation):**
+`qualityWhere("no-image")` in `product-quality.ts` checked `images: {
+none: {} }` — "has zero `ProductImage` rows" — which is wrong for this
+data: every product has placeholder rows with `url: null`, so the check
+always returned false and the Catalog Health dashboard's "no-image"
+counter silently reported 0 instead of the real 43. Fixed to check for
+zero images with a non-null, non-empty `url`.
 
 Verified: typecheck clean, lint has only the same pre-existing warnings,
 55/55 tests pass, production build succeeds.
 
 ## Known issues / deferred
 
+- Phase 2: all 43 products lack real photos — needs real photography from the user/supplier, not something this session can produce. Upload path already exists and works (`/admin/product-images`); blocked purely on source images, not engineering.
 - Phase 4: current/amperage diffing needs a real `Attribute` + seeded values first — a data decision, not scoped as engineering work. Confirmed twice now: no non-cable category has any structured attribute data, and there's no admin pipeline to populate one either. Stop re-checking this each cycle.
 - Phase 9: phone/email matching is still not fuzzy — a customer who changed company but kept the same number links to their old record. Considered the literal trade-off of matching on contact details rather than a stronger identity signal this app doesn't have; not attempting fuzzy matching without one.
 - Phase 11: the fuller funnel (search → quote, not just quote → order) is still untracked, and — per an earlier cycle's investigation — isn't cheaply trackable without new session infrastructure; not attempting a fake/partial version of it.
@@ -64,11 +77,13 @@ Verified: typecheck clean, lint has only the same pre-existing warnings,
 
 ## Next priority
 
-The dashboard's "Заканчивающиеся остатки" (low-stock) widget
-(`dashboard-insights.tsx`, sourced from `adminService.dashboardInsights()`
-in `admin-service.ts`) shows product/warehouse rows as dead-end text —
-the underlying `prisma.stock.findMany` already joins `product` and
-`warehouse` but the query only selects `title`/`sku`/`code`, not the ids
-needed to link to the product or `/admin/warehouses/[id]`. Slightly
-bigger than this cycle's two fixes (one query field + one component),
-still real existing data, no schema change. Good next candidate.
+If the user provides real product photos (files or URLs), bulk-wiring
+them via the existing `/admin/product-images` upload action is the
+natural next cycle. Otherwise: the dashboard's "Заканчивающиеся остатки"
+(low-stock) widget (`dashboard-insights.tsx`, sourced from
+`adminService.dashboardInsights()` in `admin-service.ts`) shows
+product/warehouse rows as dead-end text — the underlying
+`prisma.stock.findMany` already joins `product` and `warehouse` but the
+query only selects `title`/`sku`/`code`, not the ids needed to link to
+the product or `/admin/warehouses/[id]`. Real existing data, no schema
+change.
