@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { SiteAnalytics } from "@/components/analytics/site-analytics";
 import { siteConfig } from "@/config/site";
 import { buildOrganizationJsonLd } from "@/lib/org-jsonld";
 import { AuthProvider } from "@/components/auth/session-provider";
@@ -77,6 +78,14 @@ export const metadata: Metadata = {
     address: true,
     email: true,
   },
+  // Populated once the site is added to Search Console / Яндекс.Вебмастер
+  // and a real verification token exists — never a placeholder value.
+  verification: {
+    ...(process.env.GOOGLE_SITE_VERIFICATION
+      ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+      : {}),
+    ...(process.env.YANDEX_VERIFICATION ? { yandex: process.env.YANDEX_VERIFICATION } : {}),
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -92,6 +101,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(website) }}
         />
+        <SiteAnalytics />
         <AuthProvider>
           <CartProvider>
             <FavoritesProvider>
