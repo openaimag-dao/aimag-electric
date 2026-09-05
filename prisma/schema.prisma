@@ -820,6 +820,19 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+/**
+ * A shareable snapshot of a cart — stores only (productId, qty) pairs, never
+ * title/price: those are always re-resolved fresh from the catalog when the
+ * link is opened (see resolveCartRefs), so a shared link never shows a stale
+ * price or a since-unpublished product silently as if it were still valid.
+ */
+model CartShare {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  items     Json
+  createdAt DateTime @default(now())
+}
+
 /** Blog article — powers /blog and the homepage "Экспертиза и разборы" section. */
 model Post {
   id          String   @id @default(cuid())

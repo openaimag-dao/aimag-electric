@@ -7,6 +7,7 @@ import { Minus, Plus, Trash2, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { QuoteForm } from "@/components/common/quote-form";
 import { SaveAsProjectButton } from "@/components/cart/save-as-project-button";
+import { CartExportPanel } from "@/components/cart/cart-export-panel";
 import { useCart } from "@/components/cart/cart-provider";
 import { formatTenge } from "@/lib/money";
 
@@ -100,6 +101,8 @@ export function CartView() {
             </span>
           </div>
         )}
+
+        {items.length > 0 && <CartExportPanel items={items} />}
       </div>
 
       <div className="rounded-2xl border border-border bg-card p-6 shadow-sm lg:sticky lg:top-24 lg:self-start">

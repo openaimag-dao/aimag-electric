@@ -15,6 +15,8 @@ interface CartContextValue {
   removeItem: (productId: string) => void;
   setQty: (productId: string, qty: number) => void;
   clear: () => void;
+  /** Replaces the whole cart wholesale — used to restore a shared cart link. */
+  loadItems: (items: CartItem[]) => void;
 }
 
 const CartContext = React.createContext<CartContextValue | null>(null);
@@ -78,13 +80,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const clear = React.useCallback(() => setItems([]), []);
+  const loadItems = React.useCallback((next: CartItem[]) => setItems(next), []);
 
   const value = React.useMemo<CartContextValue>(() => {
     const count = items.reduce((sum, i) => sum + i.qty, 0);
     const totalTenge = items.reduce((sum, i) => sum + (i.priceTenge ?? 0) * i.qty, 0);
     const hasUnpricedItems = items.some((i) => i.priceTenge === null);
-    return { items, count, totalTenge, hasUnpricedItems, addItem, removeItem, setQty, clear };
-  }, [items, addItem, removeItem, setQty, clear]);
+    return {
+      items,
+      count,
+      totalTenge,
+      hasUnpricedItems,
+      addItem,
+      removeItem,
+      setQty,
+      clear,
+      loadItems,
+    };
+  }, [items, addItem, removeItem, setQty, clear, loadItems]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
