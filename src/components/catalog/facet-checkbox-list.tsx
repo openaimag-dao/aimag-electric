@@ -45,11 +45,7 @@ export function FacetCheckboxList<T extends string | number>({
               isChecked && "text-primary"
             )}
           >
-            <Checkbox
-              id={id}
-              checked={isChecked}
-              onCheckedChange={() => onToggle(opt.value)}
-            />
+            <Checkbox id={id} checked={isChecked} onCheckedChange={() => onToggle(opt.value)} />
             <span className="flex-1 text-steel-700">{opt.label}</span>
             <span className="font-mono text-xs text-muted-foreground">{opt.count}</span>
           </label>
