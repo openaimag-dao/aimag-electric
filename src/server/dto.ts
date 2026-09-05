@@ -45,6 +45,34 @@ export interface CatalogProductDTO {
   image?: string | null;
 }
 
+export interface PostDTO {
+  slug: string;
+  title: string;
+  excerpt: string;
+  category: string;
+  readingTime: string;
+  publishedAt: string;
+}
+
+export interface PostDetailDTO extends PostDTO {
+  content: string;
+}
+
+export interface CaseStudyDTO {
+  slug: string;
+  title: string;
+  scope: string;
+  location: string;
+  year: string;
+  metric: string;
+  metricLabel: string;
+  category: string;
+}
+
+export interface CaseStudyDetailDTO extends CaseStudyDTO {
+  description: string | null;
+}
+
 export interface ProductDetailDTO extends CatalogProductDTO {
   description: string[];
   images: string[];

@@ -25,4 +25,30 @@ describe("quoteSchema", () => {
   it("rejects a too-short message", () => {
     expect(quoteSchema.safeParse({ ...valid, message: "хай" }).success).toBe(false);
   });
+  it("accepts an empty honeypot (real user)", () => {
+    expect(quoteSchema.safeParse({ ...valid, website: "" }).success).toBe(true);
+  });
+  it("still parses a filled honeypot (rejection happens in the action, not the schema)", () => {
+    const parsed = quoteSchema.safeParse({ ...valid, website: "http://spam.example" });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) expect(parsed.data.website).toBe("http://spam.example");
+  });
+  it("accepts up to 5 attachments", () => {
+    const attachments = Array.from({ length: 5 }, (_, i) => ({
+      url: `https://x.public.blob.vercel-storage.com/f${i}.pdf`,
+      filename: `f${i}.pdf`,
+      size: 1024,
+      contentType: "application/pdf",
+    }));
+    expect(quoteSchema.safeParse({ ...valid, attachments }).success).toBe(true);
+  });
+  it("rejects more than 5 attachments", () => {
+    const attachments = Array.from({ length: 6 }, (_, i) => ({
+      url: `https://x.public.blob.vercel-storage.com/f${i}.pdf`,
+      filename: `f${i}.pdf`,
+      size: 1024,
+      contentType: "application/pdf",
+    }));
+    expect(quoteSchema.safeParse({ ...valid, attachments }).success).toBe(false);
+  });
 });

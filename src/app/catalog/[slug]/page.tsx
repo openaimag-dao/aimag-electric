@@ -2,11 +2,12 @@ export const dynamic = "force-dynamic";
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
 import { availabilityLabels } from "@/config/catalog-sort";
+import { slugRedirects } from "@/config/slug-redirects";
 import { productService } from "@/server/services";
 import { buildProductJsonLd, averageRating } from "@/lib/product-jsonld";
 import { formatTenge, tiynToTenge } from "@/lib/money";
@@ -17,10 +18,11 @@ import { PurchasePanel } from "@/components/product/purchase-panel";
 import { SectionNav } from "@/components/product/section-nav";
 import { SpecTable } from "@/components/product/spec-table";
 import { DocumentList } from "@/components/product/document-list";
-import { Reviews } from "@/components/product/reviews";
+import { AskEngineer } from "@/components/product/ask-engineer";
 import { RelatedProducts } from "@/components/product/related-products";
 import { AnalogsCallout } from "@/components/product/analogs-callout";
 import { RecordRecentlyViewed } from "@/components/recently-viewed/record-recently-viewed";
+import { ProductViewTracker } from "@/components/product/product-view-tracker";
 import { RecentlyViewedSection } from "@/components/recently-viewed/recently-viewed-section";
 
 interface PageProps {
@@ -65,7 +67,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function ProductPage({ params }: PageProps) {
   const { slug } = await params;
   const product = await productService.getBySlug(slug);
-  if (!product) notFound();
+  if (!product) {
+    const newSlug = slugRedirects[slug];
+    if (newSlug) permanentRedirect(`/catalog/${newSlug}`);
+    notFound();
+  }
 
   const related = await productService.getRelated(product);
   const analogs =
@@ -99,8 +105,8 @@ export default async function ProductPage({ params }: PageProps) {
   const sections = [
     { id: "description", label: "Описание" },
     { id: "specs", label: "Характеристики" },
-    { id: "documents", label: "Документы" },
-    { id: "reviews", label: "Отзывы" },
+    ...(product.documents.length > 0 ? [{ id: "documents", label: "Документы" }] : []),
+    { id: "ask-engineer", label: "Вопрос инженеру" },
     { id: "related", label: "Похожие" },
   ];
 
@@ -116,6 +122,12 @@ export default async function ProductPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       <RecordRecentlyViewed productId={product.id} />
+      <ProductViewTracker
+        productId={product.id}
+        sku={product.sku}
+        categorySlug={product.categorySlug}
+        price={product.price}
+      />
 
       <div className="container py-6">
         {/* Breadcrumb */}
@@ -198,20 +210,24 @@ export default async function ProductPage({ params }: PageProps) {
             </div>
           </section>
 
-          <section id="documents" className="scroll-mt-32">
-            <h2 className="font-display text-xl font-bold text-primary">Документы и сертификаты</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Паспорта, сертификаты соответствия и инструкции в формате PDF.
-            </p>
-            <div className="mt-4">
-              <DocumentList documents={product.documents} />
-            </div>
-          </section>
+          {product.documents.length > 0 && (
+            <section id="documents" className="scroll-mt-32">
+              <h2 className="font-display text-xl font-bold text-primary">
+                Документы и сертификаты
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Паспорта, сертификаты соответствия и инструкции в формате PDF.
+              </p>
+              <div className="mt-4">
+                <DocumentList documents={product.documents} />
+              </div>
+            </section>
+          )}
 
-          <section id="reviews" className="scroll-mt-32">
-            <h2 className="font-display text-xl font-bold text-primary">Отзывы</h2>
+          <section id="ask-engineer" className="scroll-mt-32">
+            <h2 className="font-display text-xl font-bold text-primary">Остались вопросы?</h2>
             <div className="mt-4">
-              <Reviews reviews={product.reviews} />
+              <AskEngineer product={product} />
             </div>
           </section>
         </div>

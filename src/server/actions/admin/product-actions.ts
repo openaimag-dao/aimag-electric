@@ -95,6 +95,7 @@ function toData(d: ReturnType<typeof productFormSchema.parse>) {
     badge: d.badge ? d.badge : null,
     popularity: d.popularity,
     published: d.published,
+    isFeatured: d.isFeatured,
     category: { connect: { id: d.categoryId } },
     brand: { connect: { id: d.brandId } },
   };

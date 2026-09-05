@@ -28,3 +28,5 @@ export {
   categoryAttributeRepository,
   type CategoryAttributeItem,
 } from "./category-attribute-repository";
+export { postAdminRepository } from "./post-admin-repository";
+export { caseStudyAdminRepository } from "./case-study-admin-repository";

@@ -8,6 +8,21 @@ import { productImageFormSchema } from "@/lib/validations/admin";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
 import { requireStaff } from "@/lib/security/rbac";
 import { ALLOWED_IMAGE_TYPES, MAX_IMAGE_SIZE, formatFileSize } from "@/lib/uploads";
+import { isAllowedImageHost } from "@/lib/image-hosts";
+
+/** Rejects pasted URLs from hosts we don't allow next/image to fetch from — see lib/image-hosts.ts. */
+function checkImageHost(url: string): string | null {
+  let hostname: string;
+  try {
+    hostname = new URL(url).hostname;
+  } catch {
+    return "Некорректная ссылка на фото";
+  }
+  if (!isAllowedImageHost(hostname)) {
+    return `Хостинг «${hostname}» не в списке разрешённых. Загрузите файл кнопкой «Загрузить файл» вместо вставки ссылки.`;
+  }
+  return null;
+}
 
 function revalidate() {
   revalidatePath("/admin/product-images");
@@ -26,6 +41,8 @@ export async function createProductImage(input: unknown): Promise<ActionResult> 
   await requireStaff();
   const v = validate(productImageFormSchema, input);
   if (!v.success) return v.result;
+  const hostError = checkImageHost(v.data.url);
+  if (hostError) return fail(hostError);
   try {
     await productImageAdminRepository.create({
       url: v.data.url,
@@ -44,6 +61,8 @@ export async function updateProductImage(id: string, input: unknown): Promise<Ac
   await requireStaff();
   const v = validate(productImageFormSchema, input);
   if (!v.success) return v.result;
+  const hostError = checkImageHost(v.data.url);
+  if (hostError) return fail(hostError);
   try {
     await productImageAdminRepository.update(id, {
       url: v.data.url,

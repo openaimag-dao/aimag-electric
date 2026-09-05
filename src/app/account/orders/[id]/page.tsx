@@ -61,6 +61,7 @@ export default async function OrderDetailPage({ params }: PageProps) {
                 variant="outline"
                 size="sm"
                 items={reorderItems}
+                analyticsSource="order_reorder"
                 defaultTitle={`Повторный заказ ${order.number}`}
               />
             )}

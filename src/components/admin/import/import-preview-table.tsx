@@ -38,7 +38,11 @@ export function ImportPreviewTable({ preview }: { preview: ImportPreview }) {
     { key: "create", label: "Создать", count: preview.counts.create },
     { key: "update", label: "Обновить", count: preview.counts.update },
     { key: "skip", label: "Пропуск", count: preview.counts.skip },
-    { key: "issues", label: "С замечаниями", count: preview.rows.filter((r) => r.issues.length > 0).length },
+    {
+      key: "issues",
+      label: "С замечаниями",
+      count: preview.rows.filter((r) => r.issues.length > 0).length,
+    },
   ];
 
   return (
@@ -112,7 +116,12 @@ function PreviewRow({ row }: { row: PreparedRow }) {
     <TableRow className={row.action === "skip" ? "bg-red-50/30" : undefined}>
       <TableCell className="font-mono text-xs text-muted-foreground">{row.row}</TableCell>
       <TableCell>
-        <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium", meta.className)}>
+        <span
+          className={cn(
+            "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
+            meta.className
+          )}
+        >
           <Icon className="size-3" />
           {meta.label}
         </span>

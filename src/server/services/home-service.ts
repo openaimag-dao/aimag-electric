@@ -39,13 +39,41 @@ const loadBrands = unstable_cache(
   { tags: [CACHE_TAGS.brands], revalidate: 3600 }
 );
 
+/**
+ * Homepage showcase: staff-curated `isFeatured` products first (they're the
+ * ones known to have real photos/specs, not synthetic demo data), topped up
+ * with the most popular products from categories not already represented —
+ * so the showcase stays diverse instead of one category's top sellers
+ * crowding it out — and only falls back to plain popularity if that still
+ * isn't enough to fill `limit`.
+ */
 const loadPopular = unstable_cache(
   async (limit: number): Promise<CatalogProductDTO[]> => {
-    const rows = await productRepository.findMany();
-    return rows
+    const featured = (await productRepository.findFeatured(limit)).map(toCatalogDTO);
+    if (featured.length >= limit) return featured.slice(0, limit);
+
+    const rows = (await productRepository.findMany())
       .map(toCatalogDTO)
-      .sort((a, b) => b.popularity - a.popularity)
-      .slice(0, limit);
+      .sort((a, b) => b.popularity - a.popularity);
+
+    const result = [...featured];
+    const usedIds = new Set(result.map((p) => p.id));
+    const usedCategories = new Set(result.map((p) => p.categorySlug));
+
+    for (const p of rows) {
+      if (result.length >= limit) break;
+      if (usedIds.has(p.id) || usedCategories.has(p.categorySlug)) continue;
+      result.push(p);
+      usedIds.add(p.id);
+      usedCategories.add(p.categorySlug);
+    }
+    for (const p of rows) {
+      if (result.length >= limit) break;
+      if (usedIds.has(p.id)) continue;
+      result.push(p);
+      usedIds.add(p.id);
+    }
+    return result;
   },
   ["home-popular"],
   { tags: [CACHE_TAGS.products], revalidate: 600 }

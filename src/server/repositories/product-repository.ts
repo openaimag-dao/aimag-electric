@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { productInclude, productListSelect } from "@/server/repositories/types";
 import { rankSearchResults } from "@/lib/search/rank";
 import { expandSeparatorVariants } from "@/lib/search/normalize";
+import { withProductColumns } from "@/server/repositories/product-self-heal";
 
 /**
  * ProductRepository — the only place that talks to Prisma for products.
@@ -19,10 +20,28 @@ export const productRepository = {
   },
 
   findBySlug(slug: string) {
-    return prisma.product.findFirst({
-      where: { slug, published: true },
-      include: productInclude,
-    });
+    return withProductColumns(() =>
+      prisma.product.findFirst({
+        where: { slug, published: true },
+        include: productInclude,
+      })
+    );
+  },
+
+  /**
+   * Staff-curated homepage showcase pool. Deliberately not part of
+   * `productListSelect`'s shared shape — see homeService's loadPopular for
+   * the diverse-category fallback used when fewer than `limit` are featured.
+   */
+  findFeatured(limit: number) {
+    return withProductColumns(() =>
+      prisma.product.findMany({
+        where: { published: true, isFeatured: true },
+        select: productListSelect,
+        orderBy: { popularity: "desc" },
+        take: limit,
+      })
+    );
   },
 
   /**
@@ -73,7 +92,7 @@ export const productRepository = {
   allSlugs() {
     return prisma.product.findMany({
       where: { published: true },
-      select: { slug: true },
+      select: { slug: true, updatedAt: true },
     });
   },
 

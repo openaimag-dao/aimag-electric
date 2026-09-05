@@ -4,6 +4,7 @@ import type { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { qualityWhere, type ProductQualityFilter } from "@/lib/admin/product-quality";
+import { withProductColumns } from "@/server/repositories/product-self-heal";
 
 const listInclude = {
   category: true,
@@ -46,55 +47,63 @@ function buildWhere(params: ProductFilterParams): Prisma.ProductWhereInput {
 
 export const productAdminRepository = {
   list() {
-    return prisma.product.findMany({
-      orderBy: { createdAt: "desc" },
-      include: listInclude,
-    });
+    return withProductColumns(() =>
+      prisma.product.findMany({
+        orderBy: { createdAt: "desc" },
+        include: listInclude,
+      })
+    );
   },
   /** Server-side filtered + paginated listing — the products table doesn't load the whole catalog into the browser. */
   async listPage(params: ProductListParams) {
     const where = buildWhere(params);
     const [rows, total] = await Promise.all([
-      prisma.product.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        include: listInclude,
-        skip: (params.page - 1) * params.pageSize,
-        take: params.pageSize,
-      }),
+      withProductColumns(() =>
+        prisma.product.findMany({
+          where,
+          orderBy: { createdAt: "desc" },
+          include: listInclude,
+          skip: (params.page - 1) * params.pageSize,
+          take: params.pageSize,
+        })
+      ),
       prisma.product.count({ where }),
     ]);
     return { rows, total };
   },
   /** Same filters as listPage, unbounded — for XLSX export. */
   listForExport(params: ProductFilterParams) {
-    return prisma.product.findMany({
-      where: buildWhere(params),
-      orderBy: { createdAt: "desc" },
-      include: listInclude,
-    });
+    return withProductColumns(() =>
+      prisma.product.findMany({
+        where: buildWhere(params),
+        orderBy: { createdAt: "desc" },
+        include: listInclude,
+      })
+    );
   },
   byId(id: string) {
-    return prisma.product.findUnique({
-      where: { id },
-      include: {
-        category: true,
-        brand: true,
-        prices: true,
-        stock: { include: { warehouse: true } },
-        documents: { orderBy: { order: "asc" } },
-        values: { include: { attribute: true } },
-      },
-    });
+    return withProductColumns(() =>
+      prisma.product.findUnique({
+        where: { id },
+        include: {
+          category: true,
+          brand: true,
+          prices: true,
+          stock: { include: { warehouse: true } },
+          documents: { orderBy: { order: "asc" } },
+          values: { include: { attribute: true } },
+        },
+      })
+    );
   },
   create(data: Prisma.ProductCreateInput) {
-    return prisma.product.create({ data });
+    return withProductColumns(() => prisma.product.create({ data }));
   },
   update(id: string, data: Prisma.ProductUpdateInput) {
-    return prisma.product.update({ where: { id }, data });
+    return withProductColumns(() => prisma.product.update({ where: { id }, data }));
   },
   remove(id: string) {
-    return prisma.product.delete({ where: { id } });
+    return withProductColumns(() => prisma.product.delete({ where: { id } }));
   },
   count() {
     return prisma.product.count();

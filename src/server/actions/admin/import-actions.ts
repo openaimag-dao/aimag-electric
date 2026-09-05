@@ -11,6 +11,7 @@ import { requireStaff } from "@/lib/security/rbac";
 import { audit } from "@/server/audit";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import { coerceAttributeValue } from "@/lib/attributes";
+import { withProductColumns } from "@/server/repositories/product-self-heal";
 
 /** Build the reference context (also exposed for client-side preview). */
 async function loadContext(): Promise<ImportContext> {
@@ -151,36 +152,38 @@ export async function applyImport(
         const imageUrls = (d.imageUrls as string[]) ?? [];
 
         try {
-          const product = await prisma.product.upsert({
-            where: { sku },
-            update: {
-              title: String(d.title),
-              slug: slug || undefined,
-              description: String(d.description || "") || null,
-              unit: String(d.unit || "шт") || "шт",
-              badge,
-              popularity: Number(d.popularity) || 0,
-              warranty: String(d.warranty || "") || null,
-              leadTime: String(d.leadTime || "") || null,
-              published: Boolean(d.published),
-              category: { connect: { id: cId } },
-              brand: { connect: { id: bId } },
-            },
-            create: {
-              sku,
-              slug: slug || sku.toLowerCase(),
-              title: String(d.title),
-              description: String(d.description || "") || null,
-              unit: String(d.unit || "шт") || "шт",
-              badge,
-              popularity: Number(d.popularity) || 0,
-              warranty: String(d.warranty || "") || null,
-              leadTime: String(d.leadTime || "") || null,
-              published: Boolean(d.published),
-              category: { connect: { id: cId } },
-              brand: { connect: { id: bId } },
-            },
-          });
+          const product = await withProductColumns(() =>
+            prisma.product.upsert({
+              where: { sku },
+              update: {
+                title: String(d.title),
+                slug: slug || undefined,
+                description: String(d.description || "") || null,
+                unit: String(d.unit || "шт") || "шт",
+                badge,
+                popularity: Number(d.popularity) || 0,
+                warranty: String(d.warranty || "") || null,
+                leadTime: String(d.leadTime || "") || null,
+                published: Boolean(d.published),
+                category: { connect: { id: cId } },
+                brand: { connect: { id: bId } },
+              },
+              create: {
+                sku,
+                slug: slug || sku.toLowerCase(),
+                title: String(d.title),
+                description: String(d.description || "") || null,
+                unit: String(d.unit || "шт") || "шт",
+                badge,
+                popularity: Number(d.popularity) || 0,
+                warranty: String(d.warranty || "") || null,
+                leadTime: String(d.leadTime || "") || null,
+                published: Boolean(d.published),
+                category: { connect: { id: cId } },
+                brand: { connect: { id: bId } },
+              },
+            })
+          );
 
           // Base price — atomic upsert on the (productId, kind) unique key.
           if (price !== null && price !== undefined) {

@@ -30,7 +30,7 @@ export function Features() {
                 ].join(" ")}
               >
                 {emphasized && (
-                  <div className="absolute inset-0 conductor-grid opacity-40" aria-hidden />
+                  <div className="conductor-grid absolute inset-0 opacity-40" aria-hidden />
                 )}
                 <div className="relative">
                   <span

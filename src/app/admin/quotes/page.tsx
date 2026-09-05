@@ -58,6 +58,12 @@ export default async function AdminQuotesPage() {
       hasOrder: quoteIdsWithOrders.has(q.id),
       customerId: q.customer?.id ?? null,
       ownerName: q.customer?.owner?.name ?? q.customer?.owner?.email ?? null,
+      attachments: q.attachments.map((a) => ({
+        id: a.id,
+        url: a.url,
+        filename: a.filename,
+        size: a.size,
+      })),
       items: q.items.map((i) => ({
         id: i.id,
         title: i.title,

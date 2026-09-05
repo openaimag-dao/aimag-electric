@@ -123,13 +123,20 @@ export function DealsBoard({
             >
               <div className="flex items-center justify-between border-b border-border px-3 py-2.5">
                 <div className="flex items-center gap-2">
-                  <span className={cn("inline-flex rounded-full px-2 py-0.5 text-xs font-medium", meta.className)}>
+                  <span
+                    className={cn(
+                      "inline-flex rounded-full px-2 py-0.5 text-xs font-medium",
+                      meta.className
+                    )}
+                  >
                     {meta.label}
                   </span>
                   <span className="text-xs text-muted-foreground">{cards.length}</span>
                 </div>
                 {total > 0 && (
-                  <span className="font-mono text-xs text-muted-foreground">{formatTenge(total)}</span>
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {formatTenge(total)}
+                  </span>
                 )}
               </div>
 

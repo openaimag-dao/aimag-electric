@@ -5,7 +5,11 @@
 
 ## Публичные
 
-- `submitQuote(input)` — заявка на КП. Rate-limit 5/мин на IP. Логируется.
+- `submitQuote(input)` — заявка на КП. Rate-limit 5/мин на IP. Логируется. Honeypot-поле `website`
+  (должно быть пустым) — заполненное тихо считается спамом, без ошибки для отправителя.
+- `uploadQuoteAttachment(formData)` — загружает один файл заявки (PDF/Word/Excel/изображение,
+  до 20 МБ) в Vercel Blob и возвращает его URL; сама заявка прикрепляет его при `submitQuote`.
+  Rate-limit 10/мин на IP.
 
 ## Админские (требуют ADMIN/MANAGER)
 

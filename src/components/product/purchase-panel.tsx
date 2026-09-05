@@ -77,6 +77,7 @@ export function PurchasePanel({
           size="lg"
           triggerLabel="Получить КП"
           className="w-full"
+          analyticsSource="product_page"
           items={[
             {
               productId: product.id,

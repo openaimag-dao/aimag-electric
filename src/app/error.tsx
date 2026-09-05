@@ -30,10 +30,16 @@ export default function Error({
         <p className="mt-2 font-mono text-xs text-muted-foreground">код: {error.digest}</p>
       )}
       <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-        <button onClick={reset} className="inline-flex items-center gap-2 rounded-md bg-signal px-5 py-2.5 text-sm font-semibold text-steel-950 hover:bg-signal-400">
+        <button
+          onClick={reset}
+          className="inline-flex items-center gap-2 rounded-md bg-signal px-5 py-2.5 text-sm font-semibold text-steel-950 hover:bg-signal-400"
+        >
           <RefreshCw className="size-4" /> Попробовать снова
         </button>
-        <Link href="/" className="inline-flex items-center rounded-md border border-border px-5 py-2.5 text-sm font-medium text-primary hover:bg-secondary">
+        <Link
+          href="/"
+          className="inline-flex items-center rounded-md border border-border px-5 py-2.5 text-sm font-medium text-primary hover:bg-secondary"
+        >
           На главную
         </Link>
       </div>

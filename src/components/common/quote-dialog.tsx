@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { QuoteForm } from "@/components/common/quote-form";
+import { track } from "@/lib/analytics";
 import type { CartItem } from "@/types/cart";
 
 interface QuoteDialogProps {
@@ -26,6 +27,8 @@ interface QuoteDialogProps {
   defaultTitle?: string;
   /** Pre-fill the free-text message, e.g. a search query that had no catalog match. */
   defaultMessage?: string;
+  /** Where this dialog was opened from — tagged on the quote_dialog_open analytics event. */
+  analyticsSource?: string;
 }
 
 /**
@@ -41,11 +44,18 @@ export function QuoteDialog({
   items,
   defaultTitle,
   defaultMessage,
+  analyticsSource = "unknown",
 }: QuoteDialogProps) {
   const [open, setOpen] = React.useState(false);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (next) track("quote_dialog_open", { source: analyticsSource });
+        setOpen(next);
+      }}
+    >
       <DialogTrigger asChild>
         {children ?? (
           <Button variant={variant} size={size} className={className}>

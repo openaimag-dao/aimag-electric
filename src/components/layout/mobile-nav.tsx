@@ -93,7 +93,7 @@ export function MobileNav() {
           ))}
         </nav>
         <div className="mt-auto">
-          <QuoteDialog className="w-full" size="lg" />
+          <QuoteDialog className="w-full" size="lg" analyticsSource="mobile_nav" />
         </div>
       </SheetContent>
     </Sheet>

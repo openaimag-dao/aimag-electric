@@ -3,11 +3,11 @@ import "server-only";
 import type { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
-import { withQuoteColumns } from "@/server/repositories/quote-self-heal";
+import { withQuoteColumns, withQuoteAttachmentsTable } from "@/server/repositories/quote-self-heal";
 
 export const quoteRepository = {
   create(data: Prisma.QuoteCreateInput) {
-    return withQuoteColumns(() => prisma.quote.create({ data }));
+    return withQuoteColumns(() => withQuoteAttachmentsTable(() => prisma.quote.create({ data })));
   },
   findRecent(take = 50) {
     return withQuoteColumns(() =>

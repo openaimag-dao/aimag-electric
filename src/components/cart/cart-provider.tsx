@@ -3,6 +3,7 @@
 import * as React from "react";
 
 import type { CartItem } from "@/types/cart";
+import { track } from "@/lib/analytics";
 
 const STORAGE_KEY = "aimag-cart-v1";
 
@@ -15,6 +16,8 @@ interface CartContextValue {
   removeItem: (productId: string) => void;
   setQty: (productId: string, qty: number) => void;
   clear: () => void;
+  /** Replaces the whole cart wholesale — used to restore a shared cart link. */
+  loadItems: (items: CartItem[]) => void;
 }
 
 const CartContext = React.createContext<CartContextValue | null>(null);
@@ -51,6 +54,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [items]);
 
   const addItem = React.useCallback((item: Omit<CartItem, "qty">, qty = 1) => {
+    track("add_to_cart", { productId: item.productId, sku: item.sku, qty });
     setItems((prev) => {
       const existing = prev.find((i) => i.productId === item.productId);
       if (existing) {
@@ -68,6 +72,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const removeItem = React.useCallback((productId: string) => {
+    track("remove_from_cart", { productId });
     setItems((prev) => prev.filter((i) => i.productId !== productId));
   }, []);
 
@@ -78,13 +83,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const clear = React.useCallback(() => setItems([]), []);
+  const loadItems = React.useCallback((next: CartItem[]) => setItems(next), []);
 
   const value = React.useMemo<CartContextValue>(() => {
     const count = items.reduce((sum, i) => sum + i.qty, 0);
     const totalTenge = items.reduce((sum, i) => sum + (i.priceTenge ?? 0) * i.qty, 0);
     const hasUnpricedItems = items.some((i) => i.priceTenge === null);
-    return { items, count, totalTenge, hasUnpricedItems, addItem, removeItem, setQty, clear };
-  }, [items, addItem, removeItem, setQty, clear]);
+    return {
+      items,
+      count,
+      totalTenge,
+      hasUnpricedItems,
+      addItem,
+      removeItem,
+      setQty,
+      clear,
+      loadItems,
+    };
+  }, [items, addItem, removeItem, setQty, clear, loadItems]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
