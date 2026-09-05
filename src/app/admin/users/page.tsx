@@ -1,8 +1,5 @@
 import { AdminPageHeader } from "@/components/admin/page-header";
-import {
-  UsersManager,
-  type UserListRow,
-} from "@/components/admin/users/users-manager";
+import { UsersManager, type UserListRow } from "@/components/admin/users/users-manager";
 import { userAdminRepository } from "@/server/repositories/admin";
 
 export const dynamic = "force-dynamic";

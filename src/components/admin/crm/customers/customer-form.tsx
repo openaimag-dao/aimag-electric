@@ -106,7 +106,9 @@ export function CustomerForm({
         <NativeSelect id="ownerId" {...register("ownerId")}>
           <option value="">— не назначен —</option>
           {managers.map((m) => (
-            <option key={m.id} value={m.id}>{m.label}</option>
+            <option key={m.id} value={m.id}>
+              {m.label}
+            </option>
           ))}
         </NativeSelect>
       </Field>

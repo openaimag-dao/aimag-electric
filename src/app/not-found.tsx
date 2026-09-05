@@ -13,10 +13,16 @@ export default function NotFound() {
         Возможно, товар снят с продажи или ссылка устарела. Проверьте адрес или вернитесь в каталог.
       </p>
       <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-        <Link href="/" className="inline-flex items-center gap-2 rounded-md bg-signal px-5 py-2.5 text-sm font-semibold text-steel-950 hover:bg-signal-400">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 rounded-md bg-signal px-5 py-2.5 text-sm font-semibold text-steel-950 hover:bg-signal-400"
+        >
           <ArrowLeft className="size-4" /> На главную
         </Link>
-        <Link href="/catalog" className="inline-flex items-center rounded-md border border-border px-5 py-2.5 text-sm font-medium text-primary hover:bg-secondary">
+        <Link
+          href="/catalog"
+          className="inline-flex items-center rounded-md border border-border px-5 py-2.5 text-sm font-medium text-primary hover:bg-secondary"
+        >
           Открыть каталог
         </Link>
       </div>

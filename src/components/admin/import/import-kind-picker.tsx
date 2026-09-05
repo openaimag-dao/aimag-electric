@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Package,
-  FolderTree,
-  Factory,
-  Tag,
-  Warehouse,
-  type LucideIcon,
-} from "lucide-react";
+import { Package, FolderTree, Factory, Tag, Warehouse, type LucideIcon } from "lucide-react";
 
 import type { ImportKind } from "@/types/import";
 

@@ -18,33 +18,26 @@ function pageWindow(current: number, total: number): (number | "…")[] {
   return pages;
 }
 
-export function CatalogPagination({
-  page,
-  pageCount,
-}: {
-  page: number;
-  pageCount: number;
-}) {
+export function CatalogPagination({ page, pageCount }: { page: number; pageCount: number }) {
   const { update } = useCatalogFilters();
   if (pageCount <= 1) return null;
 
-  const goTo = (p: number) =>
-    update((prev) => ({ ...prev, page: p }), { keepPage: true });
+  const goTo = (p: number) => update((prev) => ({ ...prev, page: p }), { keepPage: true });
 
   const pages = pageWindow(page, pageCount);
   const btn =
     "inline-flex h-10 min-w-10 items-center justify-center rounded-md border px-3 text-sm font-medium transition-colors";
 
   return (
-    <nav
-      className="flex items-center justify-center gap-1.5"
-      aria-label="Пагинация каталога"
-    >
+    <nav className="flex items-center justify-center gap-1.5" aria-label="Пагинация каталога">
       <button
         type="button"
         onClick={() => goTo(page - 1)}
         disabled={page <= 1}
-        className={cn(btn, "border-border bg-card text-primary hover:bg-secondary disabled:pointer-events-none disabled:opacity-40")}
+        className={cn(
+          btn,
+          "border-border bg-card text-primary hover:bg-secondary disabled:pointer-events-none disabled:opacity-40"
+        )}
         aria-label="Предыдущая страница"
       >
         <ChevronLeft className="size-4" />
@@ -77,7 +70,10 @@ export function CatalogPagination({
         type="button"
         onClick={() => goTo(page + 1)}
         disabled={page >= pageCount}
-        className={cn(btn, "border-border bg-card text-primary hover:bg-secondary disabled:pointer-events-none disabled:opacity-40")}
+        className={cn(
+          btn,
+          "border-border bg-card text-primary hover:bg-secondary disabled:pointer-events-none disabled:opacity-40"
+        )}
         aria-label="Следующая страница"
       >
         <ChevronRight className="size-4" />
