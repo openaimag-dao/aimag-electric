@@ -25,7 +25,10 @@ export interface PriceListRow extends PriceRow {
   unit: string;
 }
 
-interface Ref { id: string; label: string }
+interface Ref {
+  id: string;
+  label: string;
+}
 
 const kindMeta: Record<string, { label: string; variant: "muted" | "signal" | "stock" }> = {
   BASE: { label: "Базовая", variant: "muted" },
@@ -33,13 +36,7 @@ const kindMeta: Record<string, { label: string; variant: "muted" | "signal" | "s
   PROMO: { label: "Акция", variant: "stock" },
 };
 
-export function PricesManager({
-  rows,
-  products,
-}: {
-  rows: PriceListRow[];
-  products: Ref[];
-}) {
+export function PricesManager({ rows, products }: { rows: PriceListRow[]; products: Ref[] }) {
   const {
     query,
     setQuery,
@@ -53,10 +50,7 @@ export function PricesManager({
     deleting,
     setDeleting,
     closeDelete,
-  } = useCrudManager<PriceListRow, PriceRow>(
-    rows,
-    (r) => `${r.productTitle} ${r.productSku}`
-  );
+  } = useCrudManager<PriceListRow, PriceRow>(rows, (r) => `${r.productTitle} ${r.productSku}`);
 
   return (
     <div className="space-y-4">
@@ -101,10 +95,7 @@ export function PricesManager({
                   </TableCell>
                   <TableCell className="text-center text-muted-foreground">{row.minQty}</TableCell>
                   <TableCell>
-                    <RowActions
-                      onEdit={() => openEdit(row)}
-                      onDelete={() => setDeleting(row)}
-                    />
+                    <RowActions onEdit={() => openEdit(row)} onDelete={() => setDeleting(row)} />
                   </TableCell>
                 </TableRow>
               );

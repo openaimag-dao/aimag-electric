@@ -7,11 +7,7 @@ import { Button } from "@/components/ui/button";
 
 export function SignOutButton() {
   return (
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={() => signOut({ callbackUrl: "/" })}
-    >
+    <Button variant="outline" size="sm" onClick={() => signOut({ callbackUrl: "/" })}>
       <LogOut className="size-4" /> Выйти
     </Button>
   );

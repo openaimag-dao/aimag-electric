@@ -1,9 +1,6 @@
 import { cn } from "@/lib/utils";
 
-export const quoteStatusMeta: Record<
-  string,
-  { label: string; className: string }
-> = {
+export const quoteStatusMeta: Record<string, { label: string; className: string }> = {
   NEW: { label: "Новая", className: "bg-blue-50 text-blue-700" },
   IN_PROGRESS: { label: "В работе", className: "bg-amber-50 text-amber-700" },
   SENT: { label: "КП отправлено", className: "bg-purple-50 text-purple-700" },

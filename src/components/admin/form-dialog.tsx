@@ -19,13 +19,7 @@ interface FormDialogProps {
 }
 
 /** Shared modal shell for create/edit forms. Scrolls on small screens. */
-export function FormDialog({
-  open,
-  onOpenChange,
-  title,
-  description,
-  children,
-}: FormDialogProps) {
+export function FormDialog({ open, onOpenChange, title, description, children }: FormDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
