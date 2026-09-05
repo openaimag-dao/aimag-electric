@@ -11,6 +11,8 @@ import { CartProvider } from "@/components/cart/cart-provider";
 import { FavoritesProvider } from "@/components/favorites/favorites-provider";
 import { CompareProvider } from "@/components/compare/compare-provider";
 import { RecentlyViewedProvider } from "@/components/recently-viewed/recently-viewed-provider";
+import { getLocale } from "@/i18n/locale-cookie";
+import { getDictionary } from "@/i18n/get-dictionary";
 import "./globals.css";
 
 const sans = Inter({
@@ -88,10 +90,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const { organization, website } = buildOrganizationJsonLd();
+  const locale = await getLocale();
+  const dict = getDictionary(locale);
   return (
-    <html lang="ru" className={`${sans.variable} ${display.variable} ${mono.variable}`}>
+    <html lang={locale} className={`${sans.variable} ${display.variable} ${mono.variable}`}>
       <body className="flex min-h-screen flex-col font-sans">
         <script
           type="application/ld+json"
@@ -107,7 +111,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <FavoritesProvider>
               <CompareProvider>
                 <RecentlyViewedProvider>
-                  <Header />
+                  <Header locale={locale} dict={dict} />
                   <main className="flex-1">{children}</main>
                   <Footer />
                 </RecentlyViewedProvider>
