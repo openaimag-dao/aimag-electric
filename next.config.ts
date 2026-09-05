@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+import { imageRemotePatterns } from "./src/lib/image-hosts";
+
 const securityHeaders = [
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -32,7 +34,9 @@ const nextConfig: NextConfig = {
   output: "standalone",
   images: {
     formats: ["image/avif", "image/webp"],
-    remotePatterns: [{ protocol: "https", hostname: "**" }],
+    // See src/lib/image-hosts.ts — was a hostname wildcard, closed to an
+    // explicit allowlist (Blob storage + LEGACY_IMAGE_HOSTS bridge).
+    remotePatterns: imageRemotePatterns(),
   },
   // The KP-PDF route loads font files via a runtime path.join(), which the
   // bundler's static file tracer can't always follow — make sure they ship
