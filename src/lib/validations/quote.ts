@@ -11,6 +11,14 @@ export const quoteItemSchema = z.object({
   note: z.string().max(500).nullable().optional(),
 });
 
+/** A file uploaded via uploadQuoteAttachment and attached to the request — see server/actions/quote-actions.ts. */
+export const quoteAttachmentSchema = z.object({
+  url: z.string().url(),
+  filename: z.string().min(1).max(255),
+  size: z.number().int().positive(),
+  contentType: z.string().min(1).max(120),
+});
+
 export const quoteSchema = z
   .object({
     title: z.string().max(160).optional().or(z.literal("")),
@@ -23,6 +31,9 @@ export const quoteSchema = z
     email: z.string().email("Некорректный e-mail").optional().or(z.literal("")),
     message: z.string().max(2000, "Слишком длинное сообщение").optional().or(z.literal("")),
     items: z.array(quoteItemSchema).max(200).optional(),
+    attachments: z.array(quoteAttachmentSchema).max(5).optional(),
+    /** Honeypot — real users never see or fill this field; see quote-form.tsx. Non-empty means a bot filled it. */
+    website: z.string().max(200).optional().or(z.literal("")),
   })
   .refine((v) => (v.items && v.items.length > 0) || (v.message && v.message.trim().length >= 5), {
     message: "Опишите позицию или добавьте товары в проект",
@@ -31,3 +42,4 @@ export const quoteSchema = z
 
 export type QuoteInput = z.infer<typeof quoteSchema>;
 export type QuoteItemInput = z.infer<typeof quoteItemSchema>;
+export type QuoteAttachmentInput = z.infer<typeof quoteAttachmentSchema>;

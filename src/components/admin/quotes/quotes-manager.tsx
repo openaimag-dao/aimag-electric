@@ -34,6 +34,7 @@ import {
   Check,
   X,
   Pencil,
+  Paperclip,
 } from "lucide-react";
 import { TableToolbar } from "@/components/admin/table-toolbar";
 import { FormDialog } from "@/components/admin/form-dialog";
@@ -46,7 +47,15 @@ import {
   updateQuoteItemPrice,
 } from "@/server/actions/admin";
 import { formatTiyn, formatTenge, tiynToTenge, tengeToTiyn } from "@/lib/money";
+import { formatFileSize } from "@/lib/uploads";
 import { cn } from "@/lib/utils";
+
+export interface QuoteAttachmentRow {
+  id: string;
+  url: string;
+  filename: string;
+  size: number;
+}
 
 export interface QuoteItemRow {
   id: string;
@@ -77,6 +86,7 @@ export interface QuoteListRow {
   responseNote: string | null;
   hasOrder: boolean;
   items: QuoteItemRow[];
+  attachments: QuoteAttachmentRow[];
   /** CRM Customer this quote auto-linked to (exact phone/email match, or a newly created lead) — null only if the link itself failed. */
   customerId: string | null;
   /** The customer's assigned manager (round-robin on first link), if any. */
@@ -421,6 +431,32 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
               >
                 Заказ уже создан — открыть список заказов
               </Link>
+            )}
+
+            {viewing.attachments.length > 0 && (
+              <div className="pt-2">
+                <div className="mb-1 text-muted-foreground">
+                  Файлы от клиента ({viewing.attachments.length})
+                </div>
+                <ul className="space-y-1.5">
+                  {viewing.attachments.map((a) => (
+                    <li key={a.id}>
+                      <a
+                        href={a.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 rounded-lg border border-border bg-secondary/40 px-2.5 py-1.5 text-xs hover:border-signal/60"
+                      >
+                        <Paperclip className="size-3.5 shrink-0 text-muted-foreground" />
+                        <span className="truncate text-primary">{a.filename}</span>
+                        <span className="ml-auto shrink-0 text-muted-foreground">
+                          {formatFileSize(a.size)}
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
 
             {viewing.items.length > 0 && (

@@ -15,7 +15,7 @@
  * import, until `scripts/migrate-images-to-blob.ts` re-hosts them on Blob.
  * Find the real hosts to list there with `npx tsx scripts/list-image-hosts.ts`.
  */
-const BLOB_HOST_PATTERN = /\.public\.blob\.vercel-storage\.com$/;
+import { BLOB_HOST_PATTERN } from "./blob-storage";
 
 function legacyHosts(): string[] {
   return (process.env.LEGACY_IMAGE_HOSTS ?? "")

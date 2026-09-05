@@ -361,6 +361,7 @@ model Quote {
   customer      Customer?   @relation(fields: [customerId], references: [id])
   deal          Deal?
   items         QuoteItem[]
+  attachments   QuoteAttachment[]
   /**
    * Unguessable public link token — lets a customer open, approve, or
    * reject this quote at /kp/[token] without registering (Phase 15).
@@ -376,6 +377,26 @@ model Quote {
   @@index([status])
   @@index([createdAt])
   @@index([customerId])
+}
+
+/**
+ * A file the customer attached to their КП request (spec sheet, nameplate
+ * photo, BOM in Excel/PDF) — uploaded to Vercel Blob before the Quote itself
+ * exists, then linked here on submit. See src/lib/blob-storage.ts: Blob has
+ * no real private-ACL mode on this plan, so "private" here means the URL is
+ * never surfaced in public UI, only to staff in /admin/quotes.
+ */
+model QuoteAttachment {
+  id          String   @id @default(cuid())
+  quoteId     String
+  quote       Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  url         String
+  filename    String
+  size        Int
+  contentType String
+  createdAt   DateTime @default(now())
+
+  @@index([quoteId])
 }
 
 // ---------------------------------------------------------------------------
