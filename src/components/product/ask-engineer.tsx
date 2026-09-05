@@ -19,6 +19,7 @@ export function AskEngineer({ product }: { product: ProductDetailDTO }) {
         <QuoteDialog
           variant="outline"
           triggerLabel="Задать вопрос инженеру"
+          analyticsSource="ask_engineer"
           defaultMessage={`Вопрос по товару «${product.title}» (арт. ${product.sku}):`}
           items={[
             {

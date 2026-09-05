@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { downloadBase64Xlsx, downloadBase64Pdf } from "@/lib/admin/download-file";
 import { exportCartXlsx, exportCartPdf, shareCart } from "@/server/actions";
+import { track } from "@/lib/analytics";
 import type { CartItem } from "@/types/cart";
 
 /** Export/share actions for the current cart — spec sheet (xlsx/PDF) and a shareable short link. */
@@ -27,6 +28,7 @@ export function CartExportPanel({ items }: { items: CartItem[] }) {
       return;
     }
     downloadBase64Xlsx(result.data.base64, result.data.filename);
+    track("cart_export", { format: "xlsx", itemCount: items.length });
     if (result.data.droppedCount > 0) {
       toast.info(`${result.data.droppedCount} позиц. пропущены — их больше нет в каталоге`);
     }
@@ -41,6 +43,7 @@ export function CartExportPanel({ items }: { items: CartItem[] }) {
       return;
     }
     downloadBase64Pdf(result.data.base64, result.data.filename);
+    track("cart_export", { format: "pdf", itemCount: items.length });
     if (result.data.droppedCount > 0) {
       toast.info(`${result.data.droppedCount} позиц. пропущены — их больше нет в каталоге`);
     }
@@ -54,6 +57,7 @@ export function CartExportPanel({ items }: { items: CartItem[] }) {
       toast.error(result.error ?? "Не удалось создать ссылку");
       return;
     }
+    track("cart_share", { itemCount: items.length });
     const url = `${window.location.origin}/cart/s/${result.data.code}`;
     try {
       await navigator.clipboard.writeText(url);

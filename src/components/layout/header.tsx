@@ -59,7 +59,7 @@ export function Header() {
           <FavoritesBadge />
           <CartBadge />
           <AccountLink />
-          <QuoteDialog />
+          <QuoteDialog analyticsSource="header" />
         </div>
 
         <MobileNav />

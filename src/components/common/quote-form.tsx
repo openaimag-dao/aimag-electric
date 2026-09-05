@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { quoteSchema, type QuoteInput } from "@/lib/validations/quote";
 import { submitQuote, uploadQuoteAttachment, type QuoteAttachmentUpload } from "@/server/actions";
 import { formatTenge } from "@/lib/money";
+import { track } from "@/lib/analytics";
 import type { CartItem } from "@/types/cart";
 
 interface QuoteFormProps {
@@ -83,6 +84,10 @@ export function QuoteForm({ onSuccess, items, defaultTitle, defaultMessage }: Qu
       return;
     }
     setServerError(null);
+    track("quote_submit", {
+      itemCount: items?.length ?? 0,
+      attachmentCount: attachments.length,
+    });
     reset();
     setAttachments([]);
     setSubmitted(true);

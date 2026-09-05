@@ -14,6 +14,7 @@ import {
   type SearchSuggestion,
 } from "@/server/actions/search-actions";
 import { QuoteDialog } from "@/components/common/quote-dialog";
+import { track } from "@/lib/analytics";
 
 interface SearchBarProps {
   className?: string;
@@ -69,6 +70,7 @@ export function SearchBar({ className, onSubmitted }: SearchBarProps) {
   }, []);
 
   function goToCatalog(q: string) {
+    track("search", { query: q });
     router.push(`/catalog?q=${encodeURIComponent(q)}`);
     setOpen(false);
     onSubmitted?.();
@@ -210,6 +212,7 @@ export function SearchBar({ className, onSubmitted }: SearchBarProps) {
                     triggerLabel="Запросить товар"
                     variant="outline"
                     size="sm"
+                    analyticsSource="search_no_results"
                     defaultMessage={`Не нашёл в каталоге: "${query.trim()}"`}
                   />
                 </div>

@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import type { CatalogFilters } from "@/types/catalog";
 import { parseFilters, filtersToParams } from "@/lib/catalog-url";
+import { track } from "@/lib/analytics";
 
 type Updater = (prev: CatalogFilters) => CatalogFilters;
 
@@ -43,6 +44,7 @@ export function useCatalogFilters() {
   /** Toggle a value inside an array-typed facet. */
   const toggle = React.useCallback(
     <K extends "categories" | "manufacturers" | "materials">(key: K, value: string) => {
+      track("catalog_filter_apply", { facet: key, value });
       update((prev) => {
         const set = new Set(prev[key]);
         set.has(value) ? set.delete(value) : set.add(value);
@@ -54,6 +56,7 @@ export function useCatalogFilters() {
 
   const toggleNum = React.useCallback(
     (key: "cores" | "crossSections" | "voltages", value: number) => {
+      track("catalog_filter_apply", { facet: key, value });
       update((prev) => {
         const set = new Set(prev[key]);
         set.has(value) ? set.delete(value) : set.add(value);
@@ -66,6 +69,7 @@ export function useCatalogFilters() {
   /** Toggle a value inside a dynamic (per-attribute) facet. */
   const toggleAttr = React.useCallback(
     (key: string, value: string) => {
+      track("catalog_filter_apply", { facet: key, value });
       update((prev) => {
         const set = new Set(prev.attrs[key] ?? []);
         set.has(value) ? set.delete(value) : set.add(value);

@@ -22,6 +22,7 @@ import { AskEngineer } from "@/components/product/ask-engineer";
 import { RelatedProducts } from "@/components/product/related-products";
 import { AnalogsCallout } from "@/components/product/analogs-callout";
 import { RecordRecentlyViewed } from "@/components/recently-viewed/record-recently-viewed";
+import { ProductViewTracker } from "@/components/product/product-view-tracker";
 import { RecentlyViewedSection } from "@/components/recently-viewed/recently-viewed-section";
 
 interface PageProps {
@@ -121,6 +122,12 @@ export default async function ProductPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       <RecordRecentlyViewed productId={product.id} />
+      <ProductViewTracker
+        productId={product.id}
+        sku={product.sku}
+        categorySlug={product.categorySlug}
+        price={product.price}
+      />
 
       <div className="container py-6">
         {/* Breadcrumb */}

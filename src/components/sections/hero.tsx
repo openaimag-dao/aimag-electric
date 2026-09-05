@@ -92,7 +92,7 @@ export function Hero({
           </div>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <QuoteDialog>
+            <QuoteDialog analyticsSource="hero">
               <Button variant="signal" size="lg">
                 <FileText />
                 Получить КП за 15 минут

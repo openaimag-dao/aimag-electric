@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import { sortOptions } from "@/config/catalog-sort";
 import { useCatalogFilters } from "@/hooks/use-catalog-filters";
+import { track } from "@/lib/analytics";
 import type { SortKey } from "@/types/catalog";
 
 export function SortSelect() {
@@ -19,9 +20,10 @@ export function SortSelect() {
   return (
     <Select
       value={filters.sort}
-      onValueChange={(value) =>
-        update((prev) => ({ ...prev, sort: value as SortKey }), { keepPage: true })
-      }
+      onValueChange={(value) => {
+        track("sort_change", { sort: value });
+        update((prev) => ({ ...prev, sort: value as SortKey }), { keepPage: true });
+      }}
     >
       <SelectTrigger className="w-full min-w-[210px] sm:w-auto">
         <span className="inline-flex items-center gap-2 text-muted-foreground">

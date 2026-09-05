@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { saveCartAsProject } from "@/server/actions/project-actions";
+import { track } from "@/lib/analytics";
 import type { CartItem } from "@/types/cart";
 
 /** Persists the current cart as a named, saved Project — the cart itself stays untouched (client-side, ephemeral). */
@@ -64,6 +65,7 @@ export function SaveAsProjectButton({ items }: { items: CartItem[] }) {
       toast.error(result.error ?? "Не удалось сохранить проект");
       return;
     }
+    track("save_as_project", { itemCount: items.length });
     toast.success("Проект сохранён");
     router.push(`/account/projects/${result.data.id}`);
   }

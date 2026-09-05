@@ -51,7 +51,11 @@ export function Process() {
         </div>
 
         <div className="mt-12 flex justify-center">
-          <QuoteDialog size="lg" triggerLabel="Начать — отправить заявку" />
+          <QuoteDialog
+            size="lg"
+            triggerLabel="Начать — отправить заявку"
+            analyticsSource="process"
+          />
         </div>
       </div>
     </section>
