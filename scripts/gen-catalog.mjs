@@ -73,10 +73,25 @@ for (const cat of categories) {
     for (const cs of cat.cs) {
       // limit combinations per category to keep dataset ~ 8-14 each
       if (idxInCat >= 12) break;
-      const voltage = cat.voltage[(idxInCat + (cores || 0)) % cat.voltage.length];
-      const material = cat.material[idxInCat % cat.material.length];
+      let voltage = cat.voltage[(idxInCat + (cores || 0)) % cat.voltage.length];
+      let material = cat.material[idxInCat % cat.material.length];
       const brand = brands[idxInCat % brands.length];
       const prefix = prefixes[idxInCat % prefixes.length];
+
+      // Deterministic GOST facts override the category-level cycling above
+      // for markings with only one valid material/voltage class — see
+      // src/lib/validation/cable-rules.ts (kept in sync with this list).
+      if (prefix.includes("АВВГ")) {
+        material = "Алюминий";
+        if (![0.66, 1].includes(voltage)) voltage = 1;
+      } else if (prefix.includes("ВВГ")) {
+        material = "Медь";
+        if (![0.66, 1].includes(voltage)) voltage = 1;
+      } else if (prefix.includes("СИП")) {
+        material = "Алюминий";
+      } else if (prefix.includes("ПуГВ") || prefix.includes("ПВС") || prefix.includes("ПВ-3")) {
+        material = "Медь";
+      }
 
       let spec = "";
       if (cores && cs) spec = ` ${cores}×${cs}`;

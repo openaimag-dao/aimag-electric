@@ -3,6 +3,7 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import { qualityWhere } from "@/lib/admin/product-quality";
 import { withQuoteColumns } from "@/server/repositories/quote-self-heal";
+import { withProductColumns } from "@/server/repositories/product-self-heal";
 import { orderAdminRepository } from "@/server/repositories/admin/order-admin-repository";
 import { searchLogRepository } from "@/server/repositories/search-log-repository";
 
@@ -41,11 +42,13 @@ export const adminService = {
           take: 5,
         })
       ),
-      prisma.product.findMany({
-        orderBy: { popularity: "desc" },
-        take: 5,
-        include: { brand: true, category: true },
-      }),
+      withProductColumns(() =>
+        prisma.product.findMany({
+          orderBy: { popularity: "desc" },
+          take: 5,
+          include: { brand: true, category: true },
+        })
+      ),
       withQuoteColumns(() => prisma.quote.count({ where: { order: { isNot: null } } })),
       withQuoteColumns(() => prisma.quote.count({ where: { status: "WON", order: { is: null } } })),
     ]);

@@ -49,6 +49,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
     badge: p.badge,
     popularity: p.popularity,
     published: p.published,
+    isFeatured: p.isFeatured,
     categoryId: p.categoryId,
     brandId: p.brandId,
     categoryTitle: p.category.title,

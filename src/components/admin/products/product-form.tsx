@@ -33,6 +33,7 @@ export interface ProductRow {
   badge: string | null;
   popularity: number;
   published: boolean;
+  isFeatured: boolean;
   categoryId: string;
   brandId: string;
 }
@@ -74,6 +75,7 @@ export function ProductForm({
       badge: (initial?.badge as ProductFormInput["badge"]) ?? "",
       popularity: initial?.popularity ?? 0,
       published: initial?.published ?? true,
+      isFeatured: initial?.isFeatured ?? false,
       categoryId: initial?.categoryId ?? "",
       brandId: initial?.brandId ?? "",
     },
@@ -221,6 +223,22 @@ export function ProductForm({
           name="published"
           render={({ field }) => (
             <Switch id="published" checked={field.value} onCheckedChange={field.onChange} />
+          )}
+        />
+      </div>
+
+      <div className="flex items-center justify-between rounded-lg border border-border bg-secondary/40 px-4 py-3">
+        <div>
+          <Label htmlFor="isFeatured">В витрине на главной</Label>
+          <p className="text-xs text-muted-foreground">
+            Показывать в подборке популярных товаров на главной странице.
+          </p>
+        </div>
+        <Controller
+          control={control}
+          name="isFeatured"
+          render={({ field }) => (
+            <Switch id="isFeatured" checked={field.value} onCheckedChange={field.onChange} />
           )}
         />
       </div>

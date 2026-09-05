@@ -168,6 +168,11 @@ model Product {
   badge       ProductBadge?
   popularity  Int           @default(0)
   published   Boolean       @default(true)
+  // Manual homepage-showcase pick — staff-curated, independent of `popularity`
+  // (which is also used for search ranking and can't double as "safe to show
+  // in the hero showcase"). See product-self-heal.ts: this DB has no tracked
+  // migration history, so the column is added at runtime, not via `migrate deploy`.
+  isFeatured  Boolean       @default(false)
 
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
@@ -195,6 +200,7 @@ model Product {
   @@index([published, brandId, popularity])
   @@index([published, popularity])
   @@index([published, createdAt])
+  @@index([published, isFeatured, popularity])
 }
 
 model ProductImage {

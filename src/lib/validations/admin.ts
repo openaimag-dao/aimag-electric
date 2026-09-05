@@ -69,6 +69,7 @@ export const productFormSchema = z.object({
   badge: z.union([productBadge, z.literal("")]).optional(),
   popularity: z.coerce.number().int().min(0).default(0),
   published: z.coerce.boolean().default(true),
+  isFeatured: z.coerce.boolean().default(false),
   categoryId: z.string().min(1, "Выберите категорию"),
   brandId: z.string().min(1, "Выберите производителя"),
 });
