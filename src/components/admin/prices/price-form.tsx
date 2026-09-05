@@ -63,7 +63,9 @@ export function PriceForm({
         <NativeSelect id="productId" {...register("productId")}>
           <option value="">— выберите —</option>
           {products.map((p) => (
-            <option key={p.id} value={p.id}>{p.label}</option>
+            <option key={p.id} value={p.id}>
+              {p.label}
+            </option>
           ))}
         </NativeSelect>
       </Field>
@@ -75,7 +77,12 @@ export function PriceForm({
             <option value="PROMO">Акция</option>
           </NativeSelect>
         </Field>
-        <Field label="Цена, ₸" htmlFor="amountTenge" error={errors.amountTenge} hint="пусто = по запросу">
+        <Field
+          label="Цена, ₸"
+          htmlFor="amountTenge"
+          error={errors.amountTenge}
+          hint="пусто = по запросу"
+        >
           <Input id="amountTenge" type="number" step="0.01" {...register("amountTenge")} />
         </Field>
         <Field label="От кол-ва" htmlFor="minQty" error={errors.minQty}>

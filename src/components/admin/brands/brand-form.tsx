@@ -17,13 +17,7 @@ export interface BrandRow {
   origin: string | null;
 }
 
-export function BrandForm({
-  initial,
-  onDone,
-}: {
-  initial?: BrandRow;
-  onDone: () => void;
-}) {
+export function BrandForm({ initial, onDone }: { initial?: BrandRow; onDone: () => void }) {
   const isEdit = Boolean(initial);
   const {
     register,

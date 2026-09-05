@@ -1,8 +1,5 @@
 import type { Metadata } from "next";
-import {
-  StaticPage,
-  CompanyRequisites,
-} from "@/components/static/static-page";
+import { StaticPage, CompanyRequisites } from "@/components/static/static-page";
 
 export const metadata: Metadata = {
   title: "Контакты — AIMAG ELECTRIC",
@@ -20,8 +17,7 @@ export default function ContactsPage() {
             +7 (705) 615-17-17
           </a>
           <p className="mt-1 text-sm text-gray-500">
-            Звонки, WhatsApp — по вопросам заказа, доставки и подбора
-            продукции.
+            Звонки, WhatsApp — по вопросам заказа, доставки и подбора продукции.
           </p>
         </div>
         <div className="rounded-lg border p-5">
@@ -35,9 +31,8 @@ export default function ContactsPage() {
 
       <h2 className="text-xl font-semibold">Для юридических лиц</h2>
       <p>
-        Отправьте нам спецификацию или список закупки — подготовим
-        коммерческое предложение и счёт. Заявки принимаем по телефону и через
-        форму запроса КП на сайте.
+        Отправьте нам спецификацию или список закупки — подготовим коммерческое предложение и счёт.
+        Заявки принимаем по телефону и через форму запроса КП на сайте.
       </p>
 
       <CompanyRequisites />

@@ -1,8 +1,5 @@
 import { AdminPageHeader } from "@/components/admin/page-header";
-import {
-  BrandsManager,
-  type BrandListRow,
-} from "@/components/admin/brands/brands-manager";
+import { BrandsManager, type BrandListRow } from "@/components/admin/brands/brands-manager";
 import { brandAdminRepository } from "@/server/repositories/admin";
 
 export const dynamic = "force-dynamic";

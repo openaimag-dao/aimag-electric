@@ -9,10 +9,12 @@ import { AccountLink } from "@/components/auth/account-link";
 import { CartBadge } from "@/components/cart/cart-badge";
 import { FavoritesBadge } from "@/components/favorites/favorites-badge";
 import { CompareBadge } from "@/components/compare/compare-badge";
-import { mainNav } from "@/config/navigation";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { siteConfig } from "@/config/site";
+import type { Locale } from "@/i18n/config";
+import type { Dictionary } from "@/i18n/types";
 
-export function Header() {
+export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/85 backdrop-blur-md">
       {/* Utility strip */}
@@ -39,7 +41,7 @@ export function Header() {
         <Logo />
 
         <nav aria-label="Основная навигация" className="ml-4 hidden items-center gap-1 md:flex">
-          {mainNav.map((item) => (
+          {dict.nav.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -55,6 +57,7 @@ export function Header() {
         </div>
 
         <div className="ml-auto hidden items-center gap-2 md:flex lg:ml-3">
+          <LanguageSwitcher locale={locale} dict={dict} />
           <CompareBadge />
           <FavoritesBadge />
           <CartBadge />
@@ -62,7 +65,7 @@ export function Header() {
           <QuoteDialog />
         </div>
 
-        <MobileNav />
+        <MobileNav dict={dict} />
       </div>
     </header>
   );
