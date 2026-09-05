@@ -1,6 +1,25 @@
 // One-off generator → prints TS for src/config/catalog-data.ts
 // Deterministic: no Math.random, stable ordering.
 
+// Mirrors src/lib/slugify.ts — duplicated here since this is a standalone
+// .mjs codegen script with no bundler, not runtime application code.
+const CYRILLIC_MAP = {
+  а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "e", ж: "zh", з: "z",
+  и: "i", й: "y", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r",
+  с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "ts", ч: "ch", ш: "sh",
+  щ: "sch", ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya",
+};
+function slugify(input) {
+  return input
+    .toLowerCase()
+    .split("")
+    .map((ch) => (CYRILLIC_MAP[ch] !== undefined ? CYRILLIC_MAP[ch] : ch))
+    .join("")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+}
+
 const categories = [
   { slug: "kabeli", name: "Кабели", unit: "м", material: ["Медь", "Алюминий"], voltage: [0.66, 1, 6, 10], cores: [2, 3, 4, 5], cs: [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70] },
   { slug: "provoda", name: "Провода", unit: "м", material: ["Медь", "Алюминий"], voltage: [0.4, 0.66, 1], cores: [1, 2, 3, 4], cs: [1.5, 2.5, 4, 6, 16, 25, 35, 70, 95] },
@@ -76,14 +95,15 @@ for (const cat of categories) {
       created.setDate(created.getDate() - daysAgo);
 
       const badge = badges[(counter + idxInCat) % badges.length];
+      const sku = `${cat.slug.slice(0, 3).toUpperCase()}-${1000 + counter}`;
       const record = {
         id: `p${String(counter).padStart(3, "0")}`,
-        slug: `${cat.slug}-${idxInCat}-${counter}`,
+        slug: `${slugify(title)}-${sku.toLowerCase()}`,
         title,
         categorySlug: cat.slug,
         category: cat.name,
         manufacturer: brand,
-        sku: `${cat.slug.slice(0, 3).toUpperCase()}-${1000 + counter}`,
+        sku,
         price: priceFor(cat.slug, cs, voltage),
         unit: cat.unit,
         availability,

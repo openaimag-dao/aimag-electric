@@ -2,11 +2,12 @@ export const dynamic = "force-dynamic";
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
 import { availabilityLabels } from "@/config/catalog-sort";
+import { slugRedirects } from "@/config/slug-redirects";
 import { productService } from "@/server/services";
 import { buildProductJsonLd, averageRating } from "@/lib/product-jsonld";
 import { formatTenge, tiynToTenge } from "@/lib/money";
@@ -65,7 +66,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function ProductPage({ params }: PageProps) {
   const { slug } = await params;
   const product = await productService.getBySlug(slug);
-  if (!product) notFound();
+  if (!product) {
+    const newSlug = slugRedirects[slug];
+    if (newSlug) permanentRedirect(`/catalog/${newSlug}`);
+    notFound();
+  }
 
   const related = await productService.getRelated(product);
   const analogs =

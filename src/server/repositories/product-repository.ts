@@ -73,7 +73,7 @@ export const productRepository = {
   allSlugs() {
     return prisma.product.findMany({
       where: { published: true },
-      select: { slug: true },
+      select: { slug: true, updatedAt: true },
     });
   },
 
