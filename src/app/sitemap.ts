@@ -1,7 +1,12 @@
 import type { MetadataRoute } from "next";
 
 import { siteConfig } from "@/config/site";
-import { productRepository, categoryRepository } from "@/server/repositories";
+import {
+  productRepository,
+  categoryRepository,
+  postRepository,
+  caseStudyRepository,
+} from "@/server/repositories";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +41,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: base, lastModified: now, changeFrequency: "weekly", priority: 1 },
     { url: `${base}/catalog`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
+    { url: `${base}/blog`, lastModified: now, changeFrequency: "weekly", priority: 0.6 },
+    { url: `${base}/projects`, lastModified: now, changeFrequency: "weekly", priority: 0.6 },
     ...STATIC_CONTENT_PAGES.map((p) => ({
       url: `${base}${p.path}`,
       lastModified: now,
@@ -46,11 +53,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   let productRoutes: MetadataRoute.Sitemap = [];
   let categoryRoutes: MetadataRoute.Sitemap = [];
+  let postRoutes: MetadataRoute.Sitemap = [];
+  let caseStudyRoutes: MetadataRoute.Sitemap = [];
 
   try {
-    const [products, categories] = await Promise.all([
+    const [products, categories, posts, caseStudies] = await Promise.all([
       productRepository.allSlugs(),
       categoryRepository.findMany(),
+      postRepository.allSlugs(),
+      caseStudyRepository.allSlugs(),
     ]);
 
     productRoutes = products.map((p) => ({
@@ -66,9 +77,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly" as const,
       priority: 0.6,
     }));
+
+    postRoutes = posts.map((p) => ({
+      url: `${base}/blog/${p.slug}`,
+      lastModified: p.updatedAt,
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
+    }));
+
+    caseStudyRoutes = caseStudies.map((c) => ({
+      url: `${base}/projects/${c.slug}`,
+      lastModified: c.updatedAt,
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
+    }));
   } catch {
     // If the DB is unreachable at build/generation time, still return static routes.
   }
 
-  return [...staticRoutes, ...categoryRoutes, ...productRoutes];
+  return [...staticRoutes, ...categoryRoutes, ...productRoutes, ...postRoutes, ...caseStudyRoutes];
 }

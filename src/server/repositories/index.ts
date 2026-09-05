@@ -6,3 +6,5 @@ export { notificationRepository } from "./notification-repository";
 export { attributeRepository } from "./attribute-repository";
 export { projectRepository, ProjectAccessError } from "./project-repository";
 export { orderRepository } from "./order-repository";
+export { postRepository } from "./post-repository";
+export { caseStudyRepository } from "./case-study-repository";

@@ -18,20 +18,22 @@ import {
   Articles,
   Cta,
 } from "@/components/sections";
-import { homeService } from "@/server/services";
+import { homeService, postService, caseStudyService } from "@/server/services";
 
 /**
  * AIMAG ELECTRIC — homepage. All catalog-driven sections (Hero links,
- * Categories, Popular products, Manufacturers) are sourced from the database
- * via homeService; static marketing sections (Features, Process, Projects,
- * Articles) remain in config as editorial content.
+ * Categories, Popular products, Manufacturers, Projects, Articles) are
+ * sourced from the database; Features/Process stay in config as static
+ * editorial copy about how the company works, not content that gets added to.
  */
 export default async function HomePage() {
-  const [categories, popular, brands, productCount] = await Promise.all([
+  const [categories, popular, brands, productCount, posts, caseStudies] = await Promise.all([
     homeService.categories(),
     homeService.popularProducts(8),
     homeService.brands(),
     homeService.productCount(),
+    postService.list(3),
+    caseStudyService.list(3),
   ]);
 
   return (
@@ -42,8 +44,8 @@ export default async function HomePage() {
       <Manufacturers brands={brands} />
       <Features />
       <Process />
-      <Projects />
-      <Articles />
+      <Projects caseStudies={caseStudies} />
+      <Articles posts={posts} />
       <Cta />
     </>
   );

@@ -798,3 +798,45 @@ model VerificationToken {
 
   @@unique([identifier, token])
 }
+
+/** Blog article — powers /blog and the homepage "Экспертиза и разборы" section. */
+model Post {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  excerpt     String
+  content     String   @db.Text
+  category    String
+  readingTime String
+  published   Boolean  @default(true)
+  publishedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([published, publishedAt])
+}
+
+/**
+ * A completed/delivered project shown as a portfolio case study — powers
+ * /projects and the homepage "Поставки на объекты" section. Not to be
+ * confused with `Project` (a customer's own procurement BOM under
+ * /account/projects) — different feature entirely.
+ */
+model CaseStudy {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  scope       String
+  description String?  @db.Text
+  location    String
+  year        String
+  metric      String
+  metricLabel String
+  category    String
+  published   Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([published, order])
+}

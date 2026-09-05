@@ -17,6 +17,8 @@ import {
   Image as ImageIcon,
   Building2,
   Truck,
+  Newspaper,
+  HardHat,
 } from "lucide-react";
 
 export interface AdminNavItem {
@@ -45,4 +47,6 @@ export const adminNav: AdminNavItem[] = [
   { label: "CRM: клиенты", href: "/admin/crm/customers", icon: Contact },
   { label: "CRM: сделки", href: "/admin/crm/deals", icon: KanbanSquare },
   { label: "Импорт", href: "/admin/import", icon: Upload },
+  { label: "Блог", href: "/admin/blog", icon: Newspaper },
+  { label: "Проекты (кейсы)", href: "/admin/case-studies", icon: HardHat },
 ];

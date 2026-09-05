@@ -1,10 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight, Clock } from "lucide-react";
 
-import { SectionHeading } from "@/components/common/section-heading";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import type { PostDTO } from "@/server/dto";
+import { postService } from "@/server/services";
+
+export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Блог — AIMAG ELECTRIC",
+  description: "Практические материалы для инженеров, снабженцев и энергетиков.",
+};
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("ru-RU", {
@@ -14,28 +20,24 @@ function formatDate(iso: string) {
   });
 }
 
-/** Latest articles — positions the company as an engineering authority. Hidden entirely until there's something real to show. */
-export function Articles({ posts }: { posts: PostDTO[] }) {
-  if (posts.length === 0) return null;
+export default async function BlogPage() {
+  const posts = await postService.list();
 
   return (
-    <section className="border-b border-border bg-background py-20 md:py-24">
-      <div className="container">
-        <div className="flex flex-wrap items-end justify-between gap-6">
-          <SectionHeading
-            eyebrow="Блог"
-            title="Экспертиза и разборы"
-            description="Практические материалы для инженеров, снабженцев и энергетиков."
-          />
-          <Button asChild variant="outline">
-            <Link href="/blog">
-              Все статьи
-              <ArrowUpRight />
-            </Link>
-          </Button>
-        </div>
+    <div className="container py-10">
+      <h1 className="font-display text-3xl font-bold tracking-tight text-primary sm:text-4xl">
+        Блог
+      </h1>
+      <p className="mt-3 max-w-2xl text-muted-foreground">
+        Практические материалы для инженеров, снабженцев и энергетиков.
+      </p>
 
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
+      {posts.length === 0 ? (
+        <p className="mt-10 rounded-xl border border-dashed border-border bg-card p-8 text-center text-muted-foreground">
+          Статей пока нет — загляните позже.
+        </p>
+      ) : (
+        <div className="mt-10 grid gap-6 md:grid-cols-3">
           {posts.map((post) => (
             <Link
               key={post.slug}
@@ -49,9 +51,9 @@ export function Articles({ posts }: { posts: PostDTO[] }) {
                   {post.readingTime}
                 </span>
               </div>
-              <h3 className="mt-4 font-display text-lg font-semibold leading-snug text-primary transition-colors group-hover:text-signal-700">
+              <h2 className="mt-4 font-display text-lg font-semibold leading-snug text-primary transition-colors group-hover:text-signal-700">
                 {post.title}
-              </h3>
+              </h2>
               <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
                 {post.excerpt}
               </p>
@@ -67,7 +69,7 @@ export function Articles({ posts }: { posts: PostDTO[] }) {
             </Link>
           ))}
         </div>
-      </div>
-    </section>
+      )}
+    </div>
   );
 }

@@ -4,10 +4,12 @@ import { ArrowUpRight, MapPin } from "lucide-react";
 import { SectionHeading } from "@/components/common/section-heading";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { projects } from "@/config/projects";
+import type { CaseStudyDTO } from "@/server/dto";
 
-/** Realized projects — proof of scale for large-project buyers. */
-export function Projects() {
+/** Realized projects — proof of scale for large-project buyers. Hidden entirely until there's a real case study to show. */
+export function Projects({ caseStudies }: { caseStudies: CaseStudyDTO[] }) {
+  if (caseStudies.length === 0) return null;
+
   return (
     <section className="border-b border-steel-800 bg-steel-950 py-20 text-white md:py-24">
       <div className="container">
@@ -31,14 +33,14 @@ export function Projects() {
         </div>
 
         <div className="mt-12 grid gap-5 lg:grid-cols-3">
-          {projects.map((project) => (
+          {caseStudies.map((project) => (
             <Link
               key={project.slug}
               href={`/projects/${project.slug}`}
               className="group flex flex-col overflow-hidden rounded-2xl border border-steel-800 bg-steel-900/50 transition-colors hover:border-signal/50"
             >
               <div className="relative flex h-40 flex-col justify-end overflow-hidden border-b border-steel-800 p-6">
-                <div className="absolute inset-0 conductor-grid opacity-40" aria-hidden />
+                <div className="conductor-grid absolute inset-0 opacity-40" aria-hidden />
                 <div
                   className="absolute -right-10 -top-10 size-40 rounded-full bg-signal/15 blur-2xl"
                   aria-hidden
@@ -55,9 +57,7 @@ export function Projects() {
               </div>
 
               <div className="flex flex-1 flex-col p-6">
-                <h3 className="font-display text-lg font-semibold text-white">
-                  {project.title}
-                </h3>
+                <h3 className="font-display text-lg font-semibold text-white">{project.title}</h3>
                 <p className="mt-2 flex-1 text-sm leading-relaxed text-steel-400">
                   {project.scope}
                 </p>

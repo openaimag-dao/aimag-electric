@@ -172,6 +172,32 @@ const orderDocumentKind = z.enum([
   "OTHER",
 ]);
 
+export const postFormSchema = z.object({
+  slug,
+  title: z.string().min(2, "Укажите заголовок"),
+  excerpt: z.string().min(2, "Укажите короткое описание"),
+  content: z.string().min(2, "Укажите текст статьи"),
+  category: z.string().min(2, "Укажите рубрику"),
+  readingTime: z.string().min(1, "Укажите время чтения").default("5 мин"),
+  published: z.coerce.boolean().default(true),
+});
+export type PostFormInput = z.infer<typeof postFormSchema>;
+
+export const caseStudyFormSchema = z.object({
+  slug,
+  title: z.string().min(2, "Укажите название"),
+  scope: z.string().min(2, "Укажите суть поставки"),
+  description: z.string().optional().or(z.literal("")),
+  location: z.string().min(2, "Укажите город/регион"),
+  year: z.string().min(4, "Укажите год"),
+  metric: z.string().min(1, "Укажите показатель"),
+  metricLabel: z.string().min(2, "Укажите подпись показателя"),
+  category: z.string().min(2, "Укажите отрасль"),
+  order: z.coerce.number().int().min(0).default(0),
+  published: z.coerce.boolean().default(true),
+});
+export type CaseStudyFormInput = z.infer<typeof caseStudyFormSchema>;
+
 export const orderDocumentFormSchema = z.object({
   title: z.string().min(2, "Укажите название"),
   kind: orderDocumentKind.default("OTHER"),
