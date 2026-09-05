@@ -35,10 +35,7 @@ export function BrandsManager({ rows }: { rows: BrandListRow[] }) {
     deleting,
     setDeleting,
     closeDelete,
-  } = useCrudManager<BrandListRow, BrandRow>(
-    rows,
-    (r) => `${r.name} ${r.slug} ${r.origin ?? ""}`
-  );
+  } = useCrudManager<BrandListRow, BrandRow>(rows, (r) => `${r.name} ${r.slug} ${r.origin ?? ""}`);
 
   return (
     <div className="space-y-4">
@@ -69,15 +66,10 @@ export function BrandsManager({ rows }: { rows: BrandListRow[] }) {
                 <TableCell className="font-mono text-xs text-muted-foreground">
                   {row.slug}
                 </TableCell>
-                <TableCell className="text-muted-foreground">
-                  {row.origin ?? "—"}
-                </TableCell>
+                <TableCell className="text-muted-foreground">{row.origin ?? "—"}</TableCell>
                 <TableCell className="text-center">{row.productCount}</TableCell>
                 <TableCell>
-                  <RowActions
-                    onEdit={() => openEdit(row)}
-                    onDelete={() => setDeleting(row)}
-                  />
+                  <RowActions onEdit={() => openEdit(row)} onDelete={() => setDeleting(row)} />
                 </TableCell>
               </TableRow>
             ))}
@@ -103,9 +95,7 @@ export function BrandsManager({ rows }: { rows: BrandListRow[] }) {
       <ConfirmDelete
         open={Boolean(deleting)}
         onOpenChange={closeDelete}
-        description={
-          deleting ? `Производитель «${deleting.name}» будет удалён.` : ""
-        }
+        description={deleting ? `Производитель «${deleting.name}» будет удалён.` : ""}
         action={() => deleteBrand(deleting!.id)}
       />
     </div>
