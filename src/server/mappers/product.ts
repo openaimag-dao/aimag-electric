@@ -2,6 +2,7 @@ import type { PriceKind, ProductBadge } from "@prisma/client";
 
 import { tiynToTenge } from "@/lib/money";
 import { deriveAvailabilityFromStock, leadTimeForAvailability } from "@/lib/availability";
+import { isPlaceholderBrand } from "@/lib/brand";
 
 import type { CatalogProductDTO, ProductDetailDTO } from "@/server/dto";
 import type { Availability } from "@/types/catalog";
@@ -123,11 +124,11 @@ export function toCatalogDTO(p: ProductForCatalog): CatalogProductDTO {
 
 function buildSpecGroups(p: ProductWithRelations): SpecGroup[] {
   const attrs = attrMap(p);
-  const main = [
-    { label: "Производитель", value: p.brand.name },
-    { label: "Артикул", value: p.sku },
-    { label: "Категория", value: p.category.title },
-  ];
+  const main: { label: string; value: string }[] = [];
+  // The DB carries a placeholder "Без бренда" Brand row for unmapped
+  // manufacturers — don't present that as if it were real product info.
+  if (!isPlaceholderBrand(p.brand.name)) main.push({ label: "Производитель", value: p.brand.name });
+  main.push({ label: "Артикул", value: p.sku }, { label: "Категория", value: p.category.title });
   const material = attrs.get("material");
   if (material) main.push({ label: "Материал", value: String(material) });
 
@@ -140,11 +141,13 @@ function buildSpecGroups(p: ProductWithRelations): SpecGroup[] {
   if (cores !== undefined) electrical.push({ label: "Количество жил", value: String(cores) });
   if (cs !== undefined) electrical.push({ label: "Сечение", value: `${cs} мм²` });
 
+  // Deliberately just the two real fields we have — a blanket "−50…+50 °C,
+  // УХЛ1 / ГОСТ / ТР ТС" used to be hardcoded here for every product
+  // regardless of category, which is a fabricated technical/compliance claim
+  // (wrong for plenty of real SKUs) rather than actual catalog data.
   const operational = [
     { label: "Единица измерения", value: p.unit },
     { label: "Гарантия", value: p.warranty ?? "12 месяцев" },
-    { label: "Условия эксплуатации", value: "−50…+50 °C, УХЛ1" },
-    { label: "Соответствие", value: "ГОСТ / ТР ТС" },
   ];
 
   const groups: SpecGroup[] = [{ title: "Основные параметры", rows: main }];

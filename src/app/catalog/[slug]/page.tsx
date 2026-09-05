@@ -18,7 +18,7 @@ import { PurchasePanel } from "@/components/product/purchase-panel";
 import { SectionNav } from "@/components/product/section-nav";
 import { SpecTable } from "@/components/product/spec-table";
 import { DocumentList } from "@/components/product/document-list";
-import { Reviews } from "@/components/product/reviews";
+import { AskEngineer } from "@/components/product/ask-engineer";
 import { RelatedProducts } from "@/components/product/related-products";
 import { AnalogsCallout } from "@/components/product/analogs-callout";
 import { RecordRecentlyViewed } from "@/components/recently-viewed/record-recently-viewed";
@@ -104,8 +104,8 @@ export default async function ProductPage({ params }: PageProps) {
   const sections = [
     { id: "description", label: "Описание" },
     { id: "specs", label: "Характеристики" },
-    { id: "documents", label: "Документы" },
-    { id: "reviews", label: "Отзывы" },
+    ...(product.documents.length > 0 ? [{ id: "documents", label: "Документы" }] : []),
+    { id: "ask-engineer", label: "Вопрос инженеру" },
     { id: "related", label: "Похожие" },
   ];
 
@@ -203,20 +203,24 @@ export default async function ProductPage({ params }: PageProps) {
             </div>
           </section>
 
-          <section id="documents" className="scroll-mt-32">
-            <h2 className="font-display text-xl font-bold text-primary">Документы и сертификаты</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Паспорта, сертификаты соответствия и инструкции в формате PDF.
-            </p>
-            <div className="mt-4">
-              <DocumentList documents={product.documents} />
-            </div>
-          </section>
+          {product.documents.length > 0 && (
+            <section id="documents" className="scroll-mt-32">
+              <h2 className="font-display text-xl font-bold text-primary">
+                Документы и сертификаты
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Паспорта, сертификаты соответствия и инструкции в формате PDF.
+              </p>
+              <div className="mt-4">
+                <DocumentList documents={product.documents} />
+              </div>
+            </section>
+          )}
 
-          <section id="reviews" className="scroll-mt-32">
-            <h2 className="font-display text-xl font-bold text-primary">Отзывы</h2>
+          <section id="ask-engineer" className="scroll-mt-32">
+            <h2 className="font-display text-xl font-bold text-primary">Остались вопросы?</h2>
             <div className="mt-4">
-              <Reviews reviews={product.reviews} />
+              <AskEngineer product={product} />
             </div>
           </section>
         </div>
