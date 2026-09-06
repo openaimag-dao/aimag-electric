@@ -14,7 +14,6 @@ import {
   Manufacturers,
   Features,
   Process,
-  Projects,
   Articles,
   Cta,
 } from "@/components/sections";
@@ -23,8 +22,13 @@ import { homeService } from "@/server/services";
 /**
  * AIMAG ELECTRIC — homepage. All catalog-driven sections (Hero links,
  * Categories, Popular products, Manufacturers) are sourced from the database
- * via homeService; static marketing sections (Features, Process, Projects,
- * Articles) remain in config as editorial content.
+ * via homeService; static marketing sections (Features, Process, Articles)
+ * remain in config as editorial content.
+ *
+ * No "Проекты" (case studies) section: it previously showed fabricated
+ * client case studies (including a named real company) with no /projects
+ * pages behind them. Removed rather than filled with invented content —
+ * bring it back once there are real, published case studies to show.
  */
 export default async function HomePage() {
   const [categories, popular, brands, productCount] = await Promise.all([
@@ -42,7 +46,6 @@ export default async function HomePage() {
       <Manufacturers brands={brands} />
       <Features />
       <Process />
-      <Projects />
       <Articles />
       <Cta />
     </>
