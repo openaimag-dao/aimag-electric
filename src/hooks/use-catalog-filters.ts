@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import type { CatalogFilters } from "@/types/catalog";
 import { parseFilters, filtersToParams } from "@/lib/catalog-url";
+import { track } from "@/lib/analytics";
 
 type Updater = (prev: CatalogFilters) => CatalogFilters;
 
@@ -34,6 +35,8 @@ export function useCatalogFilters() {
   const update = React.useCallback(
     (updater: Updater, opts?: { keepPage?: boolean }) => {
       const next = updater(filters);
+      if (next.sort !== filters.sort) track("sort_change", { sort: next.sort });
+      else track("catalog_filter_apply");
       if (!opts?.keepPage) next.page = 1;
       commit(next);
     },
