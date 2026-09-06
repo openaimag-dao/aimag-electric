@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { QuoteForm } from "@/components/common/quote-form";
+import { track } from "@/lib/analytics";
 import type { CartItem } from "@/types/cart";
 
 interface QuoteDialogProps {
@@ -45,7 +46,13 @@ export function QuoteDialog({
   const [open, setOpen] = React.useState(false);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (next) track("quote_dialog_open");
+        setOpen(next);
+      }}
+    >
       <DialogTrigger asChild>
         {children ?? (
           <Button variant={variant} size={size} className={className}>

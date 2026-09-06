@@ -5,6 +5,7 @@ import * as React from "react";
 import { buildFacets, queryCatalog, activeFilterCount } from "@/lib/catalog";
 import { useCatalogFilters } from "@/hooks/use-catalog-filters";
 import { logCatalogSearch } from "@/server/actions/search-actions";
+import { track } from "@/lib/analytics";
 import { getProductsByIds } from "@/server/actions/product-lookup-actions";
 import { FilterSidebar } from "@/components/catalog/filter-sidebar";
 import { MobileFilterDrawer } from "@/components/catalog/mobile-filter-drawer";
@@ -75,6 +76,7 @@ export function CatalogView({ products, categoryNames, attributeDefs }: CatalogV
     if (!q || loggedQueryRef.current === q) return;
     loggedQueryRef.current = q;
     logCatalogSearch(q, total);
+    track("search", { query: q, results: total });
   }, [filters.q, total]);
 
   const from = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;

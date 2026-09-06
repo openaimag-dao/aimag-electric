@@ -3,6 +3,7 @@
 import * as React from "react";
 
 import type { CartItem } from "@/types/cart";
+import { track } from "@/lib/analytics";
 
 const STORAGE_KEY = "aimag-cart-v1";
 
@@ -51,6 +52,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [items]);
 
   const addItem = React.useCallback((item: Omit<CartItem, "qty">, qty = 1) => {
+    track("add_to_cart", { productId: item.productId, qty });
     setItems((prev) => {
       const existing = prev.find((i) => i.productId === item.productId);
       if (existing) {
@@ -68,6 +70,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const removeItem = React.useCallback((productId: string) => {
+    track("remove_from_cart", { productId });
     setItems((prev) => prev.filter((i) => i.productId !== productId));
   }, []);
 

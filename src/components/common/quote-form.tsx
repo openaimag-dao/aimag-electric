@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { quoteSchema, type QuoteInput } from "@/lib/validations/quote";
 import { submitQuote } from "@/server/actions";
 import { formatTenge } from "@/lib/money";
+import { track } from "@/lib/analytics";
 import type { CartItem } from "@/types/cart";
 
 interface QuoteFormProps {
@@ -55,6 +56,7 @@ export function QuoteForm({ onSuccess, items, defaultTitle, defaultMessage }: Qu
     setServerError(null);
     reset();
     setSubmitted(true);
+    track("quote_submit");
     onSuccess?.();
   }
 
