@@ -38,10 +38,15 @@ export function AdminGlobalSearch() {
     }
     setLoading(true);
     const t = setTimeout(async () => {
-      const result = await globalAdminSearch(query);
-      setResults(result.ok ? (result.data ?? []) : []);
-      setLoading(false);
-      setOpen(true);
+      try {
+        const result = await globalAdminSearch(query);
+        setResults(result.ok ? (result.data ?? []) : []);
+      } catch {
+        setResults([]);
+      } finally {
+        setLoading(false);
+        setOpen(true);
+      }
     }, 300);
     return () => clearTimeout(t);
   }, [query]);
