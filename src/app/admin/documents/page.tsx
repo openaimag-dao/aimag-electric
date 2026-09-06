@@ -9,10 +9,7 @@ import { adminService } from "@/server/services/admin-service";
 export const dynamic = "force-dynamic";
 
 export default async function AdminDocumentsPage() {
-  const [rows, refs] = await Promise.all([
-    documentAdminRepository.list(),
-    adminService.refs(),
-  ]);
+  const [rows, refs] = await Promise.all([documentAdminRepository.list(), adminService.refs()]);
 
   const data: DocumentListRow[] = rows.map((d) => ({
     id: d.id,

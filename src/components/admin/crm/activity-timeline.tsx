@@ -112,7 +112,9 @@ export function ActivityTimeline({
             className="h-10 w-40"
           >
             {Object.entries(activityTypeMeta).map(([k, m]) => (
-              <option key={k} value={k}>{m.label}</option>
+              <option key={k} value={k}>
+                {m.label}
+              </option>
             ))}
           </NativeSelect>
           <Input
@@ -161,7 +163,12 @@ export function ActivityTimeline({
               <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className={cn("text-sm font-medium text-primary", a.done && "line-through opacity-60")}>
+                    <p
+                      className={cn(
+                        "text-sm font-medium text-primary",
+                        a.done && "line-through opacity-60"
+                      )}
+                    >
                       {a.subject}
                     </p>
                     {a.body && <p className="mt-0.5 text-sm text-muted-foreground">{a.body}</p>}
@@ -173,7 +180,11 @@ export function ActivityTimeline({
                         className="rounded p-1 text-muted-foreground hover:text-signal-700"
                         aria-label="Отметить"
                       >
-                        {a.done ? <CheckSquare className="size-4" /> : <Square className="size-4" />}
+                        {a.done ? (
+                          <CheckSquare className="size-4" />
+                        ) : (
+                          <Square className="size-4" />
+                        )}
                       </button>
                     )}
                     <button
@@ -189,7 +200,12 @@ export function ActivityTimeline({
                   <span>{meta.label}</span>
                   <span>·</span>
                   <span>{formatDate(a.createdAt)}</span>
-                  {a.authorName && <><span>·</span><span>{a.authorName}</span></>}
+                  {a.authorName && (
+                    <>
+                      <span>·</span>
+                      <span>{a.authorName}</span>
+                    </>
+                  )}
                   {a.dueAt && (
                     <>
                       <span>·</span>

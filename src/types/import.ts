@@ -4,12 +4,7 @@
  */
 
 /** Which entity a sheet/import targets. */
-export type ImportKind =
-  | "products"
-  | "categories"
-  | "brands"
-  | "prices"
-  | "stock";
+export type ImportKind = "products" | "categories" | "brands" | "prices" | "stock";
 
 export const IMPORT_KIND_LABELS: Record<ImportKind, string> = {
   products: "Товары",

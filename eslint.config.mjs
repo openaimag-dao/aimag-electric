@@ -24,12 +24,7 @@ const eslintConfig = [
     },
   },
   {
-    ignores: [
-      "node_modules",
-      ".next",
-      "prisma/migrations",
-      "scripts/gen-prisma-shim.mjs",
-    ],
+    ignores: ["node_modules", ".next", "prisma/migrations", "scripts/gen-prisma-shim.mjs"],
   },
 ];
 

@@ -46,9 +46,7 @@ export function PopularProducts({ products }: { products: CatalogProductDTO[] })
 
           {categories.map((category) => {
             const items =
-              category === ALL
-                ? products
-                : products.filter((p) => p.category === category);
+              category === ALL ? products : products.filter((p) => p.category === category);
             return (
               <TabsContent key={category} value={category}>
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">

@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
 
 const config: Config = {
   darkMode: ["class"],
@@ -38,14 +39,24 @@ const config: Config = {
         },
         // Brand: voltage steel + signal amber
         steel: {
-          50: "#f3f5f8", 100: "#e4e9f0", 200: "#c6d0de",
-          300: "#9caebf", 400: "#6c839c", 500: "#4d6580",
-          600: "#3c5069", 700: "#334156", 800: "#2c3849",
-          900: "#0e1622", 950: "#080d15",
+          50: "#f3f5f8",
+          100: "#e4e9f0",
+          200: "#c6d0de",
+          300: "#9caebf",
+          400: "#6c839c",
+          500: "#4d6580",
+          600: "#3c5069",
+          700: "#334156",
+          800: "#2c3849",
+          900: "#0e1622",
+          950: "#080d15",
         },
         signal: {
           DEFAULT: "#ffb300",
-          400: "#ffc23d", 500: "#ffb300", 600: "#e69800", 700: "#b87500",
+          400: "#ffc23d",
+          500: "#ffb300",
+          600: "#e69800",
+          700: "#b87500",
         },
       },
       fontFamily: {
@@ -59,8 +70,14 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       keyframes: {
-        "accordion-down": { from: { height: "0" }, to: { height: "var(--radix-accordion-content-height)" } },
-        "accordion-up": { from: { height: "var(--radix-accordion-content-height)" }, to: { height: "0" } },
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
         current: {
           "0%,100%": { opacity: "0.15" },
           "50%": { opacity: "0.5" },
@@ -73,6 +90,6 @@ const config: Config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [tailwindcssAnimate],
 };
 export default config;

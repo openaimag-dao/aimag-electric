@@ -1,10 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import {
-  FileSearch,
-  Calculator,
-  FileSignature,
-  PackageCheck,
-} from "lucide-react";
+import { FileSearch, Calculator, FileSignature, PackageCheck } from "lucide-react";
 
 export interface ProcessStep {
   step: number;

@@ -38,7 +38,7 @@ export function Projects() {
               className="group flex flex-col overflow-hidden rounded-2xl border border-steel-800 bg-steel-900/50 transition-colors hover:border-signal/50"
             >
               <div className="relative flex h-40 flex-col justify-end overflow-hidden border-b border-steel-800 p-6">
-                <div className="absolute inset-0 conductor-grid opacity-40" aria-hidden />
+                <div className="conductor-grid absolute inset-0 opacity-40" aria-hidden />
                 <div
                   className="absolute -right-10 -top-10 size-40 rounded-full bg-signal/15 blur-2xl"
                   aria-hidden
@@ -55,9 +55,7 @@ export function Projects() {
               </div>
 
               <div className="flex flex-1 flex-col p-6">
-                <h3 className="font-display text-lg font-semibold text-white">
-                  {project.title}
-                </h3>
+                <h3 className="font-display text-lg font-semibold text-white">{project.title}</h3>
                 <p className="mt-2 flex-1 text-sm leading-relaxed text-steel-400">
                   {project.scope}
                 </p>

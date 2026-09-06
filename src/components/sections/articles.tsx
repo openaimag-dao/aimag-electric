@@ -59,7 +59,7 @@ export function Articles() {
                 </time>
                 <span className="inline-flex items-center gap-1 text-sm font-medium text-signal-700">
                   Читать
-                  <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  <ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                 </span>
               </div>
             </Link>

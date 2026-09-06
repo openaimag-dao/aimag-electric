@@ -23,14 +23,14 @@ npm run dev                   # http://localhost:3000
 
 ## Скрипты
 
-| Скрипт | Назначение |
-|--------|-----------|
-| `npm run dev` | Дев-сервер |
-| `npm run build` / `start` | Прод-сборка и запуск |
-| `npm run db:deploy` / `db:seed` | Миграции / наполнение |
-| `npm run lint` / `format` / `typecheck` | Качество кода |
-| `npm test` | Юнит-тесты (Vitest) |
-| `npm run test:e2e` | E2E (Playwright) |
+| Скрипт                                  | Назначение            |
+| --------------------------------------- | --------------------- |
+| `npm run dev`                           | Дев-сервер            |
+| `npm run build` / `start`               | Прод-сборка и запуск  |
+| `npm run db:deploy` / `db:seed`         | Миграции / наполнение |
+| `npm run lint` / `format` / `typecheck` | Качество кода         |
+| `npm test`                              | Юнит-тесты (Vitest)   |
+| `npm run test:e2e`                      | E2E (Playwright)      |
 
 ## Документация
 

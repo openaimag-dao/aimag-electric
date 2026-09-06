@@ -22,14 +22,18 @@
     --radius: 0.5rem;
   }
 
-  * { @apply border-border; }
+  * {
+    @apply border-border;
+  }
 
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "ss01", "cv01", "cv03";
   }
 
-  ::selection { @apply bg-signal/30 text-primary; }
+  ::selection {
+    @apply bg-signal/30 text-primary;
+  }
 }
 
 @layer utilities {
@@ -41,7 +45,9 @@
     background-size: 56px 56px;
   }
 
-  .text-balance { text-wrap: balance; }
+  .text-balance {
+    text-wrap: balance;
+  }
 
   .conductor-line {
     stroke-dasharray: 6 10;
@@ -49,11 +55,18 @@
   }
 
   @keyframes flow {
-    to { stroke-dashoffset: -32; }
+    to {
+      stroke-dashoffset: -32;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .conductor-line { animation: none; }
-    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    .conductor-line {
+      animation: none;
+    }
+    * {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }

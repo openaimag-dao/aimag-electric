@@ -3,13 +3,9 @@ export interface NavItem {
   href: string;
 }
 
-export const mainNav: NavItem[] = [
-  { label: "Каталог", href: "/catalog" },
-  { label: "Категории", href: "/#categories" },
-  { label: "О компании", href: "/o-kompanii" },
-  { label: "Доставка", href: "/dostavka" },
-  { label: "Контакты", href: "/kontakty" },
-];
+// Main nav labels/hrefs now live in i18n/dictionaries/{ru,kk}.ts (dict.nav) —
+// see Header/MobileNav — so they can be localized. footerNav/legalNav below
+// aren't localized yet (Block 9 is chrome-only for now), so they stay here.
 
 export const footerNav: { title: string; items: NavItem[] }[] = [
   {

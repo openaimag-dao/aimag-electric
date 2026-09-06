@@ -3,7 +3,12 @@
 import { useCrudManager } from "@/hooks/use-crud-manager";
 
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { TableToolbar } from "@/components/admin/table-toolbar";
@@ -18,7 +23,10 @@ export interface DocumentListRow extends DocumentRow {
   productSku: string;
 }
 
-interface Ref { id: string; label: string }
+interface Ref {
+  id: string;
+  label: string;
+}
 
 const kindMeta: Record<string, string> = {
   DATASHEET: "Паспорт",
@@ -27,12 +35,7 @@ const kindMeta: Record<string, string> = {
   DRAWING: "Чертёж",
 };
 
-export function DocumentsManager({
-  rows, products,
-}: {
-  rows: DocumentListRow[];
-  products: Ref[];
-}) {
+export function DocumentsManager({ rows, products }: { rows: DocumentListRow[]; products: Ref[] }) {
   const {
     query,
     setQuery,
@@ -77,19 +80,23 @@ export function DocumentsManager({
             {filtered.map((row) => (
               <TableRow key={row.id}>
                 <TableCell>
-                  <a href={row.url} className="font-medium text-primary hover:text-signal-700" target="_blank" rel="noreferrer">
+                  <a
+                    href={row.url}
+                    className="font-medium text-primary hover:text-signal-700"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
                     {row.title}
                   </a>
                   <div className="font-mono text-xs text-muted-foreground">{row.url}</div>
                 </TableCell>
                 <TableCell className="text-muted-foreground">{row.productTitle}</TableCell>
-                <TableCell><Badge variant="muted">{kindMeta[row.kind] ?? row.kind}</Badge></TableCell>
+                <TableCell>
+                  <Badge variant="muted">{kindMeta[row.kind] ?? row.kind}</Badge>
+                </TableCell>
                 <TableCell className="text-muted-foreground">{row.size ?? "—"}</TableCell>
                 <TableCell>
-                  <RowActions
-                    onEdit={() => openEdit(row)}
-                    onDelete={() => setDeleting(row)}
-                  />
+                  <RowActions onEdit={() => openEdit(row)} onDelete={() => setDeleting(row)} />
                 </TableCell>
               </TableRow>
             ))}

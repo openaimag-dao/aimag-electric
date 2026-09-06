@@ -26,13 +26,12 @@ export function Cta() {
               <Clock className="size-3.5" />
               Быстрый расчёт
             </span>
-            <h2 className="mt-6 font-display text-3xl font-bold tracking-tight text-balance sm:text-4xl lg:text-5xl">
+            <h2 className="mt-6 text-balance font-display text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
               Получить коммерческое предложение за 15 минут
             </h2>
             <p className="mt-5 max-w-lg text-lg leading-relaxed text-steel-300">
-              Пришлите спецификацию или опишите задачу — инженер подберёт
-              продукцию, проверит наличие и подготовит КП с ценами и сроками
-              поставки.
+              Пришлите спецификацию или опишите задачу — инженер подберёт продукцию, проверит
+              наличие и подготовит КП с ценами и сроками поставки.
             </p>
 
             <ul className="mt-8 space-y-3">

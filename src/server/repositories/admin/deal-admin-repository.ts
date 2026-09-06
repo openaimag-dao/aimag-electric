@@ -30,7 +30,10 @@ export const dealAdminRepository = {
         customer: true,
         owner: { select: { id: true, name: true, email: true } },
         quote: true,
-        activities: { orderBy: { createdAt: "desc" }, include: { author: { select: { name: true } } } },
+        activities: {
+          orderBy: { createdAt: "desc" },
+          include: { author: { select: { name: true } } },
+        },
       },
     });
   },

@@ -3,10 +3,7 @@ import { Check, Clock, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Availability } from "@/types/catalog";
 
-const config: Record<
-  Availability,
-  { label: string; className: string; icon: typeof Check }
-> = {
+const config: Record<Availability, { label: string; className: string; icon: typeof Check }> = {
   in_stock: {
     label: "В наличии",
     className: "bg-emerald-50 text-emerald-700",

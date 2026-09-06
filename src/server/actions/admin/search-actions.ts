@@ -20,11 +20,11 @@ const RESULT_LIMIT = 5;
 export async function globalAdminSearch(
   query: string
 ): Promise<ActionResult<GlobalSearchResult[]>> {
-  await requireStaff();
-  const q = query.trim();
-  if (q.length < 2) return ok([]);
-
   try {
+    await requireStaff();
+    const q = query.trim();
+    if (q.length < 2) return ok([]);
+
     const [products, categories, brands, customers, quotes] = await Promise.all([
       prisma.product.findMany({
         where: {

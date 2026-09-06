@@ -49,7 +49,8 @@ function tsType(f) {
   let base;
   if (scalarMap[f.ftype]) base = scalarMap[f.ftype];
   else if (isEnum(f.ftype)) base = f.ftype;
-  else if (isModel(f.ftype)) base = f.ftype; // relation
+  else if (isModel(f.ftype))
+    base = f.ftype; // relation
   else base = "any";
   if (f.isArray) base = `${base}[]`;
   if (f.isOpt) base = `${base} | null`;
@@ -157,10 +158,7 @@ class PrismaClient {
 }
 const enums = ${JSON.stringify(
   Object.fromEntries(
-    Object.entries(enums).map(([k, vals]) => [
-      k,
-      Object.fromEntries(vals.map((v) => [v, v])),
-    ])
+    Object.entries(enums).map(([k, vals]) => [k, Object.fromEntries(vals.map((v) => [v, v]))])
   )
 )};
 module.exports = { PrismaClient, Prisma: {}, ...enums };

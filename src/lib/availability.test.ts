@@ -4,10 +4,12 @@ import { deriveAvailabilityFromStock, leadTimeForAvailability } from "./availabi
 describe("deriveAvailabilityFromStock", () => {
   it("is in_stock when any warehouse has positive quantity", () => {
     expect(deriveAvailabilityFromStock([{ quantity: 5, restockAt: null }])).toBe("in_stock");
-    expect(deriveAvailabilityFromStock([
-      { quantity: 0, restockAt: null },
-      { quantity: 3, restockAt: null },
-    ])).toBe("in_stock");
+    expect(
+      deriveAvailabilityFromStock([
+        { quantity: 0, restockAt: null },
+        { quantity: 3, restockAt: null },
+      ])
+    ).toBe("in_stock");
   });
   it("is on_order when zero stock but a restock date exists", () => {
     expect(deriveAvailabilityFromStock([{ quantity: 0, restockAt: new Date() }])).toBe("on_order");

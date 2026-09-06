@@ -1,8 +1,5 @@
 import { AdminPageHeader } from "@/components/admin/page-header";
-import {
-  PricesManager,
-  type PriceListRow,
-} from "@/components/admin/prices/prices-manager";
+import { PricesManager, type PriceListRow } from "@/components/admin/prices/prices-manager";
 import { priceAdminRepository } from "@/server/repositories/admin";
 import { adminService } from "@/server/services/admin-service";
 import { tiynToTenge } from "@/lib/money";
@@ -10,10 +7,7 @@ import { tiynToTenge } from "@/lib/money";
 export const dynamic = "force-dynamic";
 
 export default async function AdminPricesPage() {
-  const [rows, refs] = await Promise.all([
-    priceAdminRepository.list(),
-    adminService.refs(),
-  ]);
+  const [rows, refs] = await Promise.all([priceAdminRepository.list(), adminService.refs()]);
 
   const data: PriceListRow[] = rows.map((p) => ({
     id: p.id,

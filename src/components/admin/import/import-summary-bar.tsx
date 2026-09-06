@@ -1,6 +1,13 @@
 "use client";
 
-import { FileSpreadsheet, Plus, RefreshCw, MinusCircle, AlertTriangle, XOctagon } from "lucide-react";
+import {
+  FileSpreadsheet,
+  Plus,
+  RefreshCw,
+  MinusCircle,
+  AlertTriangle,
+  XOctagon,
+} from "lucide-react";
 
 import type { ImportPreview } from "@/types/import";
 
@@ -15,9 +22,19 @@ export function ImportSummaryBar({
   const items = [
     { label: "Создать", value: counts.create, icon: Plus, className: "text-emerald-700" },
     { label: "Обновить", value: counts.update, icon: RefreshCw, className: "text-blue-700" },
-    { label: "Пропустить", value: counts.skip, icon: MinusCircle, className: "text-muted-foreground" },
+    {
+      label: "Пропустить",
+      value: counts.skip,
+      icon: MinusCircle,
+      className: "text-muted-foreground",
+    },
     { label: "Ошибки", value: counts.errors, icon: XOctagon, className: "text-red-700" },
-    { label: "Предупреждения", value: counts.warnings, icon: AlertTriangle, className: "text-amber-700" },
+    {
+      label: "Предупреждения",
+      value: counts.warnings,
+      icon: AlertTriangle,
+      className: "text-amber-700",
+    },
   ];
 
   return (
@@ -35,7 +52,9 @@ export function ImportSummaryBar({
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Icon className="size-3.5" /> {it.label}
               </div>
-              <div className={`mt-1 font-display text-xl font-bold ${it.className}`}>{it.value}</div>
+              <div className={`mt-1 font-display text-xl font-bold ${it.className}`}>
+                {it.value}
+              </div>
             </div>
           );
         })}

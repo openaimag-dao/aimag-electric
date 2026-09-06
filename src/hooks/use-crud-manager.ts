@@ -10,10 +10,7 @@ import * as React from "react";
  * @param rows       full row set
  * @param searchable maps a row to the string searched against the query
  */
-export function useCrudManager<Row, EditRow = Row>(
-  rows: Row[],
-  searchable: (row: Row) => string
-) {
+export function useCrudManager<Row, EditRow = Row>(rows: Row[], searchable: (row: Row) => string) {
   const [query, setQuery] = React.useState("");
   const [formOpen, setFormOpen] = React.useState(false);
   const [editing, setEditing] = React.useState<EditRow | undefined>();

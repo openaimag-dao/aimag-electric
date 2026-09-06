@@ -13,9 +13,9 @@ import { AccountLink } from "@/components/auth/account-link";
 import { useCart } from "@/components/cart/cart-provider";
 import { useFavorites } from "@/components/favorites/favorites-provider";
 import { useCompare } from "@/components/compare/compare-provider";
-import { mainNav } from "@/config/navigation";
+import type { Dictionary } from "@/i18n/types";
 
-export function MobileNav() {
+export function MobileNav({ dict }: { dict: Dictionary }) {
   const [open, setOpen] = React.useState(false);
   const { count: cartCount } = useCart();
   const { count: favoritesCount } = useFavorites();
@@ -81,7 +81,7 @@ export function MobileNav() {
           </div>
         </div>
         <nav className="flex flex-col">
-          {mainNav.map((item) => (
+          {dict.nav.map((item) => (
             <SheetClose asChild key={item.href}>
               <Link
                 href={item.href}

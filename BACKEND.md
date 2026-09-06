@@ -23,6 +23,7 @@ npm run dev
 `VerificationToken`).
 
 Ключевые решения:
+
 - **EAV-спецификации** (`Attribute` + `AttributeValue`): материал, жилы,
   сечение, напряжение — гибкие фильтруемые параметры без изменения схемы.
 - **Наличие** вычисляется из `Stock` по складам (`Warehouse`), а не хранится
@@ -64,11 +65,11 @@ src/server/
 
 ## Данные на страницах (всё из БД)
 
-| Страница | Источник |
-| --- | --- |
-| `/` (главная) | `homeService` — категории, бренды, популярные товары |
-| `/catalog` | `catalogService.loadProducts/getCategoryNames/count` |
-| `/catalog/[slug]` | `productService.getBySlug/getRelated` |
+| Страница          | Источник                                             |
+| ----------------- | ---------------------------------------------------- |
+| `/` (главная)     | `homeService` — категории, бренды, популярные товары |
+| `/catalog`        | `catalogService.loadProducts/getCategoryNames/count` |
+| `/catalog/[slug]` | `productService.getBySlug/getRelated`                |
 
 Страницы помечены `force-dynamic` — рендерятся из БД на каждый запрос. Для
 пре-рендера товаров на билде верните slug'и в `generateStaticParams` и уберите
@@ -77,14 +78,14 @@ src/server/
 
 ## Скрипты БД
 
-| Команда | Действие |
-| --- | --- |
-| `npm run db:generate` | Генерация Prisma client |
-| `npm run db:migrate` | `prisma migrate dev` (создать/применить миграции) |
-| `npm run db:deploy` | `prisma migrate deploy` (прод) |
-| `npm run db:seed` | Заполнить БД (`prisma/seed.ts`) |
-| `npm run db:reset` | Полный сброс + миграции + seed |
-| `npm run db:studio` | Prisma Studio |
+| Команда               | Действие                                          |
+| --------------------- | ------------------------------------------------- |
+| `npm run db:generate` | Генерация Prisma client                           |
+| `npm run db:migrate`  | `prisma migrate dev` (создать/применить миграции) |
+| `npm run db:deploy`   | `prisma migrate deploy` (прод)                    |
+| `npm run db:seed`     | Заполнить БД (`prisma/seed.ts`)                   |
+| `npm run db:reset`    | Полный сброс + миграции + seed                    |
+| `npm run db:studio`   | Prisma Studio                                     |
 
 ## Миграции
 

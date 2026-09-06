@@ -27,13 +27,13 @@ export function DocumentList({ documents }: { documents: ProductDocument[] }) {
               download
               className="group flex items-center gap-3 rounded-xl border border-border bg-card p-4 transition-all hover:border-signal/60 hover:shadow-sm"
             >
-              <span className={`inline-flex size-11 shrink-0 items-center justify-center rounded-lg ${tone}`}>
+              <span
+                className={`inline-flex size-11 shrink-0 items-center justify-center rounded-lg ${tone}`}
+              >
                 <Icon className="size-5" />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-primary">
-                  {doc.title}
-                </p>
+                <p className="truncate text-sm font-medium text-primary">{doc.title}</p>
                 <p className="text-xs text-muted-foreground">
                   {label} · PDF · {doc.size}
                 </p>

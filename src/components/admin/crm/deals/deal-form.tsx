@@ -66,9 +66,7 @@ export function DealForm({
   const stage = watch("stage");
 
   async function onSubmit(values: DealFormInput) {
-    const result = isEdit
-      ? await updateDeal(initial!.id, values)
-      : await createDeal(values);
+    const result = isEdit ? await updateDeal(initial!.id, values) : await createDeal(values);
     handleFormResult<DealFormInput>(result, {
       setError,
       onDone,
@@ -85,10 +83,16 @@ export function DealForm({
         <Input id="title" {...register("title")} />
       </Field>
       <Field label="Клиент *" htmlFor="customerId" error={errors.customerId}>
-        <NativeSelect id="customerId" {...register("customerId")} disabled={Boolean(defaultCustomerId)}>
+        <NativeSelect
+          id="customerId"
+          {...register("customerId")}
+          disabled={Boolean(defaultCustomerId)}
+        >
           <option value="">— выберите —</option>
           {customers.map((c) => (
-            <option key={c.id} value={c.id}>{c.label}</option>
+            <option key={c.id} value={c.id}>
+              {c.label}
+            </option>
           ))}
         </NativeSelect>
       </Field>
@@ -96,7 +100,9 @@ export function DealForm({
         <Field label="Стадия" htmlFor="stage" error={errors.stage}>
           <NativeSelect id="stage" {...register("stage")}>
             {dealStageOrder.map((s) => (
-              <option key={s} value={s}>{dealStageMeta[s].label}</option>
+              <option key={s} value={s}>
+                {dealStageMeta[s].label}
+              </option>
             ))}
           </NativeSelect>
         </Field>
@@ -116,7 +122,9 @@ export function DealForm({
         <NativeSelect id="ownerId" {...register("ownerId")}>
           <option value="">— не назначен —</option>
           {managers.map((m) => (
-            <option key={m.id} value={m.id}>{m.label}</option>
+            <option key={m.id} value={m.id}>
+              {m.label}
+            </option>
           ))}
         </NativeSelect>
       </Field>

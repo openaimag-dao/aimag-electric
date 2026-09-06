@@ -3,7 +3,12 @@
 import { useCrudManager } from "@/hooks/use-crud-manager";
 
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { TableToolbar } from "@/components/admin/table-toolbar";
@@ -75,13 +80,12 @@ export function UsersManager({ rows }: { rows: UserListRow[] }) {
                     <div className="text-xs text-muted-foreground">{row.email}</div>
                   </TableCell>
                   <TableCell className="text-muted-foreground">{row.company ?? "—"}</TableCell>
-                  <TableCell><Badge variant={meta.variant}>{meta.label}</Badge></TableCell>
+                  <TableCell>
+                    <Badge variant={meta.variant}>{meta.label}</Badge>
+                  </TableCell>
                   <TableCell className="text-center">{row.quoteCount}</TableCell>
                   <TableCell>
-                    <RowActions
-                      onEdit={() => openEdit(row)}
-                      onDelete={() => setDeleting(row)}
-                    />
+                    <RowActions onEdit={() => openEdit(row)} onDelete={() => setDeleting(row)} />
                   </TableCell>
                 </TableRow>
               );

@@ -17,13 +17,7 @@ export interface WarehouseRow {
   city: string;
 }
 
-export function WarehouseForm({
-  initial,
-  onDone,
-}: {
-  initial?: WarehouseRow;
-  onDone: () => void;
-}) {
+export function WarehouseForm({ initial, onDone }: { initial?: WarehouseRow; onDone: () => void }) {
   const isEdit = Boolean(initial);
   const {
     register,
@@ -40,7 +34,9 @@ export function WarehouseForm({
   });
 
   async function onSubmit(values: WarehouseFormInput) {
-    const result = isEdit ? await updateWarehouse(initial!.id, values) : await createWarehouse(values);
+    const result = isEdit
+      ? await updateWarehouse(initial!.id, values)
+      : await createWarehouse(values);
     handleFormResult<WarehouseFormInput>(result, {
       setError,
       onDone,

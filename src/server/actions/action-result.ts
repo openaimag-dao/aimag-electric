@@ -23,9 +23,7 @@ export function validate<S extends z.ZodTypeAny>(
   const parsed = schema.safeParse(input);
   if (parsed.success) return { success: true, data: parsed.data };
   const flat = parsed.error.flatten().fieldErrors as Record<string, string[]>;
-  const fieldErrors = Object.fromEntries(
-    Object.entries(flat).map(([k, v]) => [k, v?.[0] ?? ""])
-  );
+  const fieldErrors = Object.fromEntries(Object.entries(flat).map(([k, v]) => [k, v?.[0] ?? ""]));
   return { success: false, result: fail("Проверьте заполнение формы", fieldErrors) };
 }
 

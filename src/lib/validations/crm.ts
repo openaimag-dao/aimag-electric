@@ -15,14 +15,7 @@ export const customerFormSchema = z.object({
 });
 export type CustomerFormInput = z.infer<typeof customerFormSchema>;
 
-export const dealStage = z.enum([
-  "NEW",
-  "QUALIFIED",
-  "PROPOSAL",
-  "NEGOTIATION",
-  "WON",
-  "LOST",
-]);
+export const dealStage = z.enum(["NEW", "QUALIFIED", "PROPOSAL", "NEGOTIATION", "WON", "LOST"]);
 
 export const dealFormSchema = z.object({
   title: z.string().min(2, "Укажите название сделки"),
