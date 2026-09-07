@@ -17,14 +17,14 @@ interface AddToCartButtonProps {
   label?: string;
 }
 
-/** Adds one product to the client-side project cart (see CartProvider). */
+/** Adds one product to the client-side cart (see CartProvider). */
 export function AddToCartButton({
   product,
   qty = 1,
   variant = "outline",
   size = "default",
   className,
-  label = "Добавить в проект",
+  label = "Добавить в корзину",
 }: AddToCartButtonProps) {
   const { addItem } = useCart();
   const [justAdded, setJustAdded] = React.useState(false);
@@ -33,7 +33,7 @@ export function AddToCartButton({
     e.preventDefault();
     e.stopPropagation();
     addItem(product, qty);
-    toast.success(`${product.title} — добавлено в проект`);
+    toast.success(`${product.title} — добавлено в корзину`);
     setJustAdded(true);
     window.setTimeout(() => setJustAdded(false), 1500);
   }

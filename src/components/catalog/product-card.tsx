@@ -102,7 +102,7 @@ export function ProductCard({
           <AddToCartButton
             variant="signal"
             size="sm"
-            label="В проект"
+            label="В корзину"
             product={{
               productId: product.id,
               slug: product.slug,

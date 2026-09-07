@@ -25,7 +25,7 @@ export const quoteSchema = z
     items: z.array(quoteItemSchema).max(200).optional(),
   })
   .refine((v) => (v.items && v.items.length > 0) || (v.message && v.message.trim().length >= 5), {
-    message: "Опишите позицию или добавьте товары в проект",
+    message: "Опишите позицию или добавьте товары в корзину",
     path: ["message"],
   });
 
