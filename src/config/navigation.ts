@@ -22,6 +22,7 @@ export const footerNav: { title: string; items: NavItem[] }[] = [
   {
     title: "Покупателям",
     items: [
+      { label: "Быстрый заказ", href: "/quick-order" },
       { label: "Доставка", href: "/dostavka" },
       { label: "Оплата и реквизиты", href: "/oplata" },
       { label: "Гарантия", href: "/garantiya" },
