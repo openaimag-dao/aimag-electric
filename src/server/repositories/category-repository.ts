@@ -31,12 +31,28 @@ export const categoryRepository = {
       categories.map(async (category) => {
         const [productCount, topProduct] = await Promise.all([
           prisma.product.count({ where: { categoryId: category.id, published: true } }),
+          // images.url is nullable (placeholder rows exist for products with
+          // no photo yet) — both the existence check and the picked image
+          // itself must require a real url, or a popular-but-photo-less
+          // product can silently win the tiebreak and the tile falls back
+          // to the icon.
           category.image
             ? null
             : prisma.product.findFirst({
-                where: { categoryId: category.id, published: true, images: { some: {} } },
+                where: {
+                  categoryId: category.id,
+                  published: true,
+                  images: { some: { url: { not: null } } },
+                },
                 orderBy: { popularity: "desc" },
-                select: { images: { orderBy: { order: "asc" }, take: 1, select: { url: true } } },
+                select: {
+                  images: {
+                    where: { url: { not: null } },
+                    orderBy: { order: "asc" },
+                    take: 1,
+                    select: { url: true },
+                  },
+                },
               }),
         ]);
         return {

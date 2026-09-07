@@ -30,7 +30,9 @@ const loadCategoryCards = unstable_cache(
       productCount: c.productCount,
     }));
   },
-  ["home-category-cards"],
+  // Key bumped (v2) alongside the null-url image-selection fix below, so the
+  // fix takes effect immediately on deploy instead of waiting out the 1h TTL.
+  ["home-category-cards-v2"],
   { tags: [CACHE_TAGS.categories, CACHE_TAGS.products], revalidate: 3600 }
 );
 
