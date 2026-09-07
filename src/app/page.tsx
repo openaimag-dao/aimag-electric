@@ -31,8 +31,8 @@ import { homeService } from "@/server/services";
  * bring it back once there are real, published case studies to show.
  */
 export default async function HomePage() {
-  const [categories, popular, brands, productCount] = await Promise.all([
-    homeService.categories(),
+  const [categoryCards, popular, brands, productCount] = await Promise.all([
+    homeService.categoryCards(),
     homeService.popularProducts(8),
     homeService.brands(),
     homeService.productCount(),
@@ -40,8 +40,8 @@ export default async function HomePage() {
 
   return (
     <>
-      <Hero categories={categories} productCount={productCount} />
-      <Categories categories={categories} />
+      <Hero categories={categoryCards} productCount={productCount} />
+      <Categories categories={categoryCards} />
       <PopularProducts products={popular} />
       <Manufacturers brands={brands} />
       <Features />

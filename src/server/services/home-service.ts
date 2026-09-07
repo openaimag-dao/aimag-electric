@@ -5,7 +5,7 @@ import { unstable_cache } from "next/cache";
 
 import { productRepository, categoryRepository, brandRepository } from "@/server/repositories";
 import { toCatalogDTO } from "@/server/mappers/product";
-import type { CatalogProductDTO, CategoryDTO, BrandDTO } from "@/server/dto";
+import type { CatalogProductDTO, CategoryCardDTO, BrandDTO } from "@/server/dto";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 
 /**
@@ -14,9 +14,12 @@ import { CACHE_TAGS } from "@/lib/cache-tags";
  *  - React cache(): request-level dedupe so one render hits the store once.
  */
 
-const loadCategories = unstable_cache(
-  async (): Promise<CategoryDTO[]> => {
-    const rows = await categoryRepository.findMany();
+// Depends on both Category rows and Product rows/images (via
+// findManyWithStats' product count + representative photo), so it's tagged
+// with both — an admin edit to either kind invalidates it.
+const loadCategoryCards = unstable_cache(
+  async (): Promise<CategoryCardDTO[]> => {
+    const rows = await categoryRepository.findManyWithStats();
     return rows.map((c) => ({
       slug: c.slug,
       title: c.title,
@@ -24,10 +27,11 @@ const loadCategories = unstable_cache(
       spec: c.spec,
       icon: c.icon,
       image: c.image,
+      productCount: c.productCount,
     }));
   },
-  ["home-categories"],
-  { tags: [CACHE_TAGS.categories], revalidate: 3600 }
+  ["home-category-cards"],
+  { tags: [CACHE_TAGS.categories, CACHE_TAGS.products], revalidate: 3600 }
 );
 
 const loadBrands = unstable_cache(
@@ -52,7 +56,7 @@ const loadPopular = unstable_cache(
 );
 
 export const homeService = {
-  categories: cache(loadCategories),
+  categoryCards: cache(loadCategoryCards),
   brands: cache(loadBrands),
   popularProducts: cache((limit = 8) => loadPopular(limit)),
   // Real published-product count for the hero's catalog-size stat — not a
