@@ -7,6 +7,7 @@ import { productImageAdminRepository } from "@/server/repositories/admin";
 import { productImageFormSchema } from "@/lib/validations/admin";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
 import { requireStaff } from "@/lib/security/rbac";
+import { audit } from "@/server/audit";
 import { ALLOWED_IMAGE_TYPES, MAX_IMAGE_SIZE, formatFileSize } from "@/lib/uploads";
 
 function revalidate() {
@@ -27,11 +28,18 @@ export async function createProductImage(input: unknown): Promise<ActionResult> 
   const v = validate(productImageFormSchema, input);
   if (!v.success) return v.result;
   try {
-    await productImageAdminRepository.create({
+    const image = await productImageAdminRepository.create({
       url: v.data.url,
       alt: v.data.alt || null,
       order: v.data.order,
       product: { connect: { id: v.data.productId } },
+    });
+    await audit({
+      action: "CREATE",
+      entity: "ProductImage",
+      entityId: image.id,
+      summary: `Фото добавлено для товара ${v.data.productId}`,
+      meta: { productId: v.data.productId },
     });
     revalidate();
     return ok();
@@ -50,6 +58,13 @@ export async function updateProductImage(id: string, input: unknown): Promise<Ac
       alt: v.data.alt || null,
       order: v.data.order,
       product: { connect: { id: v.data.productId } },
+    });
+    await audit({
+      action: "UPDATE",
+      entity: "ProductImage",
+      entityId: id,
+      summary: `Фото изменено для товара ${v.data.productId}`,
+      meta: { productId: v.data.productId },
     });
     revalidate();
     return ok();
@@ -85,6 +100,12 @@ export async function deleteProductImage(id: string): Promise<ActionResult> {
   await requireStaff();
   try {
     await productImageAdminRepository.remove(id);
+    await audit({
+      action: "DELETE",
+      entity: "ProductImage",
+      entityId: id,
+      summary: `Фото удалено (${id})`,
+    });
     revalidate();
     return ok();
   } catch (e) {

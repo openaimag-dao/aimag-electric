@@ -8,8 +8,7 @@ import { prisma } from "@/lib/prisma";
 
 /**
  * Auth scaffold. Credentials provider is included as a starting point for the
- * B2B customer cabinet; swap the password check for a real hash comparison
- * (e.g. bcrypt) before production, and add OAuth providers as needed.
+ * B2B customer cabinet — add OAuth providers as needed.
  */
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
@@ -55,11 +54,43 @@ export const authOptions: NextAuthOptions = {
     },
   },
   events: {
+    // Written directly rather than through server/audit.ts's audit() helper:
+    // that helper resolves the actor via getServerSession(), which isn't
+    // reliably populated yet at the exact moment these events fire — the
+    // identity is already right here in the event payload.
     async signIn({ user }) {
       logger.info("auth.login", { userId: user.id, email: user.email });
+      try {
+        await prisma.auditLog.create({
+          data: {
+            action: "LOGIN",
+            entity: "User",
+            entityId: user.id ?? null,
+            summary: `Вход: ${user.email}`,
+            actorId: user.id ?? null,
+            actorEmail: user.email ?? null,
+          },
+        });
+      } catch (e) {
+        logger.error("audit.failed", { error: String(e), action: "LOGIN" });
+      }
     },
     async signOut({ token }) {
       logger.info("auth.logout", { userId: token?.sub });
+      try {
+        await prisma.auditLog.create({
+          data: {
+            action: "LOGOUT",
+            entity: "User",
+            entityId: token?.sub ?? null,
+            summary: `Выход: ${token?.email ?? token?.sub ?? "unknown"}`,
+            actorId: token?.sub ?? null,
+            actorEmail: (token?.email as string | undefined) ?? null,
+          },
+        });
+      } catch (e) {
+        logger.error("audit.failed", { error: String(e), action: "LOGOUT" });
+      }
     },
   },
 };

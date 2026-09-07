@@ -11,6 +11,7 @@ import {
 } from "@/lib/validations/admin";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
 import { requireStaff } from "@/lib/security/rbac";
+import { audit } from "@/server/audit";
 import { ALLOWED_DOCUMENT_TYPES, MAX_DOCUMENT_SIZE, formatFileSize } from "@/lib/uploads";
 
 function revalidate(id?: string) {
@@ -24,6 +25,13 @@ export async function createOrderFromQuote(quoteId: string): Promise<ActionResul
   await requireStaff();
   try {
     const order = await orderAdminRepository.createFromQuote(quoteId);
+    await audit({
+      action: "CREATE",
+      entity: "Order",
+      entityId: order.id,
+      summary: `Заказ создан из КП ${quoteId}`,
+      meta: { quoteId },
+    });
     revalidate();
     return ok({ id: order.id });
   } catch (e) {
@@ -41,6 +49,12 @@ export async function setOrderStatus(id: string, status: unknown): Promise<Actio
   if (!parsed.success) return fail("Некорректный статус");
   try {
     await orderAdminRepository.updateStatus(id, parsed.data);
+    await audit({
+      action: "UPDATE",
+      entity: "Order",
+      entityId: id,
+      summary: `Статус заказа изменён: ${parsed.data}`,
+    });
     revalidate(id);
     return ok();
   } catch (e) {
@@ -59,6 +73,12 @@ export async function updateOrderDelivery(id: string, input: unknown): Promise<A
       estimatedDelivery: v.data.estimatedDelivery ? new Date(v.data.estimatedDelivery) : null,
       actualDelivery: v.data.actualDelivery ? new Date(v.data.actualDelivery) : null,
     });
+    await audit({
+      action: "UPDATE",
+      entity: "Order",
+      entityId: id,
+      summary: "Доставка заказа обновлена",
+    });
     revalidate(id);
     return ok();
   } catch (e) {
@@ -70,6 +90,12 @@ export async function deleteOrder(id: string): Promise<ActionResult> {
   await requireStaff();
   try {
     await orderAdminRepository.remove(id);
+    await audit({
+      action: "DELETE",
+      entity: "Order",
+      entityId: id,
+      summary: `Заказ удалён (${id})`,
+    });
     revalidate();
     return ok();
   } catch (e) {
@@ -111,6 +137,13 @@ export async function addOrderDocument(orderId: string, input: unknown): Promise
       url: v.data.url,
       size: v.data.size || null,
     });
+    await audit({
+      action: "CREATE",
+      entity: "OrderDocument",
+      entityId: orderId,
+      summary: `Документ добавлен к заказу: ${v.data.title}`,
+      meta: { orderId },
+    });
     revalidate(orderId);
     return ok();
   } catch (e) {
@@ -122,6 +155,12 @@ export async function removeOrderDocument(id: string): Promise<ActionResult> {
   await requireStaff();
   try {
     await orderAdminRepository.removeDocument(id);
+    await audit({
+      action: "DELETE",
+      entity: "OrderDocument",
+      entityId: id,
+      summary: `Документ заказа удалён (${id})`,
+    });
     revalidate();
     return ok();
   } catch (e) {

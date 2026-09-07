@@ -12,6 +12,7 @@ import { attributeValueFormSchema } from "@/lib/validations/admin";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
 import { coerceAttributeValue, type AttributeValueType } from "@/lib/attributes";
 import { requireStaff } from "@/lib/security/rbac";
+import { audit } from "@/server/audit";
 
 function revalidate() {
   revalidatePath("/admin/attribute-values");
@@ -32,10 +33,17 @@ export async function createAttributeValue(input: unknown): Promise<ActionResult
   try {
     const attribute = await attributeAdminRepository.byId(v.data.attributeId);
     if (!attribute) return fail("Характеристика не найдена");
-    await attributeValueAdminRepository.create({
+    const value = await attributeValueAdminRepository.create({
       product: { connect: { id: v.data.productId } },
       attribute: { connect: { id: v.data.attributeId } },
       ...typedColumns(attribute.type, v.data.value),
+    });
+    await audit({
+      action: "CREATE",
+      entity: "AttributeValue",
+      entityId: value.id,
+      summary: `Значение характеристики «${attribute.name}» добавлено для товара ${v.data.productId}`,
+      meta: { productId: v.data.productId, attributeId: v.data.attributeId },
     });
     revalidate();
     return ok();
@@ -58,6 +66,13 @@ export async function updateAttributeValue(id: string, input: unknown): Promise<
       attribute: { connect: { id: v.data.attributeId } },
       ...typedColumns(attribute.type, v.data.value),
     });
+    await audit({
+      action: "UPDATE",
+      entity: "AttributeValue",
+      entityId: id,
+      summary: `Значение характеристики «${attribute.name}» изменено для товара ${v.data.productId}`,
+      meta: { productId: v.data.productId, attributeId: v.data.attributeId },
+    });
     revalidate();
     return ok();
   } catch (e) {
@@ -71,6 +86,12 @@ export async function deleteAttributeValue(id: string): Promise<ActionResult> {
   await requireStaff();
   try {
     await attributeValueAdminRepository.remove(id);
+    await audit({
+      action: "DELETE",
+      entity: "AttributeValue",
+      entityId: id,
+      summary: `Значение характеристики удалено (${id})`,
+    });
     revalidate();
     return ok();
   } catch (e) {
@@ -185,6 +206,13 @@ export async function saveProductSpecs(
         });
       }
     }
+    await audit({
+      action: "UPDATE",
+      entity: "AttributeValue",
+      entityId: productId,
+      summary: `Характеристики товара сохранены (${fields.length})`,
+      meta: { productId },
+    });
     revalidate();
     revalidatePath("/admin/products");
     return ok();

@@ -7,6 +7,7 @@ import { categoryFormSchema } from "@/lib/validations/admin";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
 import { requireStaff } from "@/lib/security/rbac";
+import { audit } from "@/server/audit";
 
 function revalidate() {
   revalidatePath("/admin/categories");
@@ -20,7 +21,7 @@ export async function createCategory(input: unknown): Promise<ActionResult> {
   const v = validate(categoryFormSchema, input);
   if (!v.success) return v.result;
   try {
-    await categoryAdminRepository.create({
+    const category = await categoryAdminRepository.create({
       slug: v.data.slug,
       title: v.data.title,
       description: v.data.description || null,
@@ -28,6 +29,12 @@ export async function createCategory(input: unknown): Promise<ActionResult> {
       icon: v.data.icon || null,
       image: v.data.image || null,
       order: v.data.order,
+    });
+    await audit({
+      action: "CREATE",
+      entity: "Category",
+      entityId: category.id,
+      summary: `Категория создана: ${v.data.title}`,
     });
     revalidate();
     return ok();
@@ -50,6 +57,12 @@ export async function updateCategory(id: string, input: unknown): Promise<Action
       image: v.data.image || null,
       order: v.data.order,
     });
+    await audit({
+      action: "UPDATE",
+      entity: "Category",
+      entityId: id,
+      summary: `Категория изменена: ${v.data.title}`,
+    });
     revalidate();
     return ok();
   } catch (e) {
@@ -65,6 +78,12 @@ export async function deleteCategory(id: string): Promise<ActionResult> {
       return fail(`Нельзя удалить: в категории ${count} товаров. Сначала перенесите их.`);
     }
     await categoryAdminRepository.remove(id);
+    await audit({
+      action: "DELETE",
+      entity: "Category",
+      entityId: id,
+      summary: `Категория удалена (${id})`,
+    });
     revalidate();
     return ok();
   } catch (e) {

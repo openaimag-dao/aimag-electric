@@ -6,6 +6,7 @@ import { customerAdminRepository } from "@/server/repositories/admin";
 import { customerFormSchema } from "@/lib/validations/crm";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
 import { requireStaff } from "@/lib/security/rbac";
+import { audit } from "@/server/audit";
 
 function revalidate() {
   revalidatePath("/admin/crm/customers");
@@ -31,7 +32,13 @@ export async function createCustomer(input: unknown): Promise<ActionResult> {
   const v = validate(customerFormSchema, input);
   if (!v.success) return v.result;
   try {
-    await customerAdminRepository.create(toData(v.data));
+    const customer = await customerAdminRepository.create(toData(v.data));
+    await audit({
+      action: "CREATE",
+      entity: "Customer",
+      entityId: customer.id,
+      summary: `Клиент создан: ${v.data.company}`,
+    });
     revalidate();
     return ok();
   } catch (e) {
@@ -56,6 +63,12 @@ export async function updateCustomer(id: string, input: unknown): Promise<Action
       status: d.status,
       owner: d.ownerId ? { connect: { id: d.ownerId } } : { disconnect: true },
     });
+    await audit({
+      action: "UPDATE",
+      entity: "Customer",
+      entityId: id,
+      summary: `Клиент изменён: ${v.data.company}`,
+    });
     revalidate();
     return ok();
   } catch (e) {
@@ -67,6 +80,12 @@ export async function deleteCustomer(id: string): Promise<ActionResult> {
   await requireStaff();
   try {
     await customerAdminRepository.remove(id);
+    await audit({
+      action: "DELETE",
+      entity: "Customer",
+      entityId: id,
+      summary: `Клиент удалён (${id})`,
+    });
     revalidate();
     return ok();
   } catch (e) {
