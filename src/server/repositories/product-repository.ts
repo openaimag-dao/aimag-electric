@@ -86,6 +86,15 @@ export const productRepository = {
     });
   },
 
+  /** Lookup by a pasted SKU list ("Быстрый заказ") — SKU is unique, so this is an exact-match-only lookup, no fuzzy title matching. */
+  findBySkus(skus: string[]) {
+    if (skus.length === 0) return Promise.resolve([]);
+    return prisma.product.findMany({
+      where: { published: true, sku: { in: skus } },
+      select: productListSelect,
+    });
+  },
+
   countPublished() {
     return prisma.product.count({ where: { published: true } });
   },

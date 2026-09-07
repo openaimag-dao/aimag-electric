@@ -35,6 +35,13 @@ export const productService = {
     return ids.map((id) => byId.get(id)).filter((p): p is CatalogProductDTO => Boolean(p));
   },
 
+  /** Resolve a pasted SKU list ("Быстрый заказ") to live catalog data — SKU is unique, exact match only. */
+  async getBySkus(skus: string[]): Promise<CatalogProductDTO[]> {
+    if (skus.length === 0) return [];
+    const rows = await productRepository.findBySkus(skus);
+    return rows.map(toCatalogDTO);
+  },
+
   /** Related = same category, nearest by voltage/section, excluding self. */
   async getRelated(product: CatalogProductDTO, limit = 4): Promise<CatalogProductDTO[]> {
     const rows = await productRepository.findByCategory(product.categorySlug, 50);

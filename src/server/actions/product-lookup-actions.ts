@@ -8,6 +8,13 @@ import { companyPricesForCurrentUser } from "@/server/services/company-price-ser
 import type { CatalogProduct } from "@/types/catalog";
 
 const MAX_IDS = 24;
+const MAX_SKU_LINES = 200;
+
+export interface SkuLookupLine {
+  sku: string;
+  qty: number;
+  product: CatalogProduct | null;
+}
 
 /** Attaches each product's companyPriceTenge for the viewer's company, if any is set — shared by every list built from getProductsByIds (favorites, compare, recently viewed). */
 async function withCompanyPrices(products: CatalogProduct[]): Promise<CatalogProduct[]> {
@@ -38,6 +45,44 @@ export async function getProductsByIds(ids: unknown): Promise<CatalogProduct[]> 
 
   const products = await productService.getByIds(clean);
   return withCompanyPrices(products);
+}
+
+/**
+ * Быстрый заказ: resolves a pasted "SKU  qty" list to live catalog data —
+ * exact SKU match only, no fuzzy title matching (unlike the authenticated
+ * spec-import wizard, which handles messy free-text spec sheets). Public,
+ * unauthenticated, rate-limited per IP — this is the storefront's public
+ * equivalent of that wizard for a guest who already knows their article
+ * numbers.
+ */
+export async function getProductsBySkus(lines: unknown): Promise<SkuLookupLine[]> {
+  if (!Array.isArray(lines)) return [];
+  const clean = lines
+    .filter(
+      (l): l is { sku: string; qty: number } =>
+        typeof l === "object" &&
+        l !== null &&
+        typeof (l as { sku: unknown }).sku === "string" &&
+        (l as { sku: string }).sku.trim().length > 0 &&
+        typeof (l as { qty: unknown }).qty === "number" &&
+        Number.isFinite((l as { qty: number }).qty)
+    )
+    .map((l) => ({ sku: l.sku.trim().slice(0, 60), qty: Math.max(0.001, l.qty) }))
+    .slice(0, MAX_SKU_LINES);
+  if (clean.length === 0) return [];
+
+  const hdrs = await headers();
+  const ip =
+    hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() || hdrs.get("x-real-ip") || "unknown";
+  const limit = rateLimit(`quick-order:${ip}`, 20, 60_000);
+  if (!limit.ok) return [];
+
+  const skus = [...new Set(clean.map((l) => l.sku))];
+  const products = await productService.getBySkus(skus);
+  const priced = await withCompanyPrices(products);
+  const bySku = new Map(priced.map((p) => [p.sku, p]));
+
+  return clean.map((l) => ({ sku: l.sku, qty: l.qty, product: bySku.get(l.sku) ?? null }));
 }
 
 /**

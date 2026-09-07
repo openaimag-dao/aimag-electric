@@ -26,9 +26,14 @@ export function CartView() {
             одно КП на все позиции.
           </p>
         </div>
-        <Button asChild variant="signal">
-          <Link href="/catalog">Перейти в каталог</Link>
-        </Button>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <Button asChild variant="signal">
+            <Link href="/catalog">Перейти в каталог</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/quick-order">Быстрый заказ по артикулам</Link>
+          </Button>
+        </div>
       </div>
     );
   }
