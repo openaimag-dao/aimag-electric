@@ -36,6 +36,20 @@ const loadCategoryCards = unstable_cache(
   { tags: [CACHE_TAGS.categories, CACHE_TAGS.products], revalidate: 3600 }
 );
 
+// Lean category list for the header's catalog mega menu — every page render
+// needs this, so it's a separate, cheaper cache entry than the homepage's
+// findManyWithStats() (which adds a product-count + photo query per row).
+const loadNavCategories = unstable_cache(
+  async (): Promise<{ slug: string; title: string; icon: string | null }[]> => {
+    const rows = await categoryRepository.findMany();
+    return rows
+      .map((c) => ({ slug: c.slug, title: c.title, icon: c.icon }))
+      .sort((a, b) => a.title.localeCompare(b.title, "ru"));
+  },
+  ["nav-categories"],
+  { tags: [CACHE_TAGS.categories], revalidate: 3600 }
+);
+
 const loadBrands = unstable_cache(
   async (): Promise<BrandDTO[]> => {
     const rows = await brandRepository.findMany();
@@ -59,6 +73,7 @@ const loadPopular = unstable_cache(
 
 export const homeService = {
   categoryCards: cache(loadCategoryCards),
+  navCategories: cache(loadNavCategories),
   brands: cache(loadBrands),
   popularProducts: cache((limit = 8) => loadPopular(limit)),
   // Real published-product count for the hero's catalog-size stat — not a

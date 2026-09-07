@@ -13,6 +13,7 @@ import { CompareProvider } from "@/components/compare/compare-provider";
 import { RecentlyViewedProvider } from "@/components/recently-viewed/recently-viewed-provider";
 import { getLocale } from "@/i18n/locale-cookie";
 import { getDictionary } from "@/i18n/get-dictionary";
+import { homeService } from "@/server/services/home-service";
 import "./globals.css";
 
 const sans = Inter({
@@ -96,6 +97,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const { organization, website } = buildOrganizationJsonLd();
   const locale = await getLocale();
   const dict = getDictionary(locale);
+  const navCategories = await homeService.navCategories();
   return (
     <html lang={locale} className={`${sans.variable} ${display.variable} ${mono.variable}`}>
       <body className="flex min-h-screen flex-col font-sans">
@@ -113,7 +115,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             <FavoritesProvider>
               <CompareProvider>
                 <RecentlyViewedProvider>
-                  <Header locale={locale} dict={dict} />
+                  <Header locale={locale} dict={dict} navCategories={navCategories} />
                   <main className="flex-1">{children}</main>
                   <Footer />
                 </RecentlyViewedProvider>

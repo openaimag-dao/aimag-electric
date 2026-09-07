@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AddToCartButton } from "@/components/cart/add-to-cart-button";
+import { AddToCartWithQty } from "@/components/cart/add-to-cart-with-qty";
 import { ProductThumbnail } from "@/components/catalog/product-thumbnail";
 import { ProductPrice } from "@/components/catalog/product-price";
 import { AvailabilityBadge } from "@/components/catalog/availability-badge";
@@ -95,14 +95,9 @@ export function ProductCard({
           </p>
         )}
 
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          <Button asChild variant="outline" size="sm">
-            <Link href={href}>Подробнее</Link>
-          </Button>
-          <AddToCartButton
-            variant="signal"
-            size="sm"
-            label="В корзину"
+        <div className="mt-4 space-y-2">
+          <AddToCartWithQty
+            unit={product.unit}
             product={{
               productId: product.id,
               slug: product.slug,
@@ -112,6 +107,9 @@ export function ProductCard({
               priceTenge: product.companyPriceTenge ?? product.price,
             }}
           />
+          <Button asChild variant="outline" size="sm" className="w-full">
+            <Link href={href}>Подробнее</Link>
+          </Button>
         </div>
       </div>
     </article>

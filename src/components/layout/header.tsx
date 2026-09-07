@@ -4,6 +4,7 @@ import { Phone } from "lucide-react";
 import { Logo } from "@/components/common/logo";
 import { SearchBar } from "@/components/layout/search-bar";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { MegaMenu } from "@/components/layout/mega-menu";
 import { QuoteDialog } from "@/components/common/quote-dialog";
 import { AccountLink } from "@/components/auth/account-link";
 import { CartBadge } from "@/components/cart/cart-badge";
@@ -14,7 +15,15 @@ import { siteConfig } from "@/config/site";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/types";
 
-export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
+export function Header({
+  locale,
+  dict,
+  navCategories,
+}: {
+  locale: Locale;
+  dict: Dictionary;
+  navCategories: { slug: string; title: string }[];
+}) {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/85 backdrop-blur-md">
       {/* Utility strip */}
@@ -41,15 +50,24 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
         <Logo />
 
         <nav aria-label="Основная навигация" className="ml-4 hidden items-center gap-1 md:flex">
-          {dict.nav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="rounded-md px-3 py-2 text-sm font-medium text-steel-600 transition-colors hover:bg-secondary hover:text-primary"
-            >
-              {item.label}
-            </Link>
-          ))}
+          {dict.nav.map((item) =>
+            item.href === "/catalog" ? (
+              <MegaMenu
+                key={item.href}
+                label={item.label}
+                href={item.href}
+                categories={navCategories}
+              />
+            ) : (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="rounded-md px-3 py-2 text-sm font-medium text-steel-600 transition-colors hover:bg-secondary hover:text-primary"
+              >
+                {item.label}
+              </Link>
+            )
+          )}
         </nav>
 
         <div className="ml-auto hidden max-w-xs flex-1 lg:block">
