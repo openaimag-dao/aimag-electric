@@ -3,7 +3,7 @@ import { Clock, Download, ShieldCheck, Truck, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { QuoteDialog } from "@/components/common/quote-dialog";
-import { AddToCartButton } from "@/components/cart/add-to-cart-button";
+import { AddToCartWithQty } from "@/components/cart/add-to-cart-with-qty";
 import { ProductPrice } from "@/components/catalog/product-price";
 import { AvailabilityBadge } from "@/components/catalog/availability-badge";
 import { WhatsAppButton } from "@/components/product/whatsapp-button";
@@ -89,9 +89,10 @@ export function PurchasePanel({
             },
           ]}
         />
-        <AddToCartButton
-          size="lg"
-          className="w-full"
+        <AddToCartWithQty
+          layout="stacked"
+          buttonSize="lg"
+          unit={product.unit}
           product={{
             productId: product.id,
             slug: product.slug,

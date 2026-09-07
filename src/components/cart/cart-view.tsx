@@ -2,11 +2,12 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Minus, Plus, Trash2, ShoppingCart } from "lucide-react";
+import { Trash2, ShoppingCart } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { QuoteForm } from "@/components/common/quote-form";
 import { SaveAsProjectButton } from "@/components/cart/save-as-project-button";
+import { QuantityInput } from "@/components/catalog/quantity-input";
 import { useCart } from "@/components/cart/cart-provider";
 import { formatTenge } from "@/lib/money";
 
@@ -51,28 +52,11 @@ export function CartView() {
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1.5 rounded-md border border-border">
-                <button
-                  type="button"
-                  aria-label="Уменьшить количество"
-                  className="flex size-8 items-center justify-center text-steel-600 hover:text-primary"
-                  onClick={() => setQty(item.productId, item.qty - 1)}
-                  disabled={item.qty <= 1}
-                >
-                  <Minus className="size-3.5" />
-                </button>
-                <span className="min-w-10 text-center text-sm tabular-nums">
-                  {item.qty} {item.unit}
-                </span>
-                <button
-                  type="button"
-                  aria-label="Увеличить количество"
-                  className="flex size-8 items-center justify-center text-steel-600 hover:text-primary"
-                  onClick={() => setQty(item.productId, item.qty + 1)}
-                >
-                  <Plus className="size-3.5" />
-                </button>
-              </div>
+              <QuantityInput
+                value={item.qty}
+                onChange={(qty) => setQty(item.productId, qty)}
+                unit={item.unit}
+              />
 
               <span className="w-28 text-right text-sm font-semibold text-primary">
                 {item.priceTenge !== null ? formatTenge(item.priceTenge * item.qty) : "по запросу"}
