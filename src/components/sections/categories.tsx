@@ -1,20 +1,24 @@
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowUpRight, Package } from "lucide-react";
 
 import { SectionHeading } from "@/components/common/section-heading";
 import { Button } from "@/components/ui/button";
 import { resolveCategoryIcon } from "@/lib/category-icons";
+import { resolveCategoryIllustration } from "@/components/sections/category-illustrations";
 import type { CategoryCardDTO } from "@/server/dto";
 
 /** How many category tiles to show on the homepage — a clean 4×2 grid. */
 const TILE_COUNT = 8;
 
 /**
- * Homepage category grid: uniform photo tiles (real product photos, see
- * categoryRepository.findManyWithStats), sorted by actual inventory so the
- * categories worth showing off lead — not creation order. Rest of the
- * catalog is one click away via "Весь каталог".
+ * Homepage category grid: a hand-drawn pictogram per category (see
+ * category-illustrations.tsx) rather than a photo. Tried real product
+ * photos first (categoryRepository.findManyWithStats picked the most
+ * popular in-stock product's own photo) — repeatedly surfaced other
+ * suppliers' watermarks or a stray phone number baked into a hotlinked
+ * image. A drawn icon can't carry someone else's branding. Sorted by
+ * actual inventory so the categories worth showing off lead — not
+ * creation order. Rest of the catalog is one click away via "Весь каталог".
  */
 export function Categories({ categories }: { categories: CategoryCardDTO[] }) {
   if (categories.length === 0) return null;
@@ -45,8 +49,8 @@ export function Categories({ categories }: { categories: CategoryCardDTO[] }) {
         </div>
 
         <div className="mt-12 grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
-          {tiles.map((category, i) => (
-            <CategoryTile key={category.slug} category={category} priority={i < 4} />
+          {tiles.map((category) => (
+            <CategoryTile key={category.slug} category={category} />
           ))}
         </div>
       </div>
@@ -54,44 +58,26 @@ export function Categories({ categories }: { categories: CategoryCardDTO[] }) {
   );
 }
 
-function CategoryTile({ category, priority }: { category: CategoryCardDTO; priority: boolean }) {
-  const Icon = resolveCategoryIcon(category.icon);
+function CategoryTile({ category }: { category: CategoryCardDTO }) {
+  const Illustration = resolveCategoryIllustration(category.slug);
+  const FallbackIcon = resolveCategoryIcon(category.icon);
 
   return (
     <Link
       href={`/catalog?cat=${category.slug}`}
-      className="group relative flex aspect-[4/5] flex-col justify-end overflow-hidden rounded-2xl border border-border bg-steel-950 transition-all hover:-translate-y-0.5 hover:border-signal/60 hover:shadow-lg sm:aspect-square"
+      className="group flex flex-col items-center rounded-2xl border border-border bg-card px-4 py-6 text-center transition-all hover:-translate-y-0.5 hover:border-signal/60 hover:shadow-lg"
     >
-      {category.image ? (
-        <Image
-          src={category.image}
-          alt=""
-          fill
-          sizes="(min-width: 1024px) 25vw, 50vw"
-          className="object-cover opacity-80 transition-transform duration-300 group-hover:scale-105"
-          priority={priority}
-        />
-      ) : (
-        <div className="conductor-grid absolute inset-0 opacity-30" aria-hidden />
-      )}
-      <div
-        className="absolute inset-0 bg-gradient-to-t from-steel-950 via-steel-950/60 to-transparent"
-        aria-hidden
-      />
-
-      <span className="absolute right-3 top-3 inline-flex size-9 items-center justify-center rounded-lg bg-white/10 text-white backdrop-blur-sm">
-        <Icon className="size-4" />
+      <span className="inline-flex size-20 items-center justify-center rounded-full bg-signal/15 text-primary transition-colors group-hover:bg-signal/25">
+        {Illustration ? <Illustration className="size-10" /> : <FallbackIcon className="size-9" />}
       </span>
 
-      <div className="relative p-4">
-        <h3 className="font-display text-sm font-semibold leading-snug text-white sm:text-base">
-          {category.title}
-        </h3>
-        <span className="mt-1.5 inline-flex items-center gap-1 text-xs text-steel-300">
-          <Package className="size-3" />
-          {category.productCount} {pluralizeProducts(category.productCount)}
-        </span>
-      </div>
+      <h3 className="mt-4 font-display text-sm font-semibold leading-snug text-primary sm:text-base">
+        {category.title}
+      </h3>
+      <span className="mt-1.5 inline-flex items-center gap-1 text-xs text-muted-foreground">
+        <Package className="size-3" />
+        {category.productCount} {pluralizeProducts(category.productCount)}
+      </span>
     </Link>
   );
 }
