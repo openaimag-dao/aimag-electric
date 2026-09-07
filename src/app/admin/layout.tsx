@@ -4,7 +4,6 @@ import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { AdminMobileNav } from "@/components/admin/admin-mobile-nav";
 import { AdminGlobalSearch } from "@/components/admin/admin-global-search";
 import { NotificationBell } from "@/components/admin/notification-bell";
-import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Админ-панель",
@@ -31,7 +30,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
         <main className="flex-1 p-4 lg:p-8">{children}</main>
       </div>
-      <Toaster position="top-right" />
     </div>
   );
 }
