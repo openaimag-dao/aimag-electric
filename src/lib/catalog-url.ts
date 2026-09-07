@@ -46,6 +46,18 @@ export function parseFilters(params: URLSearchParams): CatalogFilters {
   };
 }
 
+/** Next.js's server-side searchParams object → the same CatalogFilters parseFilters produces from a URLSearchParams, for the server-rendered catalog page (see app/catalog/page.tsx). */
+export function searchParamsToFilters(
+  sp: Record<string, string | string[] | undefined>
+): CatalogFilters {
+  const usp = new URLSearchParams();
+  for (const [key, value] of Object.entries(sp)) {
+    if (value === undefined) continue;
+    usp.set(key, Array.isArray(value) ? value.join(",") : value);
+  }
+  return parseFilters(usp);
+}
+
 /** Serialize filters to a compact query string (omitting defaults). */
 export function filtersToParams(f: CatalogFilters): URLSearchParams {
   const p = new URLSearchParams();

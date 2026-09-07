@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { buildFacets, queryCatalog, activeFilterCount } from "@/lib/catalog";
+import { activeFilterCount, type CatalogFacets } from "@/lib/catalog";
 import { useCatalogFilters } from "@/hooks/use-catalog-filters";
 import { logCatalogSearch } from "@/server/actions/search-actions";
 import { track } from "@/lib/analytics";
@@ -15,33 +15,24 @@ import { ProductCard } from "@/components/catalog/product-card";
 import { CatalogPagination } from "@/components/catalog/catalog-pagination";
 import { CatalogEmptyState } from "@/components/catalog/empty-state";
 import { PAGE_SIZE } from "@/config/catalog-sort";
-import type { AttributeDef, CatalogProduct } from "@/types/catalog";
+import type { CatalogProduct } from "@/types/catalog";
 
 interface CatalogViewProps {
-  products: CatalogProduct[];
-  categoryNames: Record<string, string>;
-  attributeDefs: AttributeDef[];
+  /** Already the current page's items — filtering/sorting/pagination happened server-side (see catalog-service.query). */
+  items: CatalogProduct[];
+  total: number;
+  page: number;
+  pageCount: number;
+  facets: CatalogFacets;
 }
 
-export function CatalogView({ products, categoryNames, attributeDefs }: CatalogViewProps) {
+export function CatalogView({ items, total, page, pageCount, facets }: CatalogViewProps) {
   const { filters } = useCatalogFilters();
-
-  // Derived data — memoized so re-renders on unrelated state stay cheap.
-  const { items, total, page, pageCount } = React.useMemo(
-    () => queryCatalog(products, filters),
-    [products, filters]
-  );
-  const facets = React.useMemo(
-    () => buildFacets(products, filters, categoryNames, attributeDefs),
-    [products, categoryNames, attributeDefs, filters]
-  );
   const activeCount = activeFilterCount(filters);
 
-  // The catalog grid loads every published product once, unpaginated — see
-  // catalog-service.ts — so a logged-in company member's negotiated
-  // CompanyPrice can't be bulk-resolved for all of them without wasting
-  // work on rows no one will scroll to. Resolve it only for the current
-  // page's ids instead, reusing the same lookup /compare uses.
+  // A logged-in company member's negotiated CompanyPrice isn't part of the
+  // catalog listing query, so resolve it client-side for just the current
+  // page's ids, reusing the same lookup /compare uses.
   const visibleIds = React.useMemo(() => items.map((p) => p.id), [items]);
   const [companyPrices, setCompanyPrices] = React.useState<Map<string, number | null>>(new Map());
   React.useEffect(() => {

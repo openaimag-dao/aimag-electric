@@ -61,13 +61,10 @@ const loadBrands = unstable_cache(
 
 const loadPopular = unstable_cache(
   async (limit: number): Promise<CatalogProductDTO[]> => {
-    const rows = await productRepository.findMany();
-    return rows
-      .map(toCatalogDTO)
-      .sort((a, b) => b.popularity - a.popularity)
-      .slice(0, limit);
+    const rows = await productRepository.findTopPopular(limit);
+    return rows.map(toCatalogDTO);
   },
-  ["home-popular"],
+  ["home-popular-v2"],
   { tags: [CACHE_TAGS.products], revalidate: 600 }
 );
 

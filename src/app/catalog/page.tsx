@@ -16,9 +16,10 @@ import { CatalogSkeleton } from "@/components/catalog/catalog-skeleton";
 import { ContentBlocks } from "@/components/common/content-blocks";
 import { Badge } from "@/components/ui/badge";
 import { catalogService } from "@/server/services";
+import { searchParamsToFilters } from "@/lib/catalog-url";
 
 interface PageProps {
-  searchParams: Promise<{ cat?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 const DEFAULT_TITLE = "Каталог электротехнической продукции";
@@ -30,8 +31,15 @@ const DEFAULT_DESCRIPTION =
  * category) — give that URL its own title/description/canonical instead of
  * reusing the generic catalog metadata for every category variant.
  */
+/** A single, comma-free `cat` value selects one category for SEO purposes — multi-category selection (chips) falls back to the generic catalog metadata. */
+function singleCategorySlug(sp: Record<string, string | string[] | undefined>): string | null {
+  const raw = sp.cat;
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return value && !value.includes(",") ? value : null;
+}
+
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
-  const { cat } = await searchParams;
+  const cat = singleCategorySlug(await searchParams);
   const category = cat ? (await catalogService.loadCategories()).find((c) => c.slug === cat) : null;
   const seo = cat ? categorySeo[cat] : undefined;
 
@@ -58,14 +66,15 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
 }
 
 export default async function CatalogPage({ searchParams }: PageProps) {
-  const { cat } = await searchParams;
-  const [products, categories, total, attributeDefs] = await Promise.all([
-    catalogService.loadProducts(),
+  const sp = await searchParams;
+  const filters = searchParamsToFilters(sp);
+  const cat = singleCategorySlug(sp);
+  const [result, facets, categories, total] = await Promise.all([
+    catalogService.query(filters),
+    catalogService.facets(filters),
     catalogService.loadCategories(),
     catalogService.count(),
-    catalogService.loadAttributes(),
   ]);
-  const categoryNames = Object.fromEntries(categories.map((c) => [c.slug, c.title]));
   const category = cat ? categories.find((c) => c.slug === cat) : null;
   const seo = cat ? categorySeo[cat] : undefined;
   const seoArticles = seo ? articles.filter((a) => seo.relatedArticles.includes(a.slug)) : [];
@@ -115,9 +124,11 @@ export default async function CatalogPage({ searchParams }: PageProps) {
       <div className="container py-8">
         <Suspense fallback={<CatalogSkeleton />}>
           <CatalogView
-            products={products}
-            categoryNames={categoryNames}
-            attributeDefs={attributeDefs}
+            items={result.items}
+            total={result.total}
+            page={result.page}
+            pageCount={result.pageCount}
+            facets={facets}
           />
         </Suspense>
       </div>
