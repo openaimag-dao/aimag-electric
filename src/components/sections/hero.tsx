@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { QuoteDialog } from "@/components/common/quote-dialog";
 import { CatalogSearch } from "@/components/sections/catalog-search";
 import { getHeroStats } from "@/config/stats";
-import type { CategoryDTO } from "@/server/dto";
+import type { CategoryCardDTO } from "@/server/dto";
 
 /**
  * Hero — the 5-second thesis. Left: strong claim, catalog search, dual CTA.
@@ -16,7 +16,7 @@ export function Hero({
   categories,
   productCount,
 }: {
-  categories: CategoryDTO[];
+  categories: CategoryCardDTO[];
   productCount: number;
 }) {
   const heroStats = getHeroStats(productCount);
@@ -79,15 +79,19 @@ export function Hero({
             <CatalogSearch />
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-steel-400">
               <span className="text-steel-500">Популярное:</span>
-              {categories.slice(0, 4).map((c) => (
-                <Link
-                  key={c.slug}
-                  href={`/catalog/${c.slug}`}
-                  className="underline-offset-4 hover:text-signal hover:underline"
-                >
-                  {c.title}
-                </Link>
-              ))}
+              {categories
+                .slice()
+                .sort((a, b) => b.productCount - a.productCount)
+                .slice(0, 4)
+                .map((c) => (
+                  <Link
+                    key={c.slug}
+                    href={`/catalog?cat=${c.slug}`}
+                    className="underline-offset-4 hover:text-signal hover:underline"
+                  >
+                    {c.title}
+                  </Link>
+                ))}
             </div>
           </div>
 

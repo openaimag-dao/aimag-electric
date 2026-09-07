@@ -16,6 +16,11 @@ export interface CategoryDTO {
   image: string | null;
 }
 
+/** CategoryDTO + a real published-product count — the homepage category grid. */
+export interface CategoryCardDTO extends CategoryDTO {
+  productCount: number;
+}
+
 export interface BrandDTO {
   slug: string;
   name: string;
