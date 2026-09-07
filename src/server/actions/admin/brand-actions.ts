@@ -7,6 +7,7 @@ import { brandFormSchema } from "@/lib/validations/admin";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
 import { requireStaff } from "@/lib/security/rbac";
+import { audit } from "@/server/audit";
 
 function revalidate() {
   revalidatePath("/admin/brands");
@@ -19,10 +20,16 @@ export async function createBrand(input: unknown): Promise<ActionResult> {
   const v = validate(brandFormSchema, input);
   if (!v.success) return v.result;
   try {
-    await brandAdminRepository.create({
+    const brand = await brandAdminRepository.create({
       slug: v.data.slug,
       name: v.data.name,
       origin: v.data.origin || null,
+    });
+    await audit({
+      action: "CREATE",
+      entity: "Brand",
+      entityId: brand.id,
+      summary: `Бренд создан: ${v.data.name}`,
     });
     revalidate();
     return ok();
@@ -41,6 +48,12 @@ export async function updateBrand(id: string, input: unknown): Promise<ActionRes
       name: v.data.name,
       origin: v.data.origin || null,
     });
+    await audit({
+      action: "UPDATE",
+      entity: "Brand",
+      entityId: id,
+      summary: `Бренд изменён: ${v.data.name}`,
+    });
     revalidate();
     return ok();
   } catch (e) {
@@ -56,6 +69,12 @@ export async function deleteBrand(id: string): Promise<ActionResult> {
       return fail(`Нельзя удалить: у производителя ${count} товаров.`);
     }
     await brandAdminRepository.remove(id);
+    await audit({
+      action: "DELETE",
+      entity: "Brand",
+      entityId: id,
+      summary: `Бренд удалён (${id})`,
+    });
     revalidate();
     return ok();
   } catch (e) {

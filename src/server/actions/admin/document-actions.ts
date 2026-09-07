@@ -7,6 +7,7 @@ import { documentAdminRepository } from "@/server/repositories/admin";
 import { documentFormSchema } from "@/lib/validations/admin";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
 import { requireStaff } from "@/lib/security/rbac";
+import { audit } from "@/server/audit";
 import { ALLOWED_DOCUMENT_TYPES, MAX_DOCUMENT_SIZE, formatFileSize } from "@/lib/uploads";
 
 function revalidate() {
@@ -42,13 +43,20 @@ export async function createDocument(input: unknown): Promise<ActionResult> {
   const v = validate(documentFormSchema, input);
   if (!v.success) return v.result;
   try {
-    await documentAdminRepository.create({
+    const document = await documentAdminRepository.create({
       title: v.data.title,
       kind: v.data.kind,
       url: v.data.url,
       size: v.data.size || null,
       order: v.data.order,
       product: { connect: { id: v.data.productId } },
+    });
+    await audit({
+      action: "CREATE",
+      entity: "ProductDocument",
+      entityId: document.id,
+      summary: `Документ добавлен: ${v.data.title}`,
+      meta: { productId: v.data.productId },
     });
     revalidate();
     return ok();
@@ -70,6 +78,13 @@ export async function updateDocument(id: string, input: unknown): Promise<Action
       order: v.data.order,
       product: { connect: { id: v.data.productId } },
     });
+    await audit({
+      action: "UPDATE",
+      entity: "ProductDocument",
+      entityId: id,
+      summary: `Документ изменён: ${v.data.title}`,
+      meta: { productId: v.data.productId },
+    });
     revalidate();
     return ok();
   } catch (e) {
@@ -81,6 +96,12 @@ export async function deleteDocument(id: string): Promise<ActionResult> {
   await requireStaff();
   try {
     await documentAdminRepository.remove(id);
+    await audit({
+      action: "DELETE",
+      entity: "ProductDocument",
+      entityId: id,
+      summary: `Документ удалён (${id})`,
+    });
     revalidate();
     return ok();
   } catch (e) {

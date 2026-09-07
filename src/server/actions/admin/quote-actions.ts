@@ -6,6 +6,7 @@ import { quoteAdminRepository } from "@/server/repositories/admin";
 import { quoteStatus } from "@/lib/validations/admin";
 import { ok, fail, prismaError, type ActionResult } from "@/server/actions/action-result";
 import { requireStaff } from "@/lib/security/rbac";
+import { audit } from "@/server/audit";
 import { tengeToTiyn } from "@/lib/money";
 
 function revalidate() {
@@ -19,6 +20,12 @@ export async function setQuoteStatus(id: string, status: string): Promise<Action
   if (!parsed.success) return fail("Некорректный статус");
   try {
     await quoteAdminRepository.updateStatus(id, parsed.data);
+    await audit({
+      action: "UPDATE",
+      entity: "Quote",
+      entityId: id,
+      summary: `Статус КП изменён: ${parsed.data}`,
+    });
     revalidate();
     return ok();
   } catch (e) {
@@ -44,6 +51,13 @@ export async function updateQuoteItemPrice(
       itemId,
       priceTenge !== null ? tengeToTiyn(priceTenge) : null
     );
+    await audit({
+      action: "UPDATE",
+      entity: "QuoteItem",
+      entityId: itemId,
+      summary: `Цена позиции КП изменена`,
+      meta: { priceTenge },
+    });
     revalidate();
     return ok();
   } catch (e) {
@@ -55,6 +69,12 @@ export async function deleteQuote(id: string): Promise<ActionResult> {
   await requireStaff();
   try {
     await quoteAdminRepository.remove(id);
+    await audit({
+      action: "DELETE",
+      entity: "Quote",
+      entityId: id,
+      summary: `КП удалено (${id})`,
+    });
     revalidate();
     return ok();
   } catch (e) {
