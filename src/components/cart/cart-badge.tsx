@@ -12,7 +12,7 @@ export function CartBadge() {
   return (
     <Link
       href="/cart"
-      aria-label={`Проект: ${count} позиций`}
+      aria-label={`Корзина: ${count} позиций`}
       className="relative inline-flex size-9 items-center justify-center rounded-md text-steel-600 transition-colors hover:bg-secondary hover:text-primary"
     >
       <ShoppingCart className="size-5" />

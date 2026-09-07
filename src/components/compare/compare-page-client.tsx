@@ -142,7 +142,7 @@ export function ComparePageClient({ attributeDefs }: { attributeDefs: AttributeD
                       <AddToCartButton
                         variant="signal"
                         size="sm"
-                        label="В проект"
+                        label="В корзину"
                         className="mt-2 w-full"
                         product={{
                           productId: p.id,

@@ -67,7 +67,7 @@ export function MobileNav({ dict }: { dict: Dictionary }) {
             <SheetClose asChild>
               <Link
                 href="/cart"
-                aria-label={`Проект: ${cartCount} позиций`}
+                aria-label={`Корзина: ${cartCount} позиций`}
                 className="relative inline-flex size-9 items-center justify-center rounded-md text-steel-600 hover:bg-secondary hover:text-primary"
               >
                 <ShoppingCart className="size-5" />

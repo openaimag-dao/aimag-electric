@@ -19,9 +19,9 @@ export function CartView() {
       <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-border py-16 text-center">
         <ShoppingCart className="size-10 text-muted-foreground" />
         <div>
-          <p className="font-display text-lg font-semibold text-primary">Проект пуст</p>
+          <p className="font-display text-lg font-semibold text-primary">Корзина пуста</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Добавляйте товары из каталога кнопкой «В проект» — соберите спецификацию и запросите
+            Добавляйте товары из каталога кнопкой «В корзину» — соберите спецификацию и запросите
             одно КП на все позиции.
           </p>
         </div>

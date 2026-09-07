@@ -5,7 +5,7 @@ import { ChevronRight } from "lucide-react";
 import { CartView } from "@/components/cart/cart-view";
 
 export const metadata: Metadata = {
-  title: "Проект",
+  title: "Корзина",
   description: "Собранные товары для коммерческого предложения.",
   robots: { index: false, follow: true },
 };
@@ -23,10 +23,10 @@ export default function CartPage() {
               Главная
             </Link>
             <ChevronRight className="size-4" />
-            <span className="font-medium text-primary">Проект</span>
+            <span className="font-medium text-primary">Корзина</span>
           </nav>
           <h1 className="mt-4 font-display text-3xl font-bold tracking-tight text-primary sm:text-4xl">
-            Проект
+            Корзина
           </h1>
           <p className="mt-2 max-w-2xl text-muted-foreground">
             Товары, добавленные из каталога. Проверьте количество и запросите одно коммерческое
