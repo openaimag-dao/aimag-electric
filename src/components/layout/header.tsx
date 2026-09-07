@@ -83,6 +83,14 @@ export function Header({
           <QuoteDialog />
         </div>
 
+        {/* Mobile: the cart must stay reachable without opening the hamburger
+            drawer first — otherwise "added to cart" has nowhere obvious to
+            go. Compare/favorites stay drawer-only; cart is the one action a
+            customer needs mid-browse, right after tapping "В корзину". */}
+        <div className="ml-auto flex items-center md:hidden">
+          <CartBadge />
+        </div>
+
         <MobileNav dict={dict} />
       </div>
     </header>

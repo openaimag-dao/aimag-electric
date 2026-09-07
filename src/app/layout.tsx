@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { Toaster } from "@/components/ui/sonner";
 import { SiteAnalytics } from "@/components/analytics/site-analytics";
 import { siteConfig } from "@/config/site";
 import { buildOrganizationJsonLd } from "@/lib/org-jsonld";
@@ -110,6 +111,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           dangerouslySetInnerHTML={{ __html: JSON.stringify(website) }}
         />
         <SiteAnalytics />
+        <Toaster position="top-center" />
         <AuthProvider>
           <CartProvider>
             <FavoritesProvider>
