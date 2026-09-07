@@ -8,8 +8,13 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
+import { categorySeo } from "@/config/category-seo";
+import { articles } from "@/config/articles";
+import { buildFaqJsonLd } from "@/lib/faq-jsonld";
 import { CatalogView } from "@/components/catalog/catalog-view";
 import { CatalogSkeleton } from "@/components/catalog/catalog-skeleton";
+import { ContentBlocks } from "@/components/common/content-blocks";
+import { Badge } from "@/components/ui/badge";
 import { catalogService } from "@/server/services";
 
 interface PageProps {
@@ -28,9 +33,11 @@ const DEFAULT_DESCRIPTION =
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   const { cat } = await searchParams;
   const category = cat ? (await catalogService.loadCategories()).find((c) => c.slug === cat) : null;
+  const seo = cat ? categorySeo[cat] : undefined;
 
-  const title = category ? `${category.title} — каталог` : DEFAULT_TITLE;
+  const title = seo?.metaTitle ?? (category ? `${category.title} — каталог` : DEFAULT_TITLE);
   const description =
+    seo?.metaDescription ??
     category?.description ??
     (category
       ? `${category.title}: цены, наличие и характеристики в каталоге AIMAG ELECTRIC.`
@@ -60,6 +67,9 @@ export default async function CatalogPage({ searchParams }: PageProps) {
   ]);
   const categoryNames = Object.fromEntries(categories.map((c) => [c.slug, c.title]));
   const category = cat ? categories.find((c) => c.slug === cat) : null;
+  const seo = cat ? categorySeo[cat] : undefined;
+  const seoArticles = seo ? articles.filter((a) => seo.relatedArticles.includes(a.slug)) : [];
+  const faqLd = seo ? buildFaqJsonLd(seo.faq) : null;
 
   return (
     <div className="bg-secondary/20">
@@ -111,6 +121,53 @@ export default async function CatalogPage({ searchParams }: PageProps) {
           />
         </Suspense>
       </div>
+
+      {seo && (
+        <div className="border-t border-border bg-background">
+          <div className="container max-w-3xl py-10">
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+            />
+            <ContentBlocks blocks={seo.content} />
+
+            {seo.faq.length > 0 && (
+              <div className="mt-10">
+                <h2 className="font-display text-xl font-semibold text-primary">Частые вопросы</h2>
+                <div className="mt-4 space-y-4">
+                  {seo.faq.map((item) => (
+                    <div key={item.q} className="rounded-lg border border-border p-4">
+                      <p className="font-medium text-primary">{item.q}</p>
+                      <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                        {item.a}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {(seoArticles.length > 0 || seo.relatedPages.length > 0) && (
+              <div className="mt-10 flex flex-wrap gap-2">
+                {seoArticles.map((a) => (
+                  <Link key={a.slug} href={`/blog/${a.slug}`}>
+                    <Badge variant="muted" className="cursor-pointer hover:border-signal/60">
+                      Статья: {a.title}
+                    </Badge>
+                  </Link>
+                ))}
+                {seo.relatedPages.map((p) => (
+                  <Link key={p.href} href={p.href}>
+                    <Badge variant="muted" className="cursor-pointer hover:border-signal/60">
+                      {p.label}
+                    </Badge>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -20,6 +20,9 @@ const STATIC_PAGES = [
   "/blog",
 ];
 
+/** SEO landing pages targeting specific product-family keywords — same priority tier as category pages. */
+const SEO_LANDING_PAGES = ["/kabeli-vvg-avvg", "/kabeli-sip"];
+
 /**
  * Dynamic sitemap: static marketing pages + blog posts + every published
  * product and category, sourced from the DB. Regenerated per request
@@ -37,6 +40,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
       changeFrequency: "monthly" as const,
       priority: 0.4,
+    })),
+    ...SEO_LANDING_PAGES.map((path) => ({
+      url: `${base}${path}`,
+      lastModified: now,
+      changeFrequency: "weekly" as const,
+      priority: 0.65,
     })),
   ];
 

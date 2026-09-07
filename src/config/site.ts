@@ -2,7 +2,7 @@ export const siteConfig = {
   name: "AIMAG ELECTRIC",
   shortName: "AIMAG",
   description:
-    "B2B-поставщик электротехнической продукции для бизнеса и промышленности Казахстана: кабели, провода, изоляторы, арматура СИП, муфты, автоматы и высоковольтное оборудование.",
+    "Кабель ВВГ/АВВГ, изоляторы высоковольтные, кабельная арматура и провод СИП оптом в Казахстане. Наличие и цены в каталоге, доставка по РК, КП за 15 минут.",
   // Canonical origin used for sitemap.xml, robots.txt, JSON-LD, and Open
   // Graph/canonical URLs — override with SITE_URL once a custom domain is
   // connected, so switching domains later is an env var change, not a
