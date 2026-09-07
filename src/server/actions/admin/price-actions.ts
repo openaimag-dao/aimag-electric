@@ -11,6 +11,7 @@ import { audit } from "@/server/audit";
 
 function revalidate() {
   revalidatePath("/admin/prices");
+  revalidatePath("/admin/products");
   revalidatePath("/catalog");
 }
 
@@ -65,6 +66,38 @@ export async function updatePrice(id: string, input: unknown): Promise<ActionRes
     });
     revalidate();
     return ok();
+  } catch (e) {
+    return fail(prismaError(e));
+  }
+}
+
+/**
+ * Adjusts the BASE price of every selected product by a percentage in one
+ * shot — the bulk toolbar's price control. A percentage, not an absolute
+ * value: a bulk-selected set typically spans very differently priced
+ * products (a cable at 500 ₸/м next to a cabinet at 500 000 ₸), so "set
+ * price to X" would be meaningless across the whole selection the way it is
+ * for category/brand/status. For an arbitrary set of new absolute prices,
+ * the existing XLSX export → edit → import path already covers it.
+ */
+export async function bulkAdjustProductPrices(
+  ids: string[],
+  percent: number
+): Promise<ActionResult<{ count: number }>> {
+  await requireStaff();
+  if (ids.length === 0) return fail("Не выбрано ни одного товара");
+  if (!Number.isFinite(percent) || percent === 0) return fail("Укажите процент изменения");
+  if (percent <= -100) return fail("Изменение не может обнулить или сделать цену отрицательной");
+  try {
+    const result = await priceAdminRepository.bulkAdjustBasePrice(ids, percent);
+    await audit({
+      action: "UPDATE",
+      entity: "Price",
+      summary: `Массовое изменение цены: ${result.count} товар(ов), ${percent > 0 ? "+" : ""}${percent}%`,
+      meta: { ids, percent },
+    });
+    revalidate();
+    return ok({ count: result.count });
   } catch (e) {
     return fail(prismaError(e));
   }

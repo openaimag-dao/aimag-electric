@@ -34,7 +34,13 @@ import { RowActions } from "@/components/admin/row-actions";
 import { FormDialog } from "@/components/admin/form-dialog";
 import { ConfirmDelete } from "@/components/admin/confirm-delete";
 import { ProductForm, type ProductRow } from "@/components/admin/products/product-form";
-import { deleteProduct, bulkUpdateProducts, exportProductsXlsx } from "@/server/actions/admin";
+import { Input } from "@/components/ui/input";
+import {
+  deleteProduct,
+  bulkUpdateProducts,
+  bulkAdjustProductPrices,
+  exportProductsXlsx,
+} from "@/server/actions/admin";
 import { QUALITY_FILTERS, QUALITY_FILTER_LABELS } from "@/lib/admin/product-quality";
 import { downloadBase64Xlsx } from "@/lib/admin/download-file";
 
@@ -119,10 +125,15 @@ export function ProductsManager({
   const [bulkCategoryId, setBulkCategoryId] = React.useState("");
   const [bulkBrandId, setBulkBrandId] = React.useState("");
   const [bulkStatus, setBulkStatus] = React.useState<"" | "published" | "hidden">("");
+  const [bulkPricePercent, setBulkPricePercent] = React.useState("");
   const [confirmBulkOpen, setConfirmBulkOpen] = React.useState(false);
   const [bulkPending, setBulkPending] = React.useState(false);
 
-  const bulkHasChanges = Boolean(bulkCategoryId || bulkBrandId || bulkStatus);
+  const bulkPricePercentNum = bulkPricePercent.trim() === "" ? null : Number(bulkPricePercent);
+  const bulkPriceValid = bulkPricePercentNum === null || Number.isFinite(bulkPricePercentNum);
+  const bulkHasChanges = Boolean(
+    bulkCategoryId || bulkBrandId || bulkStatus || (bulkPricePercentNum && bulkPriceValid)
+  );
 
   const [exporting, setExporting] = React.useState(false);
 
@@ -146,22 +157,37 @@ export function ProductsManager({
 
   async function applyBulk() {
     setBulkPending(true);
-    const result = await bulkUpdateProducts(Array.from(selected), {
+    const ids = Array.from(selected);
+    const patch = {
       categoryId: bulkCategoryId || undefined,
       brandId: bulkBrandId || undefined,
       published: bulkStatus ? bulkStatus === "published" : undefined,
-    });
+    };
+    const hasFieldChanges = Boolean(
+      patch.categoryId || patch.brandId || patch.published !== undefined
+    );
+
+    const [fieldsResult, priceResult] = await Promise.all([
+      hasFieldChanges ? bulkUpdateProducts(ids, patch) : Promise.resolve(null),
+      bulkPricePercentNum
+        ? bulkAdjustProductPrices(ids, bulkPricePercentNum)
+        : Promise.resolve(null),
+    ]);
     setBulkPending(false);
     setConfirmBulkOpen(false);
-    if (result.ok) {
-      toast.success(`Изменено товаров: ${result.data?.count ?? 0}`);
-      setSelected(new Set());
-      setBulkCategoryId("");
-      setBulkBrandId("");
-      setBulkStatus("");
-    } else {
-      toast.error(result.error ?? "Не удалось применить изменения");
+
+    const errors = [fieldsResult, priceResult].filter((r) => r && !r.ok).map((r) => r!.error);
+    if (errors.length > 0) {
+      toast.error(errors.join("; ") || "Не удалось применить изменения");
+      return;
     }
+    const count = fieldsResult?.data?.count ?? priceResult?.data?.count ?? 0;
+    toast.success(`Изменено товаров: ${count}`);
+    setSelected(new Set());
+    setBulkCategoryId("");
+    setBulkBrandId("");
+    setBulkStatus("");
+    setBulkPricePercent("");
   }
 
   return (
@@ -278,6 +304,19 @@ export function ProductsManager({
             <option value="published">Опубликован</option>
             <option value="hidden">Скрыт</option>
           </NativeSelect>
+
+          <div className="flex items-center gap-1.5">
+            <Input
+              type="number"
+              step="1"
+              value={bulkPricePercent}
+              onChange={(e) => setBulkPricePercent(e.target.value)}
+              placeholder="Цена: ±%"
+              className={`h-9 w-28 ${bulkPriceValid ? "" : "border-red-400"}`}
+              aria-label="Изменить цену на процент"
+            />
+            <span className="text-sm text-muted-foreground">%</span>
+          </div>
 
           <div className="ml-auto flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => setSelected(new Set())}>
@@ -403,6 +442,9 @@ export function ProductsManager({
                   `Категория → ${categories.find((c) => c.id === bulkCategoryId)?.label}`,
                 bulkBrandId && `Производитель → ${brands.find((b) => b.id === bulkBrandId)?.label}`,
                 bulkStatus && `Статус → ${bulkStatus === "published" ? "Опубликован" : "Скрыт"}`,
+                bulkPricePercentNum &&
+                  bulkPriceValid &&
+                  `Цена (BASE) ${bulkPricePercentNum > 0 ? "+" : ""}${bulkPricePercentNum}%`,
               ]
                 .filter(Boolean)
                 .join(" · ")}
