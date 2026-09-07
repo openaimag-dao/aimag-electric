@@ -11,9 +11,11 @@ export const footerNav: { title: string; items: NavItem[] }[] = [
   {
     title: "Продукция",
     items: [
-      { label: "Кабели", href: "/catalog?cat=kabeli" },
-      { label: "Провода", href: "/catalog?cat=provoda" },
-      { label: "Арматура СИП", href: "/catalog?cat=armatura-sip" },
+      { label: "Кабель ВВГ / АВВГ", href: "/kabeli-vvg-avvg" },
+      { label: "Провод СИП", href: "/kabeli-sip" },
+      { label: "Кабельная арматура", href: "/catalog?cat=kabelnaya-armatura" },
+      { label: "Изоляторы и арматура ВЛ", href: "/catalog?cat=izolyatory-armatura" },
+      { label: "Автоматические выключатели", href: "/catalog?cat=avtomaty" },
       { label: "Высоковольтное оборудование", href: "/catalog?cat=vysokovoltnoe" },
     ],
   },

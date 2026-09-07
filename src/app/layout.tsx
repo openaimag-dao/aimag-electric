@@ -36,15 +36,17 @@ const mono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `${siteConfig.name} — электротехническая продукция для бизнеса`,
+    default: `${siteConfig.name} — кабель, изоляторы и кабельная арматура`,
     template: `%s · ${siteConfig.name}`,
   },
   description: siteConfig.description,
   keywords: [
-    "кабель",
-    "провод",
-    "СИП",
-    "изоляторы",
+    "кабель ВВГ",
+    "кабель АВВГ",
+    "провод СИП",
+    "изоляторы высоковольтные",
+    "кабельная арматура",
+    "линейная арматура",
     "высоковольтное оборудование",
     "электротехника Казахстан",
     "B2B поставки",
