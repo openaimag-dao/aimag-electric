@@ -89,4 +89,14 @@ export const productRepository = {
   countPublished() {
     return prisma.product.count({ where: { published: true } });
   },
+
+  /** Top-N by popularity — for the homepage's "popular products" section. */
+  findTopPopular(limit: number) {
+    return prisma.product.findMany({
+      where: { published: true },
+      select: productListSelect,
+      orderBy: { popularity: "desc" },
+      take: limit,
+    });
+  },
 };
