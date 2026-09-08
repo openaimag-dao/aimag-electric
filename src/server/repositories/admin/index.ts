@@ -28,3 +28,4 @@ export {
   categoryAttributeRepository,
   type CategoryAttributeItem,
 } from "./category-attribute-repository";
+export { auditLogAdminRepository, type AuditLogAdminRow } from "./audit-log-admin-repository";
