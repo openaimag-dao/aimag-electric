@@ -62,7 +62,7 @@ export function Header({
               <Link
                 key={item.href}
                 href={item.href}
-                className="rounded-md px-3 py-2 text-sm font-medium text-steel-600 transition-colors hover:bg-secondary hover:text-primary"
+                className="rounded-md px-2 py-2 text-sm font-medium text-steel-600 transition-colors hover:bg-secondary hover:text-primary"
               >
                 {item.label}
               </Link>
@@ -70,7 +70,7 @@ export function Header({
           )}
         </nav>
 
-        <div className="ml-auto hidden max-w-xs flex-1 xl:block">
+        <div className="ml-auto hidden min-w-40 max-w-xs flex-1 xl:block">
           <SearchBar />
         </div>
 
@@ -79,8 +79,8 @@ export function Header({
           <CompareBadge />
           <FavoritesBadge />
           <CartBadge />
-          <AccountLink />
-          <QuoteDialog />
+          <AccountLink showLabel={false} />
+          <QuoteDialog size="sm" />
         </div>
 
         {/* Below xl: the full desktop nav/search/icon row above doesn't fit
