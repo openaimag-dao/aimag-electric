@@ -37,6 +37,8 @@ export function LanguageSwitcher({ locale, dict }: { locale: Locale; dict: Dicti
         type="button"
         onClick={() => switchTo("ru")}
         aria-pressed={locale === "ru"}
+        aria-label={dict.languageSwitcher.ru}
+        title={dict.languageSwitcher.ru}
         disabled={pending}
         className={cn(
           "rounded px-1.5 py-1 font-medium transition-colors",
@@ -45,12 +47,14 @@ export function LanguageSwitcher({ locale, dict }: { locale: Locale; dict: Dicti
             : "text-steel-600 hover:bg-secondary hover:text-primary"
         )}
       >
-        {dict.languageSwitcher.ru}
+        RU
       </button>
       <button
         type="button"
         onClick={() => switchTo("kk")}
         aria-pressed={locale === "kk"}
+        aria-label={dict.languageSwitcher.kk}
+        title={dict.languageSwitcher.kk}
         disabled={pending}
         className={cn(
           "rounded px-1.5 py-1 font-medium transition-colors",
@@ -59,7 +63,7 @@ export function LanguageSwitcher({ locale, dict }: { locale: Locale; dict: Dicti
             : "text-steel-600 hover:bg-secondary hover:text-primary"
         )}
       >
-        {dict.languageSwitcher.kk}
+        KZ
       </button>
     </div>
   );
