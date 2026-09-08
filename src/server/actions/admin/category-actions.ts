@@ -8,6 +8,7 @@ import { CACHE_TAGS } from "@/lib/cache-tags";
 import { ok, fail, validate, prismaError, type ActionResult } from "@/server/actions/action-result";
 import { requireStaff } from "@/lib/security/rbac";
 import { audit } from "@/server/audit";
+import { mergedCategorySlugs } from "@/config/category-merges";
 
 function revalidate() {
   revalidatePath("/admin/categories");
@@ -86,6 +87,48 @@ export async function deleteCategory(id: string): Promise<ActionResult> {
     });
     revalidate();
     return ok();
+  } catch (e) {
+    return fail(prismaError(e));
+  }
+}
+
+/**
+ * Runs every pending merge from src/config/category-merges.ts: for each old
+ * slug whose Category row still exists, reassigns its products to the
+ * surviving category and deletes it. A slug with no matching row (already
+ * merged, or never existed on this DB) is silently skipped — safe to call
+ * repeatedly, including after a previous partial run.
+ */
+export async function mergeDuplicateCategories(): Promise<
+  ActionResult<{ merged: number; productsMoved: number }>
+> {
+  await requireStaff();
+  try {
+    const rows = await categoryAdminRepository.list();
+    const bySlug = new Map(rows.map((c) => [c.slug, c]));
+    let merged = 0;
+    let productsMoved = 0;
+    for (const [oldSlug, newSlug] of Object.entries(mergedCategorySlugs)) {
+      const oldCat = bySlug.get(oldSlug);
+      const newCat = bySlug.get(newSlug);
+      if (!oldCat || !newCat) continue;
+      const { productsMoved: moved } = await categoryAdminRepository.mergeInto(
+        oldCat.id,
+        newCat.id
+      );
+      merged += 1;
+      productsMoved += moved;
+      await audit({
+        action: "DELETE",
+        entity: "Category",
+        entityId: oldCat.id,
+        summary: `Категория «${oldCat.title}» объединена с «${newCat.title}»: перенесено ${moved} товар(ов), категория удалена`,
+        meta: { oldSlug, newSlug, productsMoved: moved },
+      });
+    }
+    revalidate();
+    revalidatePath("/admin/products");
+    return ok({ merged, productsMoved });
   } catch (e) {
     return fail(prismaError(e));
   }

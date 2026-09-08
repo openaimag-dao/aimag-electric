@@ -18,6 +18,7 @@ import { RowActions } from "@/components/admin/row-actions";
 import { FormDialog } from "@/components/admin/form-dialog";
 import { ConfirmDelete } from "@/components/admin/confirm-delete";
 import { CategoryForm, type CategoryRow } from "@/components/admin/categories/category-form";
+import { MergeDuplicatesCard } from "@/components/admin/categories/merge-duplicates-card";
 import { deleteCategory } from "@/server/actions/admin";
 
 export interface CategoryListRow extends CategoryRow {
@@ -53,6 +54,8 @@ export function CategoriesManager({
 
   return (
     <div className="space-y-4">
+      <MergeDuplicatesCard rows={rows} />
+
       <TableToolbar
         query={query}
         onQueryChange={setQuery}
