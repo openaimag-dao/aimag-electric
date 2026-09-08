@@ -143,7 +143,7 @@ export function SearchBar({ className, onSubmitted }: SearchBarProps) {
         <div
           id="search-suggestions"
           role="listbox"
-          className="absolute left-0 right-0 top-full z-50 mt-1 max-h-96 overflow-auto rounded-md border border-input bg-card shadow-lg"
+          className="absolute left-0 right-0 top-full z-50 mt-1 max-h-96 min-w-72 overflow-y-auto overflow-x-hidden rounded-md border border-input bg-card shadow-lg"
         >
           {results.length > 0 ? (
             <>
