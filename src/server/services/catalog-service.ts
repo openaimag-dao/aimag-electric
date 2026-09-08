@@ -21,6 +21,7 @@ import {
   type DynamicAttributeFacet,
 } from "@/lib/catalog";
 import type { AttributeDef, CatalogFilters, FacetOption } from "@/types/catalog";
+import { mergedCategorySlugs } from "@/config/category-merges";
 
 /**
  * CatalogService — orchestrates repositories + the SQL query layer
@@ -150,7 +151,13 @@ export const catalogService = {
     ).filter((facet) => facet.options.length > 0);
 
     return {
-      categories: toOptions(categories, (v) => names[v] ?? v),
+      // Same consolidated-slugs hiding sitemap.ts and home-service.ts already
+      // do — without it, an old slug with stray products (e.g. "Кабели")
+      // shows up as a duplicate of the category that absorbed it.
+      categories: toOptions(
+        categories.filter((c) => !(c.value in mergedCategorySlugs)),
+        (v) => names[v] ?? v
+      ),
       manufacturers: toOptions(manufacturers, (v) => v),
       materials: toOptions(materials, (v) => v),
       cores: toNumericOptions(cores, (v) => `${v} жил.`),
