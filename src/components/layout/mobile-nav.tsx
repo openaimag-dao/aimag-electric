@@ -24,7 +24,7 @@ export function MobileNav({ dict }: { dict: Dictionary }) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden" aria-label="Открыть меню">
+        <Button variant="ghost" size="icon" className="xl:hidden" aria-label="Открыть меню">
           <Menu className="size-5" />
         </Button>
       </SheetTrigger>

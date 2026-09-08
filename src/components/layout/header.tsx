@@ -49,7 +49,7 @@ export function Header({
       <div className="container flex h-16 items-center gap-4">
         <Logo />
 
-        <nav aria-label="Основная навигация" className="ml-4 hidden items-center gap-1 md:flex">
+        <nav aria-label="Основная навигация" className="ml-4 hidden items-center gap-1 xl:flex">
           {dict.nav.map((item) =>
             item.href === "/catalog" ? (
               <MegaMenu
@@ -70,11 +70,11 @@ export function Header({
           )}
         </nav>
 
-        <div className="ml-auto hidden max-w-xs flex-1 lg:block">
+        <div className="ml-auto hidden max-w-xs flex-1 xl:block">
           <SearchBar />
         </div>
 
-        <div className="ml-auto hidden items-center gap-2 md:flex lg:ml-3">
+        <div className="ml-auto hidden items-center gap-2 xl:ml-3 xl:flex">
           <LanguageSwitcher locale={locale} dict={dict} />
           <CompareBadge />
           <FavoritesBadge />
@@ -83,11 +83,15 @@ export function Header({
           <QuoteDialog />
         </div>
 
-        {/* Mobile: the cart must stay reachable without opening the hamburger
-            drawer first — otherwise "added to cart" has nowhere obvious to
-            go. Compare/favorites stay drawer-only; cart is the one action a
-            customer needs mid-browse, right after tapping "В корзину". */}
-        <div className="ml-auto flex items-center md:hidden">
+        {/* Below xl: the full desktop nav/search/icon row above doesn't fit
+            (verified — logo+nav+icons alone already overflow the header at
+            768–1279px, well before search even joins in) — so this range
+            uses the hamburger drawer for everything except the cart, which
+            must stay reachable without opening it first: otherwise "added
+            to cart" has nowhere obvious to go. Compare/favorites stay
+            drawer-only; cart is the one action a customer needs mid-browse,
+            right after tapping "В корзину". */}
+        <div className="ml-auto flex items-center xl:hidden">
           <CartBadge />
         </div>
 
