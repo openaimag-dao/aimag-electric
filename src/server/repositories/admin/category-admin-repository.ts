@@ -33,4 +33,16 @@ export const categoryAdminRepository = {
   countProducts(id: string) {
     return prisma.product.count({ where: { categoryId: id } });
   },
+  /**
+   * Reassigns every product from `fromId` to `toId`, then deletes the now-
+   * empty `fromId` category — atomically, so a failure partway through
+   * never leaves products orphaned or the source category half-emptied.
+   */
+  async mergeInto(fromId: string, toId: string) {
+    const [{ count }] = await prisma.$transaction([
+      prisma.product.updateMany({ where: { categoryId: fromId }, data: { categoryId: toId } }),
+      prisma.category.delete({ where: { id: fromId } }),
+    ]);
+    return { productsMoved: count };
+  },
 };
