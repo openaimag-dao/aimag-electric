@@ -7,6 +7,7 @@ import { productRepository, categoryRepository, brandRepository } from "@/server
 import { toCatalogDTO } from "@/server/mappers/product";
 import type { CatalogProductDTO, CategoryCardDTO, BrandDTO } from "@/server/dto";
 import { CACHE_TAGS } from "@/lib/cache-tags";
+import { mergedCategorySlugs } from "@/config/category-merges";
 
 /**
  * Homepage data. Two cache layers:
@@ -43,6 +44,7 @@ const loadNavCategories = unstable_cache(
   async (): Promise<{ slug: string; title: string; icon: string | null }[]> => {
     const rows = await categoryRepository.findMany();
     return rows
+      .filter((c) => !(c.slug in mergedCategorySlugs))
       .map((c) => ({ slug: c.slug, title: c.title, icon: c.icon }))
       .sort((a, b) => a.title.localeCompare(b.title, "ru"));
   },

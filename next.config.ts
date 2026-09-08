@@ -1,5 +1,16 @@
 import type { NextConfig } from "next";
 
+// Kept as a literal here (not imported from src/config/category-merges.ts)
+// since next.config.ts runs outside the app's TS path-alias resolution —
+// see that file for why these old category slugs redirect to the ones
+// that absorbed them.
+const MERGED_CATEGORY_SLUGS: Record<string, string> = {
+  kabeli: "kabel-provod",
+  provoda: "kabel-provod",
+  izolyatory: "izolyatory-armatura",
+  mufty: "kabelnaya-armatura",
+};
+
 const securityHeaders = [
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -42,6 +53,19 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
+  },
+  // Old, now-consolidated category slugs still get direct hits from search
+  // and old bookmarks — send them straight to the category that absorbed
+  // them instead of a thin/duplicate listing. Extra query params beyond
+  // `cat` are not preserved (destination replaces the query string), which
+  // is an acceptable tradeoff for what's normally a bare category link.
+  async redirects() {
+    return Object.entries(MERGED_CATEGORY_SLUGS).map(([oldSlug, newSlug]) => ({
+      source: "/catalog",
+      has: [{ type: "query" as const, key: "cat", value: oldSlug }],
+      destination: `/catalog?cat=${newSlug}`,
+      permanent: true,
+    }));
   },
 };
 

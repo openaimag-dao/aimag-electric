@@ -3,6 +3,7 @@ import type { MetadataRoute } from "next";
 import { siteConfig } from "@/config/site";
 import { productRepository, categoryRepository } from "@/server/repositories";
 import { articles } from "@/config/articles";
+import { mergedCategorySlugs } from "@/config/category-merges";
 
 export const dynamic = "force-dynamic";
 
@@ -72,12 +73,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
 
-    categoryRoutes = categories.map((c) => ({
-      url: `${base}/catalog?cat=${c.slug}`,
-      lastModified: now,
-      changeFrequency: "weekly" as const,
-      priority: 0.6,
-    }));
+    categoryRoutes = categories
+      .filter((c) => !(c.slug in mergedCategorySlugs))
+      .map((c) => ({
+        url: `${base}/catalog?cat=${c.slug}`,
+        lastModified: now,
+        changeFrequency: "weekly" as const,
+        priority: 0.6,
+      }));
   } catch {
     // If the DB is unreachable at build/generation time, still return static routes.
   }
