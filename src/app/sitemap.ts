@@ -71,20 +71,16 @@ const loadCatalogRoutes = unstable_cache(
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteConfig.url;
-  const now = new Date();
-
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: base, lastModified: now, changeFrequency: "weekly", priority: 1 },
-    { url: `${base}/catalog`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
+    { url: base, changeFrequency: "weekly", priority: 1 },
+    { url: `${base}/catalog`, changeFrequency: "daily", priority: 0.9 },
     ...STATIC_PAGES.map((path) => ({
       url: `${base}${path}`,
-      lastModified: now,
       changeFrequency: "monthly" as const,
       priority: 0.4,
     })),
     ...SEO_LANDING_PAGES.map((path) => ({
       url: `${base}${path}`,
-      lastModified: now,
       changeFrequency: "weekly" as const,
       priority: 0.65,
     })),
