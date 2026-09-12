@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { StaticPage } from "@/components/static/static-page";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/garantiya" },
   title: "Гарантия — AIMAG ELECTRIC",
   description:
     "Гарантийные обязательства на электротехническую продукцию: гарантия производителя, порядок обращения, необходимые документы.",
