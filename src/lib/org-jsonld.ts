@@ -12,7 +12,14 @@ export function buildOrganizationJsonLd() {
     name: siteConfig.name,
     url: siteConfig.url,
     description: siteConfig.description,
-    areaServed: { "@type": "Country", name: "Kazakhstan" },
+    areaServed: [
+      { "@type": "City", name: siteConfig.contacts.address.addressLocality },
+      { "@type": "Country", name: "Kazakhstan" },
+    ],
+    address: {
+      "@type": "PostalAddress",
+      ...siteConfig.contacts.address,
+    },
     contactPoint: {
       "@type": "ContactPoint",
       telephone: siteConfig.contacts.phone,

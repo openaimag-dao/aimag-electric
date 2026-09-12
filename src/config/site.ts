@@ -15,6 +15,11 @@ export const siteConfig = {
     whatsapp: "77056151717",
     email: "sales@aimag-electric.kz",
     city: "Шымкент, Казахстан",
+    address: {
+      streetAddress: "ул. Байтерекова, 202",
+      addressLocality: "Шымкент",
+      addressCountry: "KZ",
+    },
     workingHours: "Пн–Пт, 09:00–18:00",
   },
 } as const;
