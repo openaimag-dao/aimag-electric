@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { StaticPage, CompanyRequisites } from "@/components/static/static-page";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/oplata" },
   title: "Оплата — AIMAG ELECTRIC",
   description:
     "Способы оплаты: безналичный расчёт для юридических лиц, Kaspi и банковские карты, наличные. Реквизиты для оплаты по счёту.",

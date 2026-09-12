@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { StaticPage } from "@/components/static/static-page";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/faq" },
   title: "Вопросы и ответы — AIMAG ELECTRIC",
   description:
     "Ответы на частые вопросы: как заказать, как получить КП и счёт, доставка по Казахстану, сертификаты, работа с юридическими лицами и тендерами.",

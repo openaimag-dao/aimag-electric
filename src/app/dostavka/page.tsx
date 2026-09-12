@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { StaticPage } from "@/components/static/static-page";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/dostavka" },
   title: "Доставка — AIMAG ELECTRIC",
   description:
     "Доставка электротехнической продукции по всему Казахстану транспортными компаниями. Отгрузка со склада в Шымкенте, самовывоз по договорённости.",
