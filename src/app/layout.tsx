@@ -38,7 +38,7 @@ const mono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `${siteConfig.name} — кабель, изоляторы и кабельная арматура`,
+    default: `${siteConfig.name} — купить кабель и изоляторы в Шымкенте`,
     template: `%s · ${siteConfig.name}`,
   },
   description: siteConfig.description,

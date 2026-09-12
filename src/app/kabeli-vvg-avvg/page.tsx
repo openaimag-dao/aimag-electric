@@ -13,7 +13,7 @@ import { QuoteDialog } from "@/components/common/quote-dialog";
 import type { CatalogProduct } from "@/types/catalog";
 import type { ArticleBlock } from "@/config/articles";
 
-const TITLE = "Кабель ВВГ и АВВГ — купить с доставкой по Казахстану";
+const TITLE = "Купить кабель ВВГ и АВВГ в Шымкенте — цены и наличие";
 const DESCRIPTION =
   "Силовой кабель ВВГ (медный) и АВВГ (алюминиевый), включая ВВГнг и ВВГнг(А)-LS, сечения от 1,5 до 240 мм². Наличие и цены в Шымкенте, отгрузка отрезками и бухтами, доставка по РК.";
 
@@ -108,7 +108,7 @@ export default async function VvgAvvgPage() {
           </nav>
 
           <h1 className="mt-4 font-display text-3xl font-bold tracking-tight text-primary sm:text-4xl">
-            Кабель ВВГ и АВВГ
+            Купить кабель ВВГ и АВВГ в Шымкенте
           </h1>
           <p className="mt-2 max-w-2xl text-muted-foreground">{DESCRIPTION}</p>
         </div>
