@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { StaticPage } from "@/components/static/static-page";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/terms" },
   title: "Пользовательское соглашение — AIMAG ELECTRIC",
   description:
     "Условия использования сайта AIMAG ELECTRIC: оформление заявок, информация о товарах и ценах, ответственность сторон.",

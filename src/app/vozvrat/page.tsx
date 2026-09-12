@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { StaticPage } from "@/components/static/static-page";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/vozvrat" },
   title: "Возврат товара — AIMAG ELECTRIC",
   description:
     "Условия возврата и обмена электротехнической продукции: сроки, порядок оформления, особенности для юридических лиц и мерной продукции.",
