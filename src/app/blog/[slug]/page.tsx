@@ -7,6 +7,26 @@ import { Badge } from "@/components/ui/badge";
 import { QuoteDialog } from "@/components/common/quote-dialog";
 import { ContentBlocks } from "@/components/common/content-blocks";
 import { articles } from "@/config/articles";
+import { siteConfig } from "@/config/site";
+
+const relatedCatalog: Record<string, { href: string; label: string }> = {
+  "izolyatory-vl-shtyrevye-i-podvesnye": {
+    href: "/catalog?cat=izolyatory-armatura",
+    label: "Посмотреть изоляторы и арматуру ВЛ",
+  },
+  "kabelnye-mufty-kak-vybrat": {
+    href: "/catalog?cat=kabelnaya-armatura",
+    label: "Посмотреть кабельную арматуру и муфты",
+  },
+  "vvg-vs-vvgng-ls": {
+    href: "/kabeli-vvg-avvg",
+    label: "Посмотреть кабель ВВГ и АВВГ",
+  },
+  "sip-vs-golyj-provod": {
+    href: "/kabeli-sip",
+    label: "Посмотреть провод СИП",
+  },
+};
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -27,6 +47,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: `${article.title} — AIMAG ELECTRIC`,
     description: article.excerpt,
+    alternates: { canonical: `/blog/${article.slug}` },
+    openGraph: {
+      title: article.title,
+      description: article.excerpt,
+      url: `${siteConfig.url}/blog/${article.slug}`,
+      type: "article",
+    },
   };
 }
 
@@ -44,6 +71,7 @@ export default async function ArticlePage({ params }: PageProps) {
   if (!article) notFound();
 
   const others = articles.filter((a) => a.slug !== article.slug).slice(0, 2);
+  const related = relatedCatalog[article.slug];
 
   return (
     <div className="container max-w-3xl py-12">
@@ -74,6 +102,21 @@ export default async function ArticlePage({ params }: PageProps) {
       <div className="mt-8 border-t border-border pt-2">
         <ContentBlocks blocks={article.content} />
       </div>
+
+      {related && (
+        <div className="mt-10 rounded-2xl border border-border bg-secondary/30 p-6">
+          <h2 className="font-display text-lg font-semibold text-primary">Товары по теме</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Проверьте доступные позиции в каталоге и запросите условия поставки для вашего проекта.
+          </p>
+          <Link
+            href={related.href}
+            className="mt-3 inline-block text-sm font-semibold text-signal-700 underline-offset-2 hover:underline"
+          >
+            {related.label} →
+          </Link>
+        </div>
+      )}
 
       <div className="mt-10 flex flex-col items-start gap-4 rounded-2xl border border-border bg-card p-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
