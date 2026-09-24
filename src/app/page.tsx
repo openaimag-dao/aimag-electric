@@ -19,6 +19,7 @@ import {
   Articles,
   Cta,
 } from "@/components/sections";
+import { BuyingGuide } from "@/components/sections/buying-guide";
 import { homeService } from "@/server/services";
 
 export const metadata: Metadata = {
@@ -47,6 +48,7 @@ export default async function HomePage() {
   return (
     <>
       <Hero categories={categoryCards} productCount={productCount} />
+      <BuyingGuide />
       <Categories categories={categoryCards} />
       <PopularProducts products={popular} />
       <Manufacturers brands={brands} />

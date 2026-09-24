@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { ArrowRight, FileText, ShieldCheck } from "lucide-react";
+import { ArrowRight, FileText, ShieldCheck, MessageCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { QuoteDialog } from "@/components/common/quote-dialog";
 import { CatalogSearch } from "@/components/sections/catalog-search";
+import { siteConfig } from "@/config/site";
 import { getHeroStats } from "@/config/stats";
 import type { CategoryCardDTO } from "@/server/dto";
 
@@ -65,7 +66,7 @@ export function Hero({
           </span>
 
           <h1 className="mt-6 text-balance font-display text-4xl font-bold leading-[1.04] tracking-tight sm:text-5xl lg:text-[3.4rem]">
-            Электротехника для промышленных проектов —
+            Кабель и электротехника в Шымкенте —
             <span className="text-signal"> с подбором под задачу</span>
           </h1>
 
@@ -95,11 +96,11 @@ export function Hero({
             </div>
           </div>
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <QuoteDialog>
-              <Button variant="signal" size="lg">
+              <Button variant="signal" size="lg" className="h-auto min-h-12 whitespace-normal py-3">
                 <FileText />
-                Запросить КП
+                Узнать цену и срок поставки
               </Button>
             </QuoteDialog>
             <Button
@@ -114,6 +115,19 @@ export function Hero({
               </Link>
             </Button>
           </div>
+          <a
+            href={`https://wa.me/${siteConfig.contacts.whatsapp}?text=${encodeURIComponent("Здравствуйте! Хочу рассчитать поставку электротехники. Отправлю спецификацию.")}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm text-steel-300 underline-offset-4 hover:text-signal hover:underline"
+          >
+            <MessageCircle className="size-5 shrink-0" aria-hidden />
+            Отправить спецификацию в WhatsApp
+          </a>
+          <p className="mt-2 text-sm text-steel-400">
+            Укажите марку, количество и город доставки. Наличие и итоговую стоимость подтвердим в
+            КП.
+          </p>
         </div>
 
         {/* Right column — trust stats */}
