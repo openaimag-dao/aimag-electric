@@ -23,9 +23,16 @@ interface QuoteFormProps {
   defaultTitle?: string;
   /** Pre-fill the free-text message, e.g. a search query that had no catalog match. */
   defaultMessage?: string;
+  messagePlaceholder?: string;
 }
 
-export function QuoteForm({ onSuccess, items, defaultTitle, defaultMessage }: QuoteFormProps) {
+export function QuoteForm({
+  onSuccess,
+  items,
+  defaultTitle,
+  defaultMessage,
+  messagePlaceholder,
+}: QuoteFormProps) {
   const [submitted, setSubmitted] = React.useState(false);
   const [serverError, setServerError] = React.useState<string | null>(null);
   const hasItems = Boolean(items && items.length > 0);
@@ -140,7 +147,8 @@ export function QuoteForm({ onSuccess, items, defaultTitle, defaultMessage }: Qu
           placeholder={
             hasItems
               ? "Особые условия, адрес доставки, сроки…"
-              : "Марка кабеля, сечение, метраж, регион доставки или ссылка на спецификацию"
+              : (messagePlaceholder ??
+                "Марка кабеля, сечение, метраж, регион доставки или ссылка на спецификацию")
           }
           {...register("message")}
         />

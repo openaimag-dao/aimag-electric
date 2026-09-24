@@ -12,6 +12,7 @@ export const dynamic = "force-dynamic";
 /** Static marketing/legal pages with no dynamic data — every one of these is a real route under src/app. */
 const STATIC_PAGES = [
   "/dostavka",
+  "/elektromontazh",
   "/faq",
   "/garantiya",
   "/kontakty",

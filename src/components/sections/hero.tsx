@@ -114,6 +114,12 @@ export function Hero({
               </Link>
             </Button>
           </div>
+          <Link
+            href="/elektromontazh"
+            className="mt-5 inline-block text-sm font-medium text-steel-200 underline-offset-4 hover:text-signal hover:underline"
+          >
+            Нужны электромонтажные работы под ключ? Узнать подробнее →
+          </Link>
         </div>
 
         {/* Right column — trust stats */}

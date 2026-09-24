@@ -12,7 +12,7 @@ import type { Dictionary } from "@/i18n/types";
 export const kk: Dictionary = {
   nav: [
     { label: "Каталог", href: "/catalog" },
-    { label: "Санаттар", href: "/#categories" },
+    { label: "Электр монтажы", href: "/elektromontazh" },
     { label: "Компания туралы", href: "/o-kompanii" },
     { label: "Жеткізу", href: "/dostavka" },
     { label: "Байланыс", href: "/kontakty" },

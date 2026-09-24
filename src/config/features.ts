@@ -1,10 +1,11 @@
 import type { LucideIcon } from "lucide-react";
-import { Truck, BadgePercent, Building2, HardHat, FileCheck2 } from "lucide-react";
+import { Truck, BadgePercent, Building2, HardHat, FileCheck2, Wrench } from "lucide-react";
 
 export interface Feature {
   title: string;
   description: string;
   icon: LucideIcon;
+  href?: string;
 }
 
 export const features: Feature[] = [
@@ -32,5 +33,12 @@ export const features: Feature[] = [
     title: "Документы на продукцию",
     description: "Паспорта и сертификаты на конкретную позицию уточняйте перед заказом.",
     icon: FileCheck2,
+  },
+  {
+    title: "Электромонтаж под ключ",
+    description:
+      "Берём в работу электромонтажные проекты любой сложности. Обсудим объём работ по вашему заданию.",
+    icon: Wrench,
+    href: "/elektromontazh",
   },
 ];
