@@ -44,6 +44,7 @@ export default async function AdminQuotesPage() {
     return {
       id: q.id,
       title: q.title,
+      sourcePath: q.sourcePath,
       company: q.company,
       resolvedCompanyName: resolvedCompany?.name ?? null,
       name: q.name,

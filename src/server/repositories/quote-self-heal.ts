@@ -14,5 +14,6 @@ export const withQuoteColumns = tableSelfHeal([
   `ALTER TABLE "Quote" ADD COLUMN IF NOT EXISTS "approvalToken" TEXT`,
   `ALTER TABLE "Quote" ADD COLUMN IF NOT EXISTS "respondedAt" TIMESTAMP(3)`,
   `ALTER TABLE "Quote" ADD COLUMN IF NOT EXISTS "responseNote" TEXT`,
+  `ALTER TABLE "Quote" ADD COLUMN IF NOT EXISTS "sourcePath" TEXT`,
   `CREATE UNIQUE INDEX IF NOT EXISTS "Quote_approvalToken_key" ON "Quote"("approvalToken")`,
 ]);

@@ -343,6 +343,8 @@ model Quote {
    * Optional project/object name the client gave their cart, e.g. "Электроснабжение объекта №1".
    */
   title         String?
+  /** Page on which the quote form was submitted; null for older requests. */
+  sourcePath    String?
   company       String
   name          String
   phone         String

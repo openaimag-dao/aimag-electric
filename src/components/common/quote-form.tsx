@@ -55,7 +55,7 @@ export function QuoteForm({
   });
 
   async function onSubmit(values: QuoteInput) {
-    const result = await submitQuote({ ...values, items });
+    const result = await submitQuote({ ...values, items, sourcePath: window.location.pathname });
     if (!result.ok) {
       setServerError(result.error ?? "Не удалось отправить заявку");
       return;
