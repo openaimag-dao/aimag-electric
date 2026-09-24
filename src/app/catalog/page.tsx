@@ -5,6 +5,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
@@ -17,6 +18,7 @@ import { ContentBlocks } from "@/components/common/content-blocks";
 import { Badge } from "@/components/ui/badge";
 import { catalogService } from "@/server/services";
 import { searchParamsToFilters } from "@/lib/catalog-url";
+import { catalogSeo } from "@/lib/catalog-seo";
 
 interface PageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -33,13 +35,14 @@ const DEFAULT_DESCRIPTION =
  */
 /** A single, comma-free `cat` value selects one category for SEO purposes — multi-category selection (chips) falls back to the generic catalog metadata. */
 function singleCategorySlug(sp: Record<string, string | string[] | undefined>): string | null {
-  const raw = sp.cat;
-  const value = Array.isArray(raw) ? raw[0] : raw;
-  return value && !value.includes(",") ? value : null;
+  const categories = searchParamsToFilters(sp).categories;
+  return categories.length === 1 ? categories[0] : null;
 }
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
-  const cat = singleCategorySlug(await searchParams);
+  const sp = await searchParams;
+  const filters = searchParamsToFilters(sp);
+  const cat = singleCategorySlug(sp);
   const category = cat ? (await catalogService.loadCategories()).find((c) => c.slug === cat) : null;
   const seo = cat ? categorySeo[cat] : undefined;
 
@@ -50,12 +53,13 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
     (category
       ? `${category.title}: цены, наличие и характеристики в каталоге AIMAG ELECTRIC.`
       : DEFAULT_DESCRIPTION);
-  const canonical = category ? `/catalog?cat=${category.slug}` : "/catalog";
+  const { canonical, robots } = catalogSeo(filters, Boolean(category));
 
   return {
     title,
     description,
     alternates: { canonical },
+    robots,
     openGraph: {
       title,
       description,
@@ -75,7 +79,12 @@ export default async function CatalogPage({ searchParams }: PageProps) {
     catalogService.loadCategories(),
     catalogService.count(),
   ]);
+  // The query layer clamps page numbers for UI callers; an out-of-range URL
+  // must not expose an unlimited number of copies of the last page to crawlers.
+  if (filters.page > result.pageCount) notFound();
   const category = cat ? categories.find((c) => c.slug === cat) : null;
+  const showCategoryContent =
+    catalogSeo(filters, Boolean(category)).indexable && filters.page === 1;
   const seo = cat ? categorySeo[cat] : undefined;
   const seoArticles = seo ? articles.filter((a) => seo.relatedArticles.includes(a.slug)) : [];
   const faqLd = seo ? buildFaqJsonLd(seo.faq) : null;
@@ -133,7 +142,7 @@ export default async function CatalogPage({ searchParams }: PageProps) {
         </Suspense>
       </div>
 
-      {seo && (
+      {seo && showCategoryContent && (
         <div className="border-t border-border bg-background">
           <div className="container max-w-3xl py-10">
             <script

@@ -7,7 +7,7 @@ export const siteConfig = {
   // Graph/canonical URLs — override with SITE_URL once a custom domain is
   // connected, so switching domains later is an env var change, not a
   // redeploy of this file.
-  url: process.env.SITE_URL || "https://aimag-electric.vercel.app",
+  url: (process.env.SITE_URL || "https://www.aimag.kz").replace(/\/+$/, ""),
   locale: "ru_KZ",
   contacts: {
     phone: "+7 705 615-17-17",

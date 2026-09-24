@@ -7,6 +7,8 @@
 // request time on that one environment.
 export const dynamic = "force-dynamic";
 
+import type { Metadata } from "next";
+
 import {
   Hero,
   Categories,
@@ -18,6 +20,10 @@ import {
   Cta,
 } from "@/components/sections";
 import { homeService } from "@/server/services";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 /**
  * AIMAG ELECTRIC — homepage. All catalog-driven sections (Hero links,

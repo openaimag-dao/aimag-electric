@@ -8,7 +8,7 @@ import { ChevronRight } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { availabilityLabels } from "@/config/catalog-sort";
 import { productService } from "@/server/services";
-import { buildProductJsonLd, averageRating } from "@/lib/product-jsonld";
+import { buildProductJsonLd, averageRating, productImageUrls } from "@/lib/product-jsonld";
 import { formatTenge, tiynToTenge } from "@/lib/money";
 import { currentUser } from "@/server/auth/session";
 import { companyAdminRepository, companyPriceAdminRepository } from "@/server/repositories/admin";
@@ -42,10 +42,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const priceText = product.price !== null ? `от ${formatTenge(product.price)}` : "цена по запросу";
   const title = `${product.title} — купить в Казахстане`;
-  const description = `${product.title}, ${product.manufacturer}. ${priceText}, ${availabilityLabels[
+  const brand =
+    product.manufacturer && product.manufacturer.toLowerCase() !== "без бренда"
+      ? `, ${product.manufacturer}`
+      : "";
+  const description = `${product.title}${brand}. ${priceText}, ${availabilityLabels[
     product.availability
-  ].toLowerCase()}. Артикул ${product.sku}. Сертификаты, документы, доставка по РК. Получить КП за 15 минут.`;
+  ].toLowerCase()}. Артикул ${product.sku}. Доставка по Казахстану. Запросить коммерческое предложение.`;
   const url = `${siteConfig.url}/catalog/${product.slug}`;
+  const images = productImageUrls(product.images);
 
   return {
     title,
@@ -57,8 +62,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title,
       description,
       siteName: siteConfig.name,
+      images: images.map((url) => ({ url, alt: product.title })),
     },
-    twitter: { card: "summary", title, description },
+    twitter: {
+      card: images.length ? "summary_large_image" : "summary",
+      title,
+      description,
+      images,
+    },
   };
 }
 
@@ -109,11 +120,11 @@ export default async function ProductPage({ params }: PageProps) {
     <div className="bg-secondary/20">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productLd).replace(/</g, "\\u003c") }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd).replace(/</g, "\\u003c") }}
       />
       <RecordRecentlyViewed productId={product.id} />
 

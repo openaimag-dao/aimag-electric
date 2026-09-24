@@ -10,3 +10,15 @@
 | `TELEGRAM_CHAT_ID`   |     нет     | Chat id, куда слать уведомления (см. `https://api.telegram.org/bot<token>/getUpdates` после первого сообщения боту). Нужен вместе с `TELEGRAM_BOT_TOKEN`. |
 
 Пример — в `.env.example`. Файл `.env` не коммитится.
+
+## Поисковики и аналитика
+
+| Переменная                 | Назначение                                                                            |
+| -------------------------- | ------------------------------------------------------------------------------------- |
+| `SITE_URL`                 | Основной адрес для canonical, sitemap и JSON-LD. По умолчанию `https://www.aimag.kz`. |
+| `GOOGLE_SITE_VERIFICATION` | Значение `content` метатега подтверждения Search Console.                             |
+| `YANDEX_VERIFICATION`      | Значение `content` метатега Яндекс.Вебмастера.                                        |
+| `NEXT_PUBLIC_GA_ID`        | ID потока GA4 вида `G-...`; задаётся до сборки.                                       |
+| `NEXT_PUBLIC_YM_ID`        | Числовой ID счётчика Метрики; задаётся до сборки.                                     |
+
+Цели и порядок продвижения описаны в [SEO-growth.md](./SEO-growth.md).
