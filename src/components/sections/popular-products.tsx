@@ -25,7 +25,7 @@ export function PopularProducts({ products }: { products: CatalogProductDTO[] })
           <SectionHeading
             eyebrow="Витрина"
             title="Популярные позиции"
-            description="Часто запрашиваемые марки со склада — добавляйте в КП в один клик."
+            description="Выберите нужную позицию и добавьте её в запрос КП."
           />
           <Button asChild variant="outline">
             <Link href="/catalog">

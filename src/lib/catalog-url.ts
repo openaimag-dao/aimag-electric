@@ -42,7 +42,7 @@ export function parseFilters(params: URLSearchParams): CatalogFilters {
     priceMax: params.get("pmax") ? Number(params.get("pmax")) : null,
     inStockOnly: params.get("stock") === "1",
     sort,
-    page: Number.isFinite(pageRaw) && pageRaw > 0 ? pageRaw : 1,
+    page: Number.isSafeInteger(pageRaw) && pageRaw > 0 ? pageRaw : 1,
   };
 }
 

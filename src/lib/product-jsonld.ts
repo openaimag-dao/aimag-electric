@@ -1,11 +1,28 @@
 import { siteConfig } from "@/config/site";
 import type { ProductDetailDTO } from "@/server/dto";
 
+/** Only real, fetchable product images — shared by JSON-LD and social previews. */
+export function productImageUrls(images: string[]): string[] {
+  return images.flatMap((image) => {
+    if (!image.trim()) return [];
+    try {
+      const url = new URL(image, `${siteConfig.url}/`);
+      return url.protocol === "https:" || url.protocol === "http:" ? [url.href] : [];
+    } catch {
+      return [];
+    }
+  });
+}
+
 /**
  * Builds Product + BreadcrumbList JSON-LD for a product page. Pure function,
  * kept out of the page component for readability and reuse.
  */
 export function buildProductJsonLd(product: ProductDetailDTO, avgRating: number | null) {
+  const url = `${siteConfig.url}/catalog/${product.slug}`;
+  const images = productImageUrls(product.images);
+  const hasPrice = product.price !== null && Number.isFinite(product.price) && product.price >= 0;
+  const brand = product.manufacturer.trim();
   const availability =
     product.availability === "in_stock"
       ? "https://schema.org/InStock"
@@ -16,19 +33,31 @@ export function buildProductJsonLd(product: ProductDetailDTO, avgRating: number 
   const productLd = {
     "@context": "https://schema.org",
     "@type": "Product",
+    "@id": `${url}#product`,
+    url,
     name: product.title,
     sku: product.sku,
     category: product.category,
-    brand: { "@type": "Brand", name: product.manufacturer },
-    description: product.description[0],
-    offers: {
-      "@type": "Offer",
-      priceCurrency: "KZT",
-      ...(product.price !== null ? { price: product.price } : {}),
-      availability,
-      seller: { "@type": "Organization", name: siteConfig.name },
-    },
-    ...(avgRating
+    ...(brand && brand.toLocaleLowerCase() !== "без бренда"
+      ? { brand: { "@type": "Brand", name: brand } }
+      : {}),
+    description: product.description.join(" ") || undefined,
+    ...(images.length ? { image: images } : {}),
+    // A request-only item has no public price; emitting an incomplete Offer
+    // makes the markup invalid and must never be replaced with a zero price.
+    ...(hasPrice
+      ? {
+          offers: {
+            "@type": "Offer",
+            url,
+            priceCurrency: "KZT",
+            price: product.price,
+            availability,
+            seller: { "@type": "Organization", name: siteConfig.name, url: siteConfig.url },
+          },
+        }
+      : {}),
+    ...(avgRating !== null && Number.isFinite(avgRating) && product.reviews.length > 0
       ? {
           aggregateRating: {
             "@type": "AggregateRating",
@@ -55,7 +84,7 @@ export function buildProductJsonLd(product: ProductDetailDTO, avgRating: number 
         "@type": "ListItem",
         position: 4,
         name: product.title,
-        item: `${siteConfig.url}/catalog/${product.slug}`,
+        item: url,
       },
     ],
   };

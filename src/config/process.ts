@@ -5,7 +5,7 @@ export interface ProcessStep {
   step: number;
   title: string;
   description: string;
-  /** Realistic SLA per step — speed is part of the value promise. */
+  /** Stage description; actual deadlines are agreed for each request. */
   duration: string;
   icon: LucideIcon;
 }
@@ -16,7 +16,7 @@ export const processSteps: ProcessStep[] = [
     title: "Заявка и спецификация",
     description:
       "Присылаете перечень позиций, проект или задачу. Инженер уточняет марки, сечения и объёмы.",
-    duration: "5 минут",
+    duration: "Начало работы",
     icon: FileSearch,
   },
   {
@@ -24,7 +24,7 @@ export const processSteps: ProcessStep[] = [
     title: "Расчёт и КП",
     description:
       "Подбираем номенклатуру, проверяем наличие на складах и готовим коммерческое предложение с ценами и сроками.",
-    duration: "15 минут",
+    duration: "После уточнения позиций",
     icon: Calculator,
   },
   {
@@ -32,7 +32,7 @@ export const processSteps: ProcessStep[] = [
     title: "Договор и оплата",
     description:
       "Заключаем договор, выставляем счёт с НДС. Работаем по тендерным и прямым закупкам с юрлицами.",
-    duration: "1 день",
+    duration: "После согласования",
     icon: FileSignature,
   },
   {
@@ -40,7 +40,7 @@ export const processSteps: ProcessStep[] = [
     title: "Отгрузка и доставка",
     description:
       "Комплектуем заказ, отгружаем со склада и доставляем транспортными компаниями в любой регион РК.",
-    duration: "от 2 дней",
+    duration: "Срок по маршруту",
     icon: PackageCheck,
   },
 ];

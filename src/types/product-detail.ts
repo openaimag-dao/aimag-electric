@@ -37,8 +37,6 @@ export interface ProductDetail extends CatalogProduct {
   description: string[];
   /** URL реальных фото товара (если есть). */
   images?: string[];
-  /** Кол-во изображений галереи; используется как fallback, если фото нет. */
-  galleryCount: number;
   specGroups: SpecGroup[];
   documents: ProductDocument[];
   reviews: ProductReview[];

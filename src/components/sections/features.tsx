@@ -12,7 +12,7 @@ export function Features() {
         <SectionHeading
           eyebrow="Почему AIMAG"
           title="Условия для бизнеса и промышленности"
-          description="Не просто продаём электротехнику — сопровождаем проект от подбора номенклатуры до отгрузки с документами."
+          description="Подберём позиции по вашей спецификации и согласуем условия поставки."
         />
 
         <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -62,7 +62,7 @@ export function Features() {
                 </div>
                 {emphasized && (
                   <p className="relative mt-8 font-mono text-xs uppercase tracking-wider text-signal">
-                    17 регионов · склад в Шымкенте
+                    Шымкент · поставки по Казахстану
                   </p>
                 )}
               </div>

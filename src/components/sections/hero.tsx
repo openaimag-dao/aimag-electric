@@ -61,17 +61,17 @@ export function Hero({
         <div>
           <span className="inline-flex items-center gap-2 rounded-full border border-signal/40 bg-signal/10 px-3 py-1 font-mono text-xs font-medium uppercase tracking-wider text-signal">
             <ShieldCheck className="size-3.5" />
-            Официальный B2B-поставщик · Казахстан
+            Электротехника для бизнеса · Казахстан
           </span>
 
           <h1 className="mt-6 text-balance font-display text-4xl font-bold leading-[1.04] tracking-tight sm:text-5xl lg:text-[3.4rem]">
             Электротехника для промышленных проектов —
-            <span className="text-signal"> со склада и с расчётом под задачу</span>
+            <span className="text-signal"> с подбором под задачу</span>
           </h1>
 
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-steel-300">
-            Кабели, провода, изоляторы, СИП, муфты и высоковольтное оборудование от
-            заводов-изготовителей. Документы для юрлиц и тендеров, доставка по всему Казахстану.
+            Кабели, провода, изоляторы, СИП, муфты и высоковольтное оборудование. Запросите
+            коммерческое предложение с подбором и доставкой по Казахстану.
           </p>
 
           {/* Catalog search */}
@@ -99,7 +99,7 @@ export function Hero({
             <QuoteDialog>
               <Button variant="signal" size="lg">
                 <FileText />
-                Получить КП за 15 минут
+                Запросить КП
               </Button>
             </QuoteDialog>
             <Button
