@@ -81,7 +81,7 @@ export function QuoteForm({ onSuccess, items, defaultTitle, defaultMessage }: Qu
       {hasItems && (
         <div className="rounded-lg border border-border bg-secondary/40 p-3">
           <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Позиции проекта ({items!.length})
+            Позиции заявки ({items!.length})
           </p>
           <ul className="space-y-1.5 text-sm">
             {items!.map((i) => (
