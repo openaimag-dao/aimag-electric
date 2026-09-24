@@ -15,7 +15,7 @@ import type { ArticleBlock } from "@/config/articles";
 
 const TITLE = "Купить кабель ВВГ и АВВГ в Шымкенте — цены и наличие";
 const DESCRIPTION =
-  "Силовой кабель ВВГ (медный) и АВВГ (алюминиевый), включая ВВГнг и ВВГнг(А)-LS, сечения от 1,5 до 240 мм². Наличие и цены в Шымкенте, отгрузка отрезками и бухтами, доставка по РК.";
+  "Силовой кабель ВВГ и АВВГ для проектов в Казахстане: сравните марки и сечения, посмотрите позиции в каталоге и запросите стоимость и условия поставки.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -67,11 +67,11 @@ const content: ArticleBlock[] = [
 const faq = [
   {
     q: "Какие сечения ВВГ и АВВГ есть в наличии?",
-    a: "От 1,5 мм² до 240 мм², число жил от 1 до 5 — по конкретному сечению и марке смотрите наличие в карточке товара или уточняйте у менеджера при запросе КП.",
+    a: "Уточните нужную марку и сечение в каталоге. Наличие конкретной позиции подтвердим при запросе КП.",
   },
   {
     q: "Можно ли заказать кабель отрезком, а не полным барабаном?",
-    a: "Да, отгружаем и отрезками под проектный расчёт, и полными бухтами/барабанами — способ отгрузки укажите в заявке.",
+    a: "Укажите нужную длину и способ отгрузки в заявке — проверим возможность для конкретной позиции.",
   },
   {
     q: "В чём разница между ВВГнг и ВВГнг(А)-LS?",
@@ -80,7 +80,13 @@ const faq = [
 ];
 
 export default async function VvgAvvgPage() {
-  const products = await catalogService.searchSuggestions("ВВГ", 8);
+  const [vvg, avvg] = await Promise.all([
+    catalogService.searchSuggestions("ВВГ", 8),
+    catalogService.searchSuggestions("АВВГ", 8),
+  ]);
+  const products = Array.from(
+    new Map([...avvg.slice(0, 4), ...vvg].map((p) => [p.id, p])).values()
+  ).slice(0, 8);
   const faqLd = buildFaqJsonLd(faq);
   const article = articles.find((a) => a.slug === "vvg-vs-vvgng-ls");
 
@@ -120,10 +126,10 @@ export default async function VvgAvvgPage() {
             <div className="flex items-end justify-between gap-4">
               <h2 className="font-display text-xl font-semibold text-primary">Позиции каталога</h2>
               <Link
-                href="/catalog?cat=kabel-provod&q=ВВГ"
+                href="/catalog?cat=kabel-provod"
                 className="text-sm font-medium text-signal-700 hover:underline"
               >
-                Весь ассортимент ВВГ/АВВГ →
+                Весь каталог кабеля и проводов →
               </Link>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
