@@ -69,7 +69,7 @@ export function Cta() {
               Оставить заявку на КП
             </h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              Ответим в течение рабочего дня, обычно быстрее.
+              Укажите контакты и нужные позиции. Ответим в рабочее время.
             </p>
             <div className="mt-6">
               <QuoteForm />
