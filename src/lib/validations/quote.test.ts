@@ -25,4 +25,13 @@ describe("quoteSchema", () => {
   it("rejects a too-short message", () => {
     expect(quoteSchema.safeParse({ ...valid, message: "хай" }).success).toBe(false);
   });
+  it("accepts a local source page and rejects external URLs and query strings", () => {
+    expect(quoteSchema.safeParse({ ...valid, sourcePath: "/elektromontazh" }).success).toBe(true);
+    expect(
+      quoteSchema.safeParse({ ...valid, sourcePath: "https://external.example" }).success
+    ).toBe(false);
+    expect(quoteSchema.safeParse({ ...valid, sourcePath: "/catalog?phone=123" }).success).toBe(
+      false
+    );
+  });
 });

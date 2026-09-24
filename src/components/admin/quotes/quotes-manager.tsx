@@ -63,6 +63,7 @@ export interface QuoteItemRow {
 export interface QuoteListRow {
   id: string;
   title: string | null;
+  sourcePath: string | null;
   company: string;
   /** The company this quote was confidently resolved to (via the submitter's account), if any — distinct from the free-text `company` label above. */
   resolvedCompanyName: string | null;
@@ -181,6 +182,22 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
     )
     .filter((r) => !reviewOnly || r.items.some((i) => i.note));
 
+  const sourceStats = [
+    ...rows
+      .reduce((groups, row) => {
+        const source = row.sourcePath || "Не определена";
+        const stat = groups.get(source) ?? { source, requests: 0, won: 0, orders: 0 };
+        stat.requests++;
+        if (row.status === "WON") stat.won++;
+        if (row.hasOrder) stat.orders++;
+        groups.set(source, stat);
+        return groups;
+      }, new Map<string, { source: string; requests: number; won: number; orders: number }>())
+      .values(),
+  ]
+    .sort((a, b) => b.requests - a.requests)
+    .slice(0, 10);
+
   async function changeStatus(id: string, status: string) {
     setPending(id);
     const result = await setQuoteStatus(id, status);
@@ -207,6 +224,46 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
         placeholder="Поиск по компании, контакту, телефону…"
         count={rows.length}
       />
+
+      <section
+        className="rounded-xl border border-border bg-card p-5"
+        aria-label="Заявки по страницам"
+      >
+        <h2 className="font-display text-lg font-semibold text-primary">Заявки по страницам</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Топ-10 страниц за всё время. Источник новых заявок сохраняется с момента этого обновления;
+          старые заявки отображаются без него. Кликов по телефону и WhatsApp здесь нет.
+        </p>
+        <div className="mt-4 overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Страница заявки</TableHead>
+                <TableHead className="text-right">Заявки</TableHead>
+                <TableHead className="text-right">Выиграны</TableHead>
+                <TableHead className="text-right">Заказы</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sourceStats.map((stat) => (
+                <TableRow key={stat.source}>
+                  <TableCell className="max-w-xs break-all">{stat.source}</TableCell>
+                  <TableCell className="text-right">{stat.requests}</TableCell>
+                  <TableCell className="text-right">{stat.won}</TableCell>
+                  <TableCell className="text-right">{stat.orders}</TableCell>
+                </TableRow>
+              ))}
+              {sourceStats.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-muted-foreground">
+                    Заявок пока нет.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </section>
 
       {reviewCount > 0 && (
         <Button
@@ -317,6 +374,12 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
                 <span className="font-medium text-primary">{viewing.title}</span>
               </div>
             )}
+            <div className="flex justify-between gap-4">
+              <span className="text-muted-foreground">Страница заявки</span>
+              <span className="break-all text-right text-primary">
+                {viewing.sourcePath ?? "Не определена"}
+              </span>
+            </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Компания</span>
               <span className="font-medium text-primary">{viewing.company}</span>

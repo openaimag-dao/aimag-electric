@@ -14,6 +14,11 @@ export const quoteItemSchema = z.object({
 export const quoteSchema = z
   .object({
     title: z.string().max(160).optional().or(z.literal("")),
+    sourcePath: z
+      .string()
+      .max(300)
+      .regex(/^\/(?!\/)[^?#]*$/)
+      .optional(),
     company: z.string().min(2, "Укажите название компании").max(120, "Слишком длинное название"),
     name: z.string().min(2, "Укажите контактное лицо").max(80, "Слишком длинное имя"),
     phone: z
