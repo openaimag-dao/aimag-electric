@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { SectionHeading } from "@/components/common/section-heading";
 import { features } from "@/config/features";
 
@@ -59,6 +61,14 @@ export function Features() {
                   >
                     {feature.description}
                   </p>
+                  {feature.href && (
+                    <Link
+                      href={feature.href}
+                      className="mt-4 inline-block text-sm font-semibold text-signal-700 underline-offset-2 hover:underline"
+                    >
+                      Подробнее об услуге →
+                    </Link>
+                  )}
                 </div>
                 {emphasized && (
                   <p className="relative mt-8 font-mono text-xs uppercase tracking-wider text-signal">

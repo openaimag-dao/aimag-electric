@@ -34,6 +34,7 @@ export const footerNav: { title: string; items: NavItem[] }[] = [
     title: "Компания",
     items: [
       { label: "О компании", href: "/o-kompanii" },
+      { label: "Электромонтажные работы", href: "/elektromontazh" },
       { label: "Контакты", href: "/kontakty" },
     ],
   },
