@@ -69,7 +69,7 @@ export function CartView() {
 
               <button
                 type="button"
-                aria-label="Удалить из проекта"
+                aria-label="Удалить из корзины"
                 className="text-muted-foreground hover:text-red-600"
                 onClick={() => removeItem(item.productId)}
               >
@@ -92,7 +92,7 @@ export function CartView() {
       </div>
 
       <div className="rounded-2xl border border-border bg-card p-6 shadow-sm lg:sticky lg:top-24 lg:self-start">
-        <h2 className="font-display text-lg font-semibold text-primary">Получить КП по проекту</h2>
+        <h2 className="font-display text-lg font-semibold text-primary">Получить КП</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Инженер проверит наличие и пришлёт коммерческое предложение со всеми позициями.
         </p>
