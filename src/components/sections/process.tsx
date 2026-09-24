@@ -13,7 +13,7 @@ export function Process() {
         <SectionHeading
           eyebrow="Как мы работаем"
           title="От заявки до отгрузки — прозрачно"
-          description="Понятный процесс с реальными сроками на каждом шаге. КП готовим за 15 минут."
+          description="Отправьте перечень позиций: уточним наличие, подготовим расчёт и согласуем доставку."
         />
 
         <div className="relative mt-14 grid gap-8 md:grid-cols-2 lg:grid-cols-4">

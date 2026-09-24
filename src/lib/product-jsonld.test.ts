@@ -23,7 +23,6 @@ const product: ProductDetailDTO = {
   popularity: 0,
   description: ["Силовой кабель.", "Три медные жилы."],
   images: ["/products/vvg.jpg"],
-  galleryCount: 1,
   specGroups: [],
   documents: [],
   reviews: [],

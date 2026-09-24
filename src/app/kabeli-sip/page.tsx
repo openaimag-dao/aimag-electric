@@ -122,7 +122,7 @@ export default async function SipPage() {
         {products.length > 0 && (
           <>
             <div className="flex items-end justify-between gap-4">
-              <h2 className="font-display text-xl font-semibold text-primary">В наличии</h2>
+              <h2 className="font-display text-xl font-semibold text-primary">Позиции каталога</h2>
               <Link
                 href="/catalog?cat=kabel-provod&q=СИП"
                 className="text-sm font-medium text-signal-700 hover:underline"
@@ -174,7 +174,7 @@ export default async function SipPage() {
                 Нужен расчёт провода под проект?
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Пришлите спецификацию — подготовим коммерческое предложение за 15 минут.
+                Пришлите спецификацию — уточним наличие, цену и срок поставки.
               </p>
             </div>
             <QuoteDialog triggerLabel="Запросить КП" />

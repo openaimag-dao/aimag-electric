@@ -17,9 +17,7 @@ function formatCatalogCount(count: number): string {
  */
 export function getHeroStats(productCount: number): Stat[] {
   return [
-    { value: "12+", label: "лет на рынке электротехники" },
     { value: formatCatalogCount(productCount), label: "позиций в каталоге" },
     { value: "17", label: "регионов поставки по РК" },
-    { value: "15 мин", label: "на подготовку КП" },
   ];
 }

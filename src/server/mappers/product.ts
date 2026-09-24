@@ -1,7 +1,14 @@
 import type { PriceKind, ProductBadge } from "@prisma/client";
 
 import { tiynToTenge } from "@/lib/money";
-import { deriveAvailabilityFromStock, leadTimeForAvailability } from "@/lib/availability";
+import { deriveAvailabilityFromStock } from "@/lib/availability";
+import {
+  isLegacySeedDescription,
+  isLegacySeedDocument,
+  isLegacySeedLeadTime,
+  isLegacySeedPackaging,
+  isLegacySeedReview,
+} from "@/lib/legacy-seed-content";
 
 import type { CatalogProductDTO, ProductDetailDTO } from "@/server/dto";
 import type { Availability } from "@/types/catalog";
@@ -140,12 +147,9 @@ function buildSpecGroups(p: ProductWithRelations): SpecGroup[] {
   if (cores !== undefined) electrical.push({ label: "Количество жил", value: String(cores) });
   if (cs !== undefined) electrical.push({ label: "Сечение", value: `${cs} мм²` });
 
-  const operational = [
-    { label: "Единица измерения", value: p.unit },
-    { label: "Гарантия", value: p.warranty ?? "12 месяцев" },
-    { label: "Условия эксплуатации", value: "−50…+50 °C, УХЛ1" },
-    { label: "Соответствие", value: "ГОСТ / ТР ТС" },
-  ];
+  const operational = [{ label: "Единица измерения", value: p.unit }];
+  if (p.warranty && p.warranty !== "12 месяцев")
+    operational.push({ label: "Гарантия", value: p.warranty });
 
   const groups: SpecGroup[] = [{ title: "Основные параметры", rows: main }];
   if (electrical.length) groups.push({ title: "Электрические характеристики", rows: electrical });
@@ -154,38 +158,44 @@ function buildSpecGroups(p: ProductWithRelations): SpecGroup[] {
 }
 
 function mapDocuments(p: ProductWithRelations): ProductDocument[] {
-  return p.documents.map((d) => ({
-    title: d.title,
-    kind: docKindMap[d.kind] ?? "datasheet",
-    href: d.url,
-    size: d.size ?? "",
-  }));
+  return p.documents
+    .filter((d) => !isLegacySeedDocument(d.url, p.sku))
+    .map((d) => ({
+      title: d.title,
+      kind: docKindMap[d.kind] ?? "datasheet",
+      href: d.url,
+      size: d.size ?? "",
+    }));
 }
 
 function mapReviews(p: ProductWithRelations): ProductReview[] {
-  return p.reviews.map((r) => ({
-    author: r.author,
-    company: r.company ?? undefined,
-    rating: r.rating,
-    date: r.createdAt.toISOString().slice(0, 10),
-    text: r.text,
-  }));
+  return p.reviews
+    .filter((r) => !isLegacySeedReview(r))
+    .map((r) => ({
+      author: r.author,
+      company: r.company ?? undefined,
+      rating: r.rating,
+      date: r.createdAt.toISOString().slice(0, 10),
+      text: r.text,
+    }));
 }
 
 export function toDetailDTO(p: ProductWithRelations): ProductDetailDTO {
   const base = toCatalogDTO(p);
   const images = productImages(p);
-  const galleryCount = images.length > 0 ? images.length : 3;
+  const hasSeedDescription = isLegacySeedDescription(p.description, p.title, p.brand.name);
   return {
     ...base,
-    description: (p.description ?? "").split("\n\n").filter(Boolean),
+    description: hasSeedDescription
+      ? [`${p.title}. Артикул ${p.sku}. Уточните параметры и документы при запросе КП.`]
+      : (p.description ?? "").split("\n\n").filter(Boolean),
     images,
-    galleryCount,
     specGroups: buildSpecGroups(p),
     documents: mapDocuments(p),
     reviews: mapReviews(p),
-    leadTime: p.leadTime ?? leadTimeForAvailability(base.availability),
-    warranty: p.warranty ?? "12 месяцев",
-    packaging: p.packaging ?? undefined,
+    leadTime:
+      p.leadTime && !isLegacySeedLeadTime(p.leadTime) ? p.leadTime : "Уточняется при заказе",
+    warranty: p.warranty && p.warranty !== "12 месяцев" ? p.warranty : "Уточняется при заказе",
+    packaging: p.packaging && !isLegacySeedPackaging(p.packaging, p.unit) ? p.packaging : undefined,
   };
 }

@@ -5,14 +5,7 @@
  *
  * Run: `npm run db:seed` (after `prisma migrate deploy`).
  */
-import {
-  PrismaClient,
-  AttributeType,
-  DocumentKind,
-  PriceKind,
-  ProductBadge,
-  Prisma,
-} from "@prisma/client";
+import { PrismaClient, AttributeType, PriceKind, ProductBadge, Prisma } from "@prisma/client";
 
 import { catalogProducts } from "../src/config/catalog-data";
 import { manufacturers } from "../src/config/manufacturers";
@@ -101,27 +94,6 @@ const badgeMap: Record<string, ProductBadge> = {
   "Со склада": ProductBadge.IN_STOCK,
 };
 
-const reviewPool = [
-  {
-    author: "Асхат Н.",
-    company: "ТОО «ЭнергоМонтаж»",
-    rating: 5,
-    text: "Брали на объект партию — пришло в срок, вся документация в порядке. КП подготовили действительно быстро.",
-  },
-  {
-    author: "Марат С.",
-    company: "СМУ-7",
-    rating: 5,
-    text: "Соответствует ГОСТ, маркировка читаемая, сечение по факту совпадает с паспортом. Возьмём ещё.",
-  },
-  {
-    author: "Ирина В.",
-    company: "Отдел снабжения",
-    rating: 4,
-    text: "Хорошая цена по опту. Отгрузку хотелось бы чуть быстрее, но в целом всё чётко.",
-  },
-];
-
 async function main() {
   console.log("Seeding AIMAG ELECTRIC…");
 
@@ -183,26 +155,12 @@ async function main() {
   await prisma.review.deleteMany();
   await prisma.product.deleteMany();
 
-  const galleryByCat: Record<string, number> = {
-    kabeli: 4,
-    provoda: 4,
-    izolyatory: 3,
-    "armatura-sip": 3,
-    mufty: 3,
-    avtomaty: 4,
-    vysokovoltnoe: 5,
-  };
-
   // Products + graph
   for (const p of catalogProducts) {
     const categoryId = categoryBySlug.get(p.categorySlug)!;
     const brandId = brandByName.get(p.manufacturer)!;
 
-    const description = [
-      `${p.title} — продукция ${p.manufacturer} для профессионального применения в энергетике, строительстве и промышленности. Поставляется с полным пакетом документов для юридических лиц и участия в тендерных закупках.`,
-      `Изделие соответствует требованиям ГОСТ и технических регламентов Таможенного союза. Каждая партия сопровождается сертификатом соответствия и техническим паспортом.`,
-      `AIMAG ELECTRIC обеспечивает подбор аналогов, расчёт под проект и доставку по всему Казахстану.`,
-    ].join("\n\n");
+    const description = `${p.title}. Артикул ${p.sku}. Уточните параметры и документы при запросе КП.`;
 
     // Attribute values
     const values: Prisma.AttributeValueCreateWithoutProductInput[] = [];
@@ -227,73 +185,6 @@ async function main() {
         valueNumber: p.voltage,
       });
 
-    // Documents
-    const skuLower = p.sku.toLowerCase();
-    const documents: Prisma.ProductDocumentCreateWithoutProductInput[] = [
-      {
-        title: `Технический паспорт — ${p.title}`,
-        kind: DocumentKind.DATASHEET,
-        url: `/docs/${skuLower}-datasheet.pdf`,
-        size: "1,2 МБ",
-        order: 0,
-      },
-      {
-        title: "Сертификат соответствия ТР ТС",
-        kind: DocumentKind.CERTIFICATE,
-        url: `/docs/${skuLower}-certificate.pdf`,
-        size: "640 КБ",
-        order: 1,
-      },
-    ];
-    if (p.categorySlug === "kabeli" || p.categorySlug === "provoda")
-      documents.push({
-        title: "Протокол испытаний",
-        kind: DocumentKind.MANUAL,
-        url: `/docs/${skuLower}-test-report.pdf`,
-        size: "820 КБ",
-        order: 2,
-      });
-    if (p.categorySlug === "vysokovoltnoe" || p.categorySlug === "mufty") {
-      documents.push({
-        title: "Инструкция по монтажу",
-        kind: DocumentKind.MANUAL,
-        url: `/docs/${skuLower}-manual.pdf`,
-        size: "2,1 МБ",
-        order: 2,
-      });
-      documents.push({
-        title: "Габаритный чертёж",
-        kind: DocumentKind.DRAWING,
-        url: `/docs/${skuLower}-drawing.pdf`,
-        size: "480 КБ",
-        order: 3,
-      });
-    }
-
-    // Images (placeholders — url null renders category plate)
-    const imageCount = galleryByCat[p.categorySlug] ?? 3;
-    const images: Prisma.ProductImageCreateWithoutProductInput[] = Array.from(
-      { length: imageCount },
-      (_, i) => ({ url: null, alt: `${p.title} — вид ${i + 1}`, order: i })
-    );
-
-    // Reviews (deterministic subset)
-    const reviewCount = (p.popularity % 3) + 1;
-    const reviews: Prisma.ReviewCreateWithoutProductInput[] = reviewPool
-      .slice(0, reviewCount)
-      .map((r, i) => {
-        const d = new Date(2025, 10, 1);
-        d.setDate(d.getDate() + ((p.popularity + i * 11) % 40));
-        return { ...r, createdAt: d };
-      });
-
-    const leadTime =
-      p.availability === "in_stock"
-        ? "1–2 рабочих дня со склада"
-        : p.availability === "on_order"
-          ? "7–14 рабочих дней"
-          : "уточняется по запросу";
-
     const created = await prisma.product.create({
       data: {
         slug: p.slug,
@@ -301,23 +192,15 @@ async function main() {
         title: p.title,
         description,
         unit: p.unit,
-        packaging:
-          p.unit === "м"
-            ? "бухта / барабан, кратно 100 м"
-            : p.unit === "шт"
-              ? "поштучно и упаковками"
-              : null,
-        warranty: "12 месяцев",
-        leadTime,
+        packaging: null,
+        warranty: null,
+        leadTime: null,
         badge: p.badge ? badgeMap[p.badge] : null,
         popularity: p.popularity,
         createdAt: new Date(p.createdAt),
         category: { connect: { id: categoryId } },
         brand: { connect: { id: brandId } },
         values: { create: values },
-        documents: { create: documents },
-        images: { create: images },
-        reviews: { create: reviews },
       },
     });
 

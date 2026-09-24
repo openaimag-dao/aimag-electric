@@ -15,19 +15,16 @@ import { Badge } from "@/components/ui/badge";
 export function ProductGallery({
   categorySlug,
   images,
-  count,
   badge,
   title,
 }: {
   categorySlug: string;
   images?: string[];
-  count: number;
   badge?: string;
   title: string;
 }) {
   const [active, setActive] = React.useState(0);
   const photos = images ?? [];
-  const views = photos.length > 0 ? photos : Array.from({ length: Math.max(1, count) });
 
   return (
     <div className="flex flex-col gap-3">
@@ -51,9 +48,9 @@ export function ProductGallery({
         </span>
       </div>
 
-      {views.length > 1 && (
+      {photos.length > 1 && (
         <div className="grid grid-cols-5 gap-2.5">
-          {views.map((photo, i) => (
+          {photos.map((photo, i) => (
             <button
               key={i}
               type="button"
@@ -67,7 +64,7 @@ export function ProductGallery({
             >
               <ProductThumbnail
                 categorySlug={categorySlug}
-                imageUrl={typeof photo === "string" ? photo : undefined}
+                imageUrl={photo}
                 alt={title}
                 className="h-full w-full"
                 size="sm"

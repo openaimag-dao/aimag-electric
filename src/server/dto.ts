@@ -53,7 +53,6 @@ export interface CatalogProductDTO {
 export interface ProductDetailDTO extends CatalogProductDTO {
   description: string[];
   images: string[];
-  galleryCount: number;
   specGroups: SpecGroup[];
   documents: ProductDocument[];
   reviews: ProductReview[];

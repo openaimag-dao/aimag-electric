@@ -5,9 +5,9 @@ import { QuoteForm } from "@/components/common/quote-form";
 import { siteConfig } from "@/config/site";
 
 const guarantees = [
-  { icon: Clock, text: "КП за 15 минут в рабочее время" },
-  { icon: FileText, text: "Полный пакет документов для юрлиц" },
-  { icon: ShieldCheck, text: "Сертификаты и паспорта качества" },
+  { icon: Clock, text: "Ответ в рабочее время" },
+  { icon: FileText, text: "Перечень позиций в одном запросе" },
+  { icon: ShieldCheck, text: "Документы на конкретные товары — по запросу" },
 ];
 
 /**
@@ -27,7 +27,7 @@ export function Cta() {
               Быстрый расчёт
             </span>
             <h2 className="mt-6 text-balance font-display text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
-              Получить коммерческое предложение за 15 минут
+              Получить коммерческое предложение
             </h2>
             <p className="mt-5 max-w-lg text-lg leading-relaxed text-steel-300">
               Пришлите спецификацию или опишите задачу — инженер подберёт продукцию, проверит

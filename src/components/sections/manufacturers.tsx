@@ -11,8 +11,8 @@ export function Manufacturers({ brands }: { brands: BrandDTO[] }) {
       <div className="container">
         <SectionHeading
           eyebrow="Производители"
-          title="Работаем напрямую с заводами"
-          description="Прямые контракты с изготовителями кабеля и электрооборудования из Казахстана, России и Европы — цена и гарантия от первоисточника."
+          title="Производители в каталоге"
+          description="Укажите желаемую марку или характеристики — уточним доступность и предложим подходящие позиции."
           align="center"
         />
 
@@ -33,7 +33,7 @@ export function Manufacturers({ brands }: { brands: BrandDTO[] }) {
         </div>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          и ещё более 40 брендов — подберём аналог под ваш проект и бюджет.
+          Не нашли нужную марку? Укажите её в запросе КП.
         </p>
       </div>
     </section>
