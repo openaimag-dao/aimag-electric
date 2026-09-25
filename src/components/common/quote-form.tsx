@@ -13,6 +13,7 @@ import { quoteSchema, type QuoteInput } from "@/lib/validations/quote";
 import { submitQuote } from "@/server/actions";
 import { formatTenge } from "@/lib/money";
 import { track } from "@/lib/analytics";
+import { captureCampaignAttribution } from "@/lib/campaign-attribution";
 import type { CartItem } from "@/types/cart";
 
 interface QuoteFormProps {
@@ -61,7 +62,12 @@ export function QuoteForm({
     setServerError(null);
     let result: Awaited<ReturnType<typeof submitQuote>>;
     try {
-      result = await submitQuote({ ...values, items, sourcePath: window.location.pathname });
+      result = await submitQuote({
+        ...values,
+        items,
+        sourcePath: window.location.pathname,
+        campaign: captureCampaignAttribution(),
+      });
     } catch {
       setServerError(
         "Не удалось получить подтверждение отправки. Проверьте связь или уточните у менеджера, получена ли заявка, прежде чем отправлять её повторно."

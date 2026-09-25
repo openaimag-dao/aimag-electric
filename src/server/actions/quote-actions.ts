@@ -72,6 +72,9 @@ export async function submitQuote(input: QuoteInput): Promise<QuoteActionState> 
     const quote = await quoteRepository.create({
       title: parsed.data.title || null,
       sourcePath: parsed.data.sourcePath ?? null,
+      utmSource: parsed.data.campaign?.utmSource || null,
+      utmMedium: parsed.data.campaign?.utmMedium || null,
+      utmCampaign: parsed.data.campaign?.utmCampaign || null,
       company: parsed.data.company,
       name: parsed.data.name,
       phone: parsed.data.phone,

@@ -48,6 +48,7 @@ import {
 } from "@/server/actions/admin";
 import { formatTiyn, formatTenge, tiynToTenge, tengeToTiyn } from "@/lib/money";
 import { cn } from "@/lib/utils";
+import { CampaignSummary } from "@/components/admin/quotes/campaign-summary";
 
 export interface QuoteItemRow {
   id: string;
@@ -65,6 +66,9 @@ export interface QuoteListRow {
   id: string;
   title: string | null;
   sourcePath: string | null;
+  utmSource: string | null;
+  utmMedium: string | null;
+  utmCampaign: string | null;
   company: string;
   /** The company this quote was confidently resolved to (via the submitter's account), if any — distinct from the free-text `company` label above. */
   resolvedCompanyName: string | null;
@@ -204,7 +208,7 @@ export function QuotesManager({
 
   const filtered = rows
     .filter((r) =>
-      `${r.company} ${r.name} ${r.phone} ${r.email ?? ""} ${r.title ?? ""} ${r.sourcePath ?? ""}`
+      `${r.company} ${r.name} ${r.phone} ${r.email ?? ""} ${r.title ?? ""} ${r.sourcePath ?? ""} ${r.utmSource ?? ""} ${r.utmMedium ?? ""} ${r.utmCampaign ?? ""}`
         .toLowerCase()
         .includes(query.toLowerCase().trim())
     )
@@ -349,6 +353,8 @@ export function QuotesManager({
         </div>
       </section>
 
+      <CampaignSummary rows={rows} />
+
       {reviewCount > 0 && (
         <Button
           variant={reviewOnly ? "signal" : "outline"}
@@ -474,6 +480,18 @@ export function QuotesManager({
               <span className="break-all text-right text-primary">
                 {viewing.sourcePath ?? "Не определена"}
               </span>
+            </div>
+            <div className="rounded-lg border border-border p-3">
+              <p className="font-medium text-primary">Рекламные метки</p>
+              <p className="mt-1 break-words text-muted-foreground">
+                Источник: {viewing.utmSource || "Не указан"}
+              </p>
+              <p className="break-words text-muted-foreground">
+                Канал: {viewing.utmMedium || "Не указан"}
+              </p>
+              <p className="break-words text-muted-foreground">
+                Кампания: {viewing.utmCampaign || "Не указана"}
+              </p>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Компания</span>

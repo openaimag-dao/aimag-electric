@@ -10,13 +10,15 @@ import { withQuoteColumns } from "@/server/repositories/quote-self-heal";
 export const accountRepository = {
   /** The customer profile(s) linked to this portal user, with quotes + deals. */
   async customerData(userId: string) {
-    const customers = await prisma.customer.findMany({
-      where: { userId },
-      include: {
-        deals: { orderBy: { createdAt: "desc" } },
-        quotes: { orderBy: { createdAt: "desc" }, include: { items: true } },
-      },
-    });
+    const customers = await withQuoteColumns(() =>
+      prisma.customer.findMany({
+        where: { userId },
+        include: {
+          deals: { orderBy: { createdAt: "desc" } },
+          quotes: { orderBy: { createdAt: "desc" }, include: { items: true } },
+        },
+      })
+    );
     return customers;
   },
 

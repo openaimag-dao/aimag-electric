@@ -21,7 +21,12 @@ test.describe("Публичные страницы", () => {
 
 test("заявка на электромонтаж сохраняется с адресом страницы", async ({ page }) => {
   const company = `Тест электромонтаж ${crypto.randomUUID()}`;
-  await page.goto("/elektromontazh");
+  await page.goto("/?utm_source=google&utm_medium=cpc&utm_campaign=installation_test");
+  await expect
+    .poll(() => page.evaluate(() => sessionStorage.getItem("aimag-campaign-v1")))
+    .not.toBeNull();
+  await page.getByRole("link", { name: "Электромонтаж", exact: true }).first().click();
+  await expect(page).toHaveURL(/\/elektromontazh$/);
   await page.getByLabel("Компания").fill(company);
   await page.getByLabel("Контактное лицо").fill("Тестовый клиент");
   await page.getByLabel("Телефон").fill("+7 700 000 00 00");
@@ -40,7 +45,10 @@ test("заявка на электромонтаж сохраняется с а�
         return quote?.sourcePath;
       })
       .toBe("/elektromontazh");
-    const quote = await prisma.quote.findFirstOrThrow({ where: { company }, select: { id: true } });
+    const quote = await prisma.quote.findFirstOrThrow({ where: { company } });
+    expect(quote.utmSource).toBe("google");
+    expect(quote.utmMedium).toBe("cpc");
+    expect(quote.utmCampaign).toBe("installation_test");
     const notification = await prisma.notification.findFirst({
       where: { type: "quote.created", link: `/admin/quotes?quote=${quote.id}` },
     });
@@ -115,6 +123,9 @@ test("выбранное количество передаётся в корзи
     expect(quote.items).toHaveLength(1);
     expect(quote.items[0].productId).toBe(product.id);
     expect(quote.items[0].qty).toBe(37);
+    expect(quote.utmSource).toBeNull();
+    expect(quote.utmMedium).toBeNull();
+    expect(quote.utmCampaign).toBeNull();
     await page.goto("/cart");
     await expect(
       page.getByRole("textbox", { name: `Количество, ${product.unit}`, exact: true })

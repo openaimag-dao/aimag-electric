@@ -3,6 +3,7 @@ import "server-only";
 import type { Prisma, CustomerStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
+import { withQuoteColumns } from "@/server/repositories/quote-self-heal";
 
 const listInclude = {
   owner: { select: { id: true, name: true, email: true } },
@@ -18,18 +19,20 @@ export const customerAdminRepository = {
     });
   },
   byId(id: string) {
-    return prisma.customer.findUnique({
-      where: { id },
-      include: {
-        owner: { select: { id: true, name: true, email: true } },
-        deals: { orderBy: { createdAt: "desc" } },
-        quotes: { orderBy: { createdAt: "desc" } },
-        activities: {
-          orderBy: { createdAt: "desc" },
-          include: { author: { select: { name: true, email: true } } },
+    return withQuoteColumns(() =>
+      prisma.customer.findUnique({
+        where: { id },
+        include: {
+          owner: { select: { id: true, name: true, email: true } },
+          deals: { orderBy: { createdAt: "desc" } },
+          quotes: { orderBy: { createdAt: "desc" } },
+          activities: {
+            orderBy: { createdAt: "desc" },
+            include: { author: { select: { name: true, email: true } } },
+          },
         },
-      },
-    });
+      })
+    );
   },
   create(data: Prisma.CustomerCreateInput) {
     return prisma.customer.create({ data });

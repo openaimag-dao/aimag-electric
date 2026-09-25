@@ -1,6 +1,8 @@
 import Script from "next/script";
+import { Suspense } from "react";
 import { Analytics } from "@vercel/analytics/next";
 import { ContactClickTracker } from "@/components/analytics/contact-click-tracker";
+import { CampaignTracker } from "@/components/analytics/campaign-tracker";
 
 /**
  * Vercel Analytics always renders (no external account needed). GA4 and
@@ -15,6 +17,9 @@ export function SiteAnalytics() {
     <>
       <Analytics />
       <ContactClickTracker />
+      <Suspense fallback={null}>
+        <CampaignTracker />
+      </Suspense>
       {gaId && (
         <>
           <Script

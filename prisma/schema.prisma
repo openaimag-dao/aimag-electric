@@ -345,6 +345,9 @@ model Quote {
   title         String?
   /** Page on which the quote form was submitted; null for older requests. */
   sourcePath    String?
+  utmSource     String?
+  utmMedium     String?
+  utmCampaign   String?
   company       String
   name          String
   phone         String
