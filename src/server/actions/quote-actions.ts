@@ -112,7 +112,7 @@ export async function submitQuote(input: QuoteInput): Promise<QuoteActionState> 
       type: "quote.created",
       title: `Новая заявка: ${parsed.data.company}`,
       body: items.length > 0 ? `${items.length} позиц. · ${parsed.data.name}` : parsed.data.name,
-      link: "/admin/quotes",
+      link: `/admin/quotes?quote=${quote.id}`,
     });
     return { ok: true };
   } catch (e) {

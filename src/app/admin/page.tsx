@@ -82,7 +82,7 @@ export default async function AdminDashboardPage() {
           label="Новые заявки"
           value={counters.quotesNew}
           icon={Inbox}
-          href="/admin/quotes"
+          href="/admin/quotes?status=NEW"
           accent
         />
         <StatCard
