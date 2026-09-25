@@ -3,6 +3,7 @@ import "server-only";
 import type { Prisma, DealStage } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
+import { withQuoteColumns } from "@/server/repositories/quote-self-heal";
 
 const listInclude = {
   customer: { select: { id: true, company: true } },
@@ -24,18 +25,20 @@ export const dealAdminRepository = {
     });
   },
   byId(id: string) {
-    return prisma.deal.findUnique({
-      where: { id },
-      include: {
-        customer: true,
-        owner: { select: { id: true, name: true, email: true } },
-        quote: true,
-        activities: {
-          orderBy: { createdAt: "desc" },
-          include: { author: { select: { name: true } } },
+    return withQuoteColumns(() =>
+      prisma.deal.findUnique({
+        where: { id },
+        include: {
+          customer: true,
+          owner: { select: { id: true, name: true, email: true } },
+          quote: true,
+          activities: {
+            orderBy: { createdAt: "desc" },
+            include: { author: { select: { name: true } } },
+          },
         },
-      },
-    });
+      })
+    );
   },
   create(data: Prisma.DealCreateInput) {
     return prisma.deal.create({ data });

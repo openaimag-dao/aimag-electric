@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { campaignSchema } from "@/lib/campaign-attribution";
 
 /** One cart line submitted with the КП request — see src/types/cart.ts. */
 export const quoteItemSchema = z.object({
@@ -14,6 +15,7 @@ export const quoteItemSchema = z.object({
 export const quoteSchema = z
   .object({
     title: z.string().max(160).optional().or(z.literal("")),
+    campaign: campaignSchema.optional().catch(undefined),
     sourcePath: z
       .string()
       .max(300)

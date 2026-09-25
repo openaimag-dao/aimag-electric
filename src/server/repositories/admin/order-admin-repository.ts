@@ -4,6 +4,7 @@ import type { Prisma, OrderStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { tableSelfHeal } from "@/lib/db-self-heal";
+import { withQuoteColumns } from "@/server/repositories/quote-self-heal";
 
 const withTables = tableSelfHeal([
   `CREATE TABLE IF NOT EXISTS "Order" (
@@ -159,10 +160,12 @@ export const orderAdminRepository = {
   /** Phase 16: Quote → Order, only from an approved (WON) quote with no order yet. */
   async createFromQuote(quoteId: string) {
     return withTables(async () => {
-      const quote = await prisma.quote.findUnique({
-        where: { id: quoteId },
-        include: { items: true, order: true },
-      });
+      const quote = await withQuoteColumns(() =>
+        prisma.quote.findUnique({
+          where: { id: quoteId },
+          include: { items: true, order: true },
+        })
+      );
       if (!quote) throw new Error("QUOTE_NOT_FOUND");
       if (quote.status !== "WON") throw new Error("QUOTE_NOT_APPROVED");
       if (quote.order) throw new Error("ORDER_ALREADY_EXISTS");
