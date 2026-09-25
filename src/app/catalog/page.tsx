@@ -14,6 +14,7 @@ import { articles } from "@/config/articles";
 import { buildFaqJsonLd } from "@/lib/faq-jsonld";
 import { CatalogView } from "@/components/catalog/catalog-view";
 import { CatalogSkeleton } from "@/components/catalog/catalog-skeleton";
+import { QuoteDialog } from "@/components/common/quote-dialog";
 import { ContentBlocks } from "@/components/common/content-blocks";
 import { Badge } from "@/components/ui/badge";
 import { catalogService } from "@/server/services";
@@ -46,7 +47,8 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   const category = cat ? (await catalogService.loadCategories()).find((c) => c.slug === cat) : null;
   const seo = cat ? categorySeo[cat] : undefined;
 
-  const title = seo?.metaTitle ?? (category ? `${category.title} — каталог` : DEFAULT_TITLE);
+  const baseTitle = seo?.metaTitle ?? (category ? `${category.title} — каталог` : DEFAULT_TITLE);
+  const title = filters.page > 1 ? `${baseTitle} — страница ${filters.page}` : baseTitle;
   const description =
     seo?.metaDescription ??
     category?.description ??
@@ -122,10 +124,28 @@ export default async function CatalogPage({ searchParams }: PageProps) {
               </h1>
               <p className="mt-2 max-w-2xl text-muted-foreground">
                 {category?.description ??
-                  `${total} позиций для энергетики, строительства и промышленности. Фильтруйте по параметрам и запрашивайте КП в один клик.`}
+                  `${category ? result.total : total} позиций для энергетики, строительства и промышленности. Фильтруйте по параметрам и запрашивайте КП в один клик.`}
               </p>
             </div>
           </div>
+
+          {category && (
+            <div className="mt-6 flex flex-col gap-4 rounded-xl border border-border bg-secondary/30 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="font-semibold text-primary">Нужна помощь с подбором?</h2>
+                <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+                  Укажите характеристики, количество и город доставки — запросите подбор и
+                  коммерческое предложение по разделу «{category.title}».
+                </p>
+              </div>
+              <QuoteDialog
+                triggerLabel="Запросить подбор и цены"
+                className="shrink-0"
+                defaultTitle={`Подбор: ${category.title}`}
+                defaultMessage={`Нужен подбор продукции из раздела «${category.title}».`}
+              />
+            </div>
+          )}
         </div>
       </div>
 
