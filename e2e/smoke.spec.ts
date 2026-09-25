@@ -60,7 +60,9 @@ test("ошибка связи при отправке сохраняет зап�
     route.request().method() === "POST" ? route.abort() : route.continue()
   );
   await page.getByRole("button", { name: "Отправить заявку" }).click();
-  await expect(page.getByRole("alert")).toContainText("Не удалось получить подтверждение");
+  await expect(page.locator("form").getByRole("alert")).toContainText(
+    "Не удалось получить подтверждение"
+  );
   await expect(page.getByLabel("Компания")).toHaveValue("Тест связи");
   await expect(page.getByText("Заявка отправлена")).not.toBeVisible();
   await expect(page.getByRole("button", { name: "Отправить заявку" })).toBeEnabled();
