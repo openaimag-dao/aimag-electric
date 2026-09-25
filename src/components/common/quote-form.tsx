@@ -43,7 +43,10 @@ export function QuoteForm({
     reset,
     formState: { errors, isSubmitting },
   } = useForm<QuoteInput>({
-    resolver: zodResolver(quoteSchema),
+    // Item lines are props, not registered inputs. Include them before validation
+    // so a cart/product quote can be submitted without an optional comment.
+    resolver: (values, context, options) =>
+      zodResolver(quoteSchema)({ ...values, items }, context, options),
     defaultValues: {
       title: defaultTitle ?? "",
       company: "",
