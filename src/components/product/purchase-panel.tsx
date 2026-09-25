@@ -2,11 +2,9 @@ import { Clock, Download, ShieldCheck, Truck, Package } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { QuoteDialog } from "@/components/common/quote-dialog";
-import { AddToCartWithQty } from "@/components/cart/add-to-cart-with-qty";
+import { PurchaseActions } from "@/components/product/purchase-actions";
 import { ProductPrice } from "@/components/catalog/product-price";
 import { AvailabilityBadge } from "@/components/catalog/availability-badge";
-import { WhatsAppButton } from "@/components/product/whatsapp-button";
 import { formatTenge } from "@/lib/money";
 import type { ProductDetail } from "@/types/product-detail";
 
@@ -73,26 +71,7 @@ export function PurchasePanel({
 
       {/* Actions */}
       <div className="flex flex-col gap-2.5">
-        <QuoteDialog
-          size="lg"
-          triggerLabel="Получить КП"
-          className="w-full"
-          items={[
-            {
-              productId: product.id,
-              slug: product.slug,
-              sku: product.sku,
-              title: product.title,
-              unit: product.unit,
-              priceTenge: companyPriceTenge ?? product.price,
-              qty: 1,
-            },
-          ]}
-        />
-        <AddToCartWithQty
-          layout="stacked"
-          buttonSize="lg"
-          unit={product.unit}
+        <PurchaseActions
           product={{
             productId: product.id,
             slug: product.slug,
@@ -102,7 +81,6 @@ export function PurchasePanel({
             priceTenge: companyPriceTenge ?? product.price,
           }}
         />
-        <WhatsAppButton title={product.title} sku={product.sku} className="w-full" />
         {primaryDoc && (
           <Button asChild variant="outline" size="lg" className="w-full">
             <a href={primaryDoc.href} download>
