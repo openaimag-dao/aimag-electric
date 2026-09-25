@@ -10,14 +10,18 @@ import { siteConfig } from "@/config/site";
 export function WhatsAppButton({
   title,
   sku,
+  qty,
+  unit,
   className,
 }: {
   title: string;
   sku: string;
+  qty: number;
+  unit: string;
   className?: string;
 }) {
   const text = encodeURIComponent(
-    `Здравствуйте! Интересует «${title}» (арт. ${sku}). Подскажите цену, наличие и срок поставки.`
+    `Здравствуйте! Интересует «${title}» (арт. ${sku}), количество: ${qty} ${unit}. Подскажите цену, наличие и срок поставки.`
   );
   const href = `https://wa.me/${siteConfig.contacts.whatsapp}?text=${text}`;
 
