@@ -19,9 +19,8 @@ export interface NotificationRow {
 export interface NotificationsState {
   items: NotificationRow[];
   unread: number;
+  error?: string;
 }
-
-const EMPTY: NotificationsState = { items: [], unread: 0 };
 
 /** Read path is defensive: a not-yet-migrated Notification table must not crash the admin UI. */
 export async function listNotifications(): Promise<NotificationsState> {
@@ -34,26 +33,30 @@ export async function listNotifications(): Promise<NotificationsState> {
     return { items, unread };
   } catch (e) {
     logger.error("notifications.list_failed", { error: String(e) });
-    return EMPTY;
+    return { items: [], unread: 0, error: "Не удалось загрузить уведомления" };
   }
 }
 
-export async function markNotificationRead(id: string): Promise<void> {
+export async function markNotificationRead(id: string): Promise<boolean> {
   await requireStaff();
   try {
     await notificationRepository.markRead(id);
     revalidatePath("/admin");
+    return true;
   } catch (e) {
     logger.error("notifications.mark_read_failed", { id, error: String(e) });
+    return false;
   }
 }
 
-export async function markAllNotificationsRead(): Promise<void> {
+export async function markAllNotificationsRead(): Promise<boolean> {
   await requireStaff();
   try {
     await notificationRepository.markAllRead();
     revalidatePath("/admin");
+    return true;
   } catch (e) {
     logger.error("notifications.mark_all_read_failed", { error: String(e) });
+    return false;
   }
 }

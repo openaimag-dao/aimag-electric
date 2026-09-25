@@ -1,6 +1,7 @@
 import "server-only";
 
 import { logger } from "@/lib/logger";
+import { siteConfig } from "@/config/site";
 
 export interface NotifyEvent {
   title: string;
@@ -43,14 +44,26 @@ export const telegramChannel: NotifyChannel = {
       }
       return;
     }
-    const text = [event.title, event.body, event.link].filter(Boolean).join("\n");
-    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: chatId, text }),
-    });
-    if (!res.ok) {
-      logger.error("notify.telegram_failed", { status: res.status });
+    const link = event.link?.startsWith("/")
+      ? new URL(event.link, siteConfig.url).toString()
+      : event.link;
+    const text = [event.title, event.body, link].filter(Boolean).join("\n");
+    try {
+      const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: chatId, text }),
+        signal: AbortSignal.timeout(5000),
+      });
+      if (!res.ok) {
+        logger.error("notify.telegram_failed", { status: res.status });
+        return;
+      }
+      const result: { ok?: boolean } = await res.json();
+      if (result.ok !== true) logger.error("notify.telegram_rejected", {});
+    } catch {
+      // Fetch errors can contain the URL (including the bot token). Never log them.
+      logger.error("notify.telegram_unavailable", { reason: "timeout_or_network" });
     }
   },
 };

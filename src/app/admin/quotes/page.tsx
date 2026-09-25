@@ -81,7 +81,7 @@ export default async function AdminQuotesPage() {
         title="Заявки"
         description="Входящие запросы на КП. Меняйте статус кликом по бейджу."
       />
-      <QuotesManager rows={data} />
+      <QuotesManager rows={data} snapshotTime={new Date().toISOString()} />
     </div>
   );
 }

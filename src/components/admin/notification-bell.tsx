@@ -24,14 +24,21 @@ const POLL_MS = 30_000;
 export function NotificationBell() {
   const [items, setItems] = React.useState<NotificationRow[]>([]);
   const [unread, setUnread] = React.useState(0);
+  const [loadError, setLoadError] = React.useState<string | null>(null);
+  const [marking, setMarking] = React.useState(false);
 
   const refresh = React.useCallback(() => {
     listNotifications()
       .then((r) => {
+        if (r.error) {
+          setLoadError(r.error);
+          return;
+        }
+        setLoadError(null);
         setItems(r.items);
         setUnread(r.unread);
       })
-      .catch(() => {});
+      .catch(() => setLoadError("Не удалось загрузить уведомления"));
   }, []);
 
   React.useEffect(() => {
@@ -44,17 +51,26 @@ export function NotificationBell() {
     if (next) refresh();
   }
 
-  function handleItemClick(n: NotificationRow) {
+  async function handleItemClick(n: NotificationRow) {
     if (n.readAt) return;
-    setItems((prev) => prev.map((i) => (i.id === n.id ? { ...i, readAt: new Date() } : i)));
-    setUnread((prev) => Math.max(0, prev - 1));
-    markNotificationRead(n.id).catch(() => {});
+    try {
+      if (!(await markNotificationRead(n.id))) throw new Error("mark_failed");
+      refresh();
+    } catch {
+      setLoadError("Не удалось отметить уведомление прочитанным");
+    }
   }
 
-  function handleMarkAll() {
-    setItems((prev) => prev.map((i) => ({ ...i, readAt: i.readAt ?? new Date() })));
-    setUnread(0);
-    markAllNotificationsRead().catch(() => {});
+  async function handleMarkAll() {
+    setMarking(true);
+    try {
+      if (!(await markAllNotificationsRead())) throw new Error("mark_failed");
+      refresh();
+    } catch {
+      setLoadError("Не удалось отметить уведомления прочитанными");
+    } finally {
+      setMarking(false);
+    }
   }
 
   return (
@@ -80,6 +96,7 @@ export function NotificationBell() {
             <button
               type="button"
               onClick={handleMarkAll}
+              disabled={marking}
               className="text-xs font-medium text-signal-700 hover:underline"
             >
               Отметить всё
@@ -87,7 +104,15 @@ export function NotificationBell() {
           )}
         </div>
         <DropdownMenuSeparator className="my-0" />
-        {items.length === 0 ? (
+        {loadError && (
+          <div role="alert" className="px-3 py-3 text-sm text-amber-700">
+            <p>{loadError}</p>
+            <button type="button" onClick={refresh} className="mt-1 underline">
+              Повторить загрузку
+            </button>
+          </div>
+        )}
+        {items.length === 0 && !loadError ? (
           <p className="px-3 py-6 text-center text-sm text-muted-foreground">Пока пусто</p>
         ) : (
           <div className="max-h-96 overflow-y-auto">

@@ -55,7 +55,16 @@ export function QuoteForm({
   });
 
   async function onSubmit(values: QuoteInput) {
-    const result = await submitQuote({ ...values, items, sourcePath: window.location.pathname });
+    setServerError(null);
+    let result: Awaited<ReturnType<typeof submitQuote>>;
+    try {
+      result = await submitQuote({ ...values, items, sourcePath: window.location.pathname });
+    } catch {
+      setServerError(
+        "Не удалось получить подтверждение отправки. Проверьте связь или уточните у менеджера, получена ли заявка, прежде чем отправлять её повторно."
+      );
+      return;
+    }
     if (!result.ok) {
       setServerError(result.error ?? "Не удалось отправить заявку");
       return;
@@ -156,7 +165,9 @@ export function QuoteForm({
       </div>
 
       {serverError && (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{serverError}</p>
+        <p role="alert" className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+          {serverError}
+        </p>
       )}
       <Button type="submit" variant="signal" size="lg" disabled={isSubmitting}>
         {isSubmitting && <Loader2 className="animate-spin" />}

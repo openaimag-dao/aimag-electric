@@ -34,6 +34,7 @@ import {
   Check,
   X,
   Pencil,
+  RefreshCw,
 } from "lucide-react";
 import { TableToolbar } from "@/components/admin/table-toolbar";
 import { FormDialog } from "@/components/admin/form-dialog";
@@ -98,7 +99,13 @@ function formatDate(iso: string) {
   });
 }
 
-export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
+export function QuotesManager({
+  rows,
+  snapshotTime,
+}: {
+  rows: QuoteListRow[];
+  snapshotTime: string;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -111,6 +118,23 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
   const [editingPriceId, setEditingPriceId] = React.useState<string | null>(null);
   const [priceDraft, setPriceDraft] = React.useState("");
   const [savingPrice, setSavingPrice] = React.useState(false);
+  const [waitingOnly, setWaitingOnly] = React.useState(false);
+  const [refreshing, startRefresh] = React.useTransition();
+  const requestedStatus = searchParams.get("status") ?? "ALL";
+  const statusFilter = Object.hasOwn(quoteStatusMeta, requestedStatus) ? requestedStatus : "ALL";
+  const waitingCutoff = Date.parse(snapshotTime) - 24 * 60 * 60 * 1000;
+  const isWaiting = (row: QuoteListRow) =>
+    row.status === "NEW" && Date.parse(row.createdAt) <= waitingCutoff;
+  const newCount = rows.filter((row) => row.status === "NEW").length;
+  const waitingCount = rows.filter(isWaiting).length;
+
+  function selectStatus(status: string) {
+    setWaitingOnly(false);
+    const params = new URLSearchParams(searchParams.toString());
+    if (status === "ALL") params.delete("status");
+    else params.set("status", status);
+    router.replace(`${pathname}${params.size ? `?${params}` : ""}`, { scroll: false });
+  }
 
   // Deep-link support: /admin/quotes?quote=<id> (used from the CRM customer
   // page) opens that quote's dialog on load.
@@ -123,7 +147,11 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
 
   function closeViewing() {
     setViewing(undefined);
-    if (searchParams.get("quote")) router.replace(pathname);
+    if (searchParams.get("quote")) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("quote");
+      router.replace(`${pathname}${params.size ? `?${params}` : ""}`, { scroll: false });
+    }
   }
 
   function startEditPrice(item: QuoteItemRow) {
@@ -176,11 +204,19 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
 
   const filtered = rows
     .filter((r) =>
-      `${r.company} ${r.name} ${r.phone} ${r.email ?? ""}`
+      `${r.company} ${r.name} ${r.phone} ${r.email ?? ""} ${r.title ?? ""} ${r.sourcePath ?? ""}`
         .toLowerCase()
         .includes(query.toLowerCase().trim())
     )
-    .filter((r) => !reviewOnly || r.items.some((i) => i.note));
+    .filter((r) => !reviewOnly || r.items.some((i) => i.note))
+    .filter((r) =>
+      waitingOnly ? isWaiting(r) : statusFilter === "ALL" || r.status === statusFilter
+    )
+    .sort((a, b) =>
+      waitingOnly || statusFilter === "NEW"
+        ? Date.parse(a.createdAt) - Date.parse(b.createdAt)
+        : Date.parse(b.createdAt) - Date.parse(a.createdAt)
+    );
 
   const sourceStats = [
     ...rows
@@ -200,10 +236,17 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
 
   async function changeStatus(id: string, status: string) {
     setPending(id);
-    const result = await setQuoteStatus(id, status);
-    setPending(null);
-    if (result.ok) toast.success("Статус обновлён");
-    else toast.error(result.error ?? "Ошибка");
+    try {
+      const result = await setQuoteStatus(id, status);
+      if (result.ok) {
+        setViewing((current) => (current?.id === id ? { ...current, status } : current));
+        toast.success("Статус обновлён");
+      } else toast.error(result.error ?? "Ошибка");
+    } catch {
+      toast.error("Не удалось обновить статус. Проверьте связь и обновите список.");
+    } finally {
+      setPending(null);
+    }
   }
 
   async function copyClientLink(token: string) {
@@ -218,11 +261,52 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
 
   return (
     <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-4">
+        <Button
+          variant={statusFilter === "NEW" && !waitingOnly ? "signal" : "outline"}
+          onClick={() => selectStatus("NEW")}
+        >
+          Новые ({newCount})
+        </Button>
+        <Button
+          variant={waitingOnly ? "signal" : "outline"}
+          aria-pressed={waitingOnly}
+          onClick={() => setWaitingOnly((value) => !value)}
+        >
+          Новые больше суток ({waitingCount})
+        </Button>
+        <label className="flex items-center gap-2 text-sm">
+          Статус
+          <select
+            value={waitingOnly ? "NEW" : statusFilter}
+            onChange={(event) => selectStatus(event.target.value)}
+            className="rounded-md border border-border bg-background px-3 py-2"
+          >
+            <option value="ALL">Все</option>
+            {Object.entries(quoteStatusMeta).map(([value, meta]) => (
+              <option key={value} value={value}>
+                {meta.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <Button
+          variant="outline"
+          disabled={refreshing}
+          onClick={() => startRefresh(() => router.refresh())}
+        >
+          <RefreshCw className={cn("size-4", refreshing && "animate-spin")} />
+          Обновить
+        </Button>
+        <p className="w-full text-xs text-muted-foreground">
+          Возраст считается с момента создания заявки. В списке новых первыми показаны самые ранние.
+        </p>
+      </div>
       <TableToolbar
         query={query}
         onQueryChange={setQuery}
         placeholder="Поиск по компании, контакту, телефону…"
-        count={rows.length}
+        count={filtered.length}
       />
 
       <section
@@ -291,7 +375,18 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
           <TableBody>
             {filtered.map((row) => (
               <TableRow key={row.id}>
-                <TableCell className="font-medium text-primary">{row.company}</TableCell>
+                <TableCell className="font-medium text-primary">
+                  <button
+                    type="button"
+                    onClick={() => setViewing(row)}
+                    className="text-left hover:underline"
+                  >
+                    {row.company}
+                  </button>
+                  {isWaiting(row) && (
+                    <p className="mt-1 text-xs text-amber-700">Новая больше суток</p>
+                  )}
+                </TableCell>
                 <TableCell>
                   <div className="text-sm text-primary">{row.name}</div>
                   <div className="text-xs text-muted-foreground">{row.phone}</div>
@@ -417,6 +512,16 @@ export function QuotesManager({ rows }: { rows: QuoteListRow[] }) {
               <span className="text-muted-foreground">Статус</span>
               <QuoteStatusBadge status={viewing.status} />
             </div>
+            {viewing.status === "NEW" && (
+              <Button
+                variant="signal"
+                disabled={pending === viewing.id}
+                onClick={() => changeStatus(viewing.id, "IN_PROGRESS")}
+              >
+                {pending === viewing.id && <Loader2 className="size-4 animate-spin" />}
+                Взять в работу
+              </Button>
+            )}
             <div className="flex justify-between">
               <span className="text-muted-foreground">Дата</span>
               <span className="text-primary">{formatDate(viewing.createdAt)}</span>
