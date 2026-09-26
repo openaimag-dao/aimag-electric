@@ -30,11 +30,13 @@ interface AttributeRef {
 
 export function AttributeValueForm({
   initial,
+  defaultProductId,
   products,
   attributes,
   onDone,
 }: {
   initial?: AttributeValueRow;
+  defaultProductId?: string;
   products: ProductRef[];
   attributes: AttributeRef[];
   onDone: () => void;
@@ -49,7 +51,7 @@ export function AttributeValueForm({
   } = useForm<AttributeValueFormInput>({
     resolver: zodResolver(attributeValueFormSchema),
     defaultValues: {
-      productId: initial?.productId ?? "",
+      productId: initial?.productId ?? defaultProductId ?? "",
       attributeId: initial?.attributeId ?? "",
       value: initial?.value ?? "",
     },

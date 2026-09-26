@@ -55,6 +55,9 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
     brandName: p.brand.name,
     priceLabel: priceLabel(p.prices, p.unit),
     availability: deriveAvailabilityFromStock(p.stock),
+    missingPhoto: p._count.images === 0,
+    missingSpecs: p._count.values === 0,
+    missingDescription: !p.description?.trim(),
   }));
 
   const categories = refs.categories.map((c) => ({ id: c.id, label: c.title }));
@@ -71,6 +74,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
         rows={data}
         categories={categories}
         brands={brands}
+        attributes={refs.attributes.map((a) => ({ id: a.id, label: a.name, unit: a.unit }))}
         total={total}
         page={query.page}
         pageCount={pageCount}

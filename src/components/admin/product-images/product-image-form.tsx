@@ -31,10 +31,12 @@ interface Ref {
 
 export function ProductImageForm({
   initial,
+  defaultProductId,
   products,
   onDone,
 }: {
   initial?: ProductImageRow;
+  defaultProductId?: string;
   products: Ref[];
   onDone: () => void;
 }) {
@@ -49,7 +51,7 @@ export function ProductImageForm({
   } = useForm<ProductImageFormInput>({
     resolver: zodResolver(productImageFormSchema),
     defaultValues: {
-      productId: initial?.productId ?? "",
+      productId: initial?.productId ?? defaultProductId ?? "",
       url: initial?.url ?? "",
       alt: initial?.alt ?? "",
       order: initial?.order ?? 0,

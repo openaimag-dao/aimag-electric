@@ -154,3 +154,51 @@ test("выбранное количество передаётся в корзи
     await prisma.$disconnect();
   }
 });
+
+test("заполнение товара из списка сохраняет выбранный товар и фильтры", async ({ page }) => {
+  const prisma = new PrismaClient();
+  const suffix = crypto.randomUUID();
+  const email = `quality-${suffix}@example.test`;
+  const password = crypto.randomUUID();
+  const { hash } = await import("bcryptjs");
+  try {
+    await prisma.user.create({
+      data: { email, passwordHash: await hash(password, 10), role: "ADMIN" },
+    });
+    const template = await prisma.product.findFirstOrThrow({
+      select: { categoryId: true, brandId: true },
+    });
+    const product = await prisma.product.create({
+      data: {
+        ...template,
+        title: `Тест заполнения ${suffix}`,
+        sku: `QUALITY-${suffix}`,
+        slug: `quality-${suffix}`,
+      },
+    });
+    await page.goto("/login?callbackUrl=/admin/products");
+    await page.getByLabel("E-mail", { exact: true }).fill(email);
+    await page.getByLabel("Пароль", { exact: true }).fill(password);
+    await page.getByRole("button", { name: "Войти", exact: true }).click();
+    await expect(page).toHaveURL(/\/admin\/products/);
+    await page.goto(`/admin/products?quality=no-description&q=${product.sku}`);
+    const rows = page.locator("tbody tr");
+    await expect(rows).toHaveCount(1);
+    await expect(rows).toContainText(product.sku);
+    await rows.getByRole("button", { name: "Добавить фото", exact: true }).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog.getByLabel("Товар", { exact: true })).toHaveValue(product.id);
+    await dialog.getByLabel("Фото", { exact: true }).fill("https://example.test/product.png");
+    await dialog.getByRole("button", { name: "Добавить", exact: true }).click();
+    await expect(dialog).not.toBeVisible();
+    await expect(rows.getByRole("button", { name: "Добавить фото", exact: true })).toHaveCount(0);
+    expect(await prisma.productImage.count({ where: { productId: product.id } })).toBe(1);
+    await rows.getByRole("button", { name: "Добавить характеристики", exact: true }).click();
+    await expect(dialog.getByLabel("Товар", { exact: true })).toHaveValue(product.id);
+    await dialog.getByRole("button", { name: "Отмена", exact: true }).click();
+    await rows.getByRole("button", { name: "Добавить описание", exact: true }).click();
+    await expect(dialog).toContainText("Редактировать товар");
+  } finally {
+    await prisma.$disconnect();
+  }
+});

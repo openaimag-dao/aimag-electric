@@ -16,6 +16,7 @@ import { audit } from "@/server/audit";
 
 function revalidate() {
   revalidatePath("/admin/attribute-values");
+  revalidatePath("/admin/products");
   revalidatePath("/catalog");
 }
 
