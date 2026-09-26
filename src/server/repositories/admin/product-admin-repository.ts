@@ -10,7 +10,14 @@ const listInclude = {
   brand: true,
   prices: true,
   stock: true,
-  _count: { select: { documents: true, reviews: true } },
+  _count: {
+    select: {
+      documents: true,
+      reviews: true,
+      values: true,
+      images: { where: { AND: [{ url: { not: null } }, { NOT: { url: "" } }] } },
+    },
+  },
 } satisfies Prisma.ProductInclude;
 
 export interface ProductFilterParams {
@@ -40,7 +47,7 @@ function buildWhere(params: ProductFilterParams): Prisma.ProductWhereInput {
     ...(params.categoryId ? { categoryId: params.categoryId } : {}),
     ...(params.brandId ? { brandId: params.brandId } : {}),
     ...(params.published !== undefined ? { published: params.published } : {}),
-    ...(params.quality ? qualityWhere(params.quality) : {}),
+    ...(params.quality ? { AND: [qualityWhere(params.quality)] } : {}),
   };
 }
 

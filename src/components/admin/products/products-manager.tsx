@@ -4,6 +4,8 @@ import * as React from "react";
 import { Search, Plus, Loader2, Download } from "lucide-react";
 import { toast } from "sonner";
 
+import { ProductImageForm } from "@/components/admin/product-images/product-image-form";
+import { AttributeValueForm } from "@/components/admin/attribute-values/attribute-value-form";
 import { useCrudManager } from "@/hooks/use-crud-manager";
 import { useAdminProductsFilters } from "@/hooks/use-admin-products-filters";
 
@@ -45,6 +47,9 @@ import { QUALITY_FILTERS, QUALITY_FILTER_LABELS } from "@/lib/admin/product-qual
 import { downloadBase64Xlsx } from "@/lib/admin/download-file";
 
 export interface ProductListRow extends ProductRow {
+  missingPhoto: boolean;
+  missingSpecs: boolean;
+  missingDescription: boolean;
   categoryTitle: string;
   brandName: string;
   priceLabel: string;
@@ -66,6 +71,7 @@ export function ProductsManager({
   rows,
   categories,
   brands,
+  attributes,
   total,
   page,
   pageCount,
@@ -73,6 +79,7 @@ export function ProductsManager({
   rows: ProductListRow[];
   categories: Ref[];
   brands: Ref[];
+  attributes: (Ref & { unit: string | null })[];
   total: number;
   page: number;
   pageCount: number;
@@ -88,6 +95,11 @@ export function ProductsManager({
     setDeleting,
     closeDelete,
   } = useCrudManager<ProductListRow, ProductRow>(rows, (r) => `${r.title} ${r.sku}`);
+
+  const [completion, setCompletion] = React.useState<{
+    row: ProductListRow;
+    kind: "photo" | "specs";
+  } | null>(null);
 
   const { query, update } = useAdminProductsFilters();
 
@@ -346,6 +358,7 @@ export function ProductsManager({
                 />
               </TableHead>
               <TableHead>Товар</TableHead>
+              <TableHead>Заполнение</TableHead>
               <TableHead>Категория</TableHead>
               <TableHead>Производитель</TableHead>
               <TableHead className="text-right">Цена</TableHead>
@@ -369,6 +382,38 @@ export function ProductsManager({
                   <TableCell>
                     <div className="font-medium text-primary">{row.title}</div>
                     <div className="font-mono text-xs text-muted-foreground">{row.sku}</div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex min-w-40 flex-col items-start gap-1">
+                      {row.missingPhoto && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCompletion({ row, kind: "photo" })}
+                        >
+                          Добавить фото
+                        </Button>
+                      )}
+                      {row.missingSpecs && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCompletion({ row, kind: "specs" })}
+                        >
+                          Добавить характеристики
+                        </Button>
+                      )}
+                      {row.missingDescription && (
+                        <Button variant="outline" size="sm" onClick={() => openEdit(row)}>
+                          Добавить описание
+                        </Button>
+                      )}
+                      {!row.missingPhoto && !row.missingSpecs && !row.missingDescription && (
+                        <span className="text-xs text-muted-foreground">
+                          Основные данные заполнены
+                        </span>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground">{row.categoryTitle}</TableCell>
                   <TableCell className="text-muted-foreground">{row.brandName}</TableCell>
@@ -397,7 +442,7 @@ export function ProductsManager({
             })}
             {rows.length === 0 && (
               <TableRow>
-                <TableCell colSpan={8} className="text-center text-muted-foreground">
+                <TableCell colSpan={9} className="text-center text-muted-foreground">
                   Ничего не найдено.
                 </TableCell>
               </TableRow>
@@ -405,6 +450,37 @@ export function ProductsManager({
           </TableBody>
         </Table>
       </div>
+
+      <FormDialog
+        open={Boolean(completion)}
+        onOpenChange={(open) => {
+          if (!open) setCompletion(null);
+        }}
+        title={completion?.kind === "photo" ? "Добавить фото" : "Добавить характеристику"}
+        description={completion ? `${completion.row.title} · ${completion.row.sku}` : undefined}
+      >
+        {completion &&
+          (completion.kind === "photo" ? (
+            <ProductImageForm
+              key={completion.row.id}
+              defaultProductId={completion.row.id}
+              products={[
+                { id: completion.row.id, label: `${completion.row.title} (${completion.row.sku})` },
+              ]}
+              onDone={() => setCompletion(null)}
+            />
+          ) : (
+            <AttributeValueForm
+              key={completion.row.id}
+              defaultProductId={completion.row.id}
+              products={[
+                { id: completion.row.id, label: `${completion.row.title} (${completion.row.sku})` },
+              ]}
+              attributes={attributes}
+              onDone={() => setCompletion(null)}
+            />
+          ))}
+      </FormDialog>
 
       <AdminPagination
         page={page}
