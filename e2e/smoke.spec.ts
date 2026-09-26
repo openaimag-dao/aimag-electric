@@ -93,20 +93,20 @@ test("выбранное количество передаётся в корзи
   const prisma = new PrismaClient();
   const company = `Тест количества ${crypto.randomUUID()}`;
   try {
-    const product = await prisma.product.findFirstOrThrow({
-      where: {
-        published: true,
-        prices: {
-          some: {
-            kind: "BASE",
-            amount: { not: null },
-            validFrom: { lte: new Date() },
-            validTo: null,
-          },
-          every: { kind: "BASE" },
-        },
+    const template = await prisma.product.findFirstOrThrow({
+      where: { published: true },
+      select: { categoryId: true, brandId: true },
+    });
+    const fixtureId = crypto.randomUUID();
+    const product = await prisma.product.create({
+      data: {
+        ...template,
+        slug: `quantity-test-${fixtureId}`,
+        sku: `TEST-${fixtureId}`,
+        title: "Тест расчёта количества",
+        unit: "м",
+        prices: { create: { kind: "BASE", amount: 123400, validFrom: new Date(0) } },
       },
-      select: { id: true, slug: true, unit: true, prices: true },
     });
     await page.goto(`/catalog/${product.slug}`);
     const actions = page.getByRole("group", { name: "Заказать товар" });
@@ -115,7 +115,7 @@ test("выбранное количество передаётся в корзи
       .fill("37");
     // Clicking the action itself must commit the typed quantity; no extra blur in the test.
     await actions.getByRole("button", { name: "Добавить в корзину", exact: true }).click();
-    const total = Math.round(product.prices[0].amount! / 100) * 37;
+    const total = 1234 * 37;
     await expect(actions.getByRole("status", { name: "Расчёт стоимости" })).toContainText(
       `${new Intl.NumberFormat("ru-RU").format(total)} ₸`
     );
