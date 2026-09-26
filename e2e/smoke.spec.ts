@@ -180,7 +180,7 @@ test("заполнение товара из списка сохраняет в�
     await page.getByLabel("E-mail", { exact: true }).fill(email);
     await page.getByLabel("Пароль", { exact: true }).fill(password);
     await page.getByRole("button", { name: "Войти", exact: true }).click();
-    await expect(page).toHaveURL(/\/admin\/products/);
+    await expect(page).toHaveURL((url) => url.pathname === "/admin/products");
     await page.goto(`/admin/products?quality=no-description&q=${product.sku}`);
     const rows = page.locator("tbody tr");
     await expect(rows).toHaveCount(1);
