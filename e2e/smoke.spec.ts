@@ -94,8 +94,19 @@ test("выбранное количество передаётся в корзи
   const company = `Тест количества ${crypto.randomUUID()}`;
   try {
     const product = await prisma.product.findFirstOrThrow({
-      where: { published: true },
-      select: { id: true, slug: true, unit: true },
+      where: {
+        published: true,
+        prices: {
+          some: {
+            kind: "BASE",
+            amount: { not: null },
+            validFrom: { lte: new Date() },
+            validTo: null,
+          },
+          every: { kind: "BASE" },
+        },
+      },
+      select: { id: true, slug: true, unit: true, prices: true },
     });
     await page.goto(`/catalog/${product.slug}`);
     const actions = page.getByRole("group", { name: "Заказать товар" });
@@ -104,6 +115,15 @@ test("выбранное количество передаётся в корзи
       .fill("37");
     // Clicking the action itself must commit the typed quantity; no extra blur in the test.
     await actions.getByRole("button", { name: "Добавить в корзину", exact: true }).click();
+    const total = Math.round(product.prices[0].amount! / 100) * 37;
+    await expect(actions.getByRole("status", { name: "Расчёт стоимости" })).toContainText(
+      `${new Intl.NumberFormat("ru-RU").format(total)} ₸`
+    );
+    await expect(
+      page
+        .getByRole("navigation", { name: "Условия покупки" })
+        .getByRole("link", { name: "Доставка и самовывоз" })
+    ).toHaveAttribute("href", "/dostavka");
     const whatsapp = await actions
       .getByRole("link", { name: "Написать в WhatsApp" })
       .getAttribute("href");

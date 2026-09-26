@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Clock, Download, ShieldCheck, Truck, Package } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -43,7 +44,9 @@ export function PurchasePanel({
         {companyPriceTenge !== null && (
           <p className="mt-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
             Ваша цена по договору:{" "}
-            <span className="font-semibold">{formatTenge(companyPriceTenge)}</span>
+            <span className="font-semibold">
+              {formatTenge(companyPriceTenge)}/{product.unit}
+            </span>
           </p>
         )}
       </div>
@@ -91,6 +94,29 @@ export function PurchasePanel({
         )}
       </div>
 
+      <nav
+        aria-label="Условия покупки"
+        className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs"
+      >
+        <Link
+          href="/dostavka"
+          className="text-steel-700 underline underline-offset-4 hover:text-primary"
+        >
+          Доставка и самовывоз
+        </Link>
+        <Link
+          href="/oplata"
+          className="text-steel-700 underline underline-offset-4 hover:text-primary"
+        >
+          Оплата
+        </Link>
+        <Link
+          href="/garantiya"
+          className="text-steel-700 underline underline-offset-4 hover:text-primary"
+        >
+          Гарантия
+        </Link>
+      </nav>
       <p className="mt-4 text-center text-xs text-muted-foreground">
         Работаем с ТОО, ИП и квазигосударственным сектором
       </p>
