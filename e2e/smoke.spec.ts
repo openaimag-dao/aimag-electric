@@ -105,9 +105,18 @@ test("выбранное количество передаётся в корзи
         sku: `TEST-${fixtureId}`,
         title: "Тест расчёта количества",
         unit: "м",
-        prices: { create: { kind: "BASE", amount: 123400, validFrom: new Date(0) } },
+        prices: {
+          create: [
+            { kind: "BASE", amount: 123400, minQty: 1, validFrom: new Date(0) },
+            { kind: "WHOLESALE", amount: 10000, minQty: 100, validFrom: new Date(0) },
+          ],
+        },
       },
     });
+    await page.goto(`/catalog?q=${product.sku}&pmin=1200&pmax=1300`);
+    await expect(
+      page.getByRole("link", { name: product.title, exact: true }).first()
+    ).toBeVisible();
     await page.goto(`/catalog/${product.slug}`);
     const actions = page.getByRole("group", { name: "Заказать товар" });
     await actions

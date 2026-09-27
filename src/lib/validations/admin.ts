@@ -80,7 +80,7 @@ export const priceFormSchema = z.object({
   productId: z.string().min(1, "Выберите товар"),
   kind: priceKind.default("BASE"),
   /** Цена в тенге в форме; сервис конвертирует в тиыны. Пусто = по запросу. */
-  amountTenge: z.union([z.coerce.number().min(0), z.literal("")]).optional(),
+  amountTenge: z.union([z.literal(""), z.coerce.number().finite().min(0)]).optional(),
   minQty: z.coerce.number().min(1).default(1),
 });
 export type PriceFormInput = z.infer<typeof priceFormSchema>;

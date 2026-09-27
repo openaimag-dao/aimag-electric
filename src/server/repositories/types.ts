@@ -34,7 +34,7 @@ export const productListSelect = {
   brand: { select: { name: true } },
   images: { select: { url: true }, orderBy: { order: "asc" }, take: 1 },
   prices: {
-    select: { kind: true, amount: true, validFrom: true, validTo: true },
+    select: { kind: true, amount: true, minQty: true, validFrom: true, validTo: true },
   },
   stock: { select: { quantity: true, restockAt: true } },
   values: {

@@ -1,5 +1,6 @@
-import type { PriceKind, ProductBadge } from "@prisma/client";
+import type { ProductBadge } from "@prisma/client";
 
+import { publicPriceTiyn, type PublicPriceRow } from "@/lib/public-price";
 import { tiynToTenge } from "@/lib/money";
 import { deriveAvailabilityFromStock } from "@/lib/availability";
 import {
@@ -45,7 +46,7 @@ interface ProductForCatalog {
   category: { slug: string; title: string };
   brand: { name: string };
   images: { url: string | null }[];
-  prices: { kind: PriceKind; amount: number | null; validFrom: Date; validTo: Date | null }[];
+  prices: PublicPriceRow[];
   stock: { quantity: number; restockAt: Date | null }[];
   values: {
     valueString: string | null;
@@ -72,21 +73,10 @@ function deriveAvailability(p: ProductForCatalog): Availability {
   return deriveAvailabilityFromStock(p.stock);
 }
 
-/** Effective base price: lowest currently-valid BASE price, in tenge. */
+/** Public reference price only includes offers eligible for one unit. */
 function derivePrice(p: ProductForCatalog): number | null {
-  const now = Date.now();
-  const active = p.prices.filter(
-    (pr) =>
-      pr.amount !== null &&
-      pr.validFrom.getTime() <= now &&
-      (pr.validTo === null || pr.validTo.getTime() >= now)
-  );
-  if (active.length === 0) return null;
-  // Prefer PROMO, then BASE; amounts stored in тиын → convert to тенге.
-  const promo = active.filter((pr) => pr.kind === "PROMO");
-  const pool = promo.length ? promo : active;
-  const minTiyn = Math.min(...pool.map((pr) => pr.amount as number));
-  return tiynToTenge(minTiyn);
+  const amount = publicPriceTiyn(p.prices);
+  return amount === null ? null : tiynToTenge(amount);
 }
 
 /** Ordered, non-empty image URLs for a product. */
