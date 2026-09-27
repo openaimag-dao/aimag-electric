@@ -1,4 +1,4 @@
-import type { ProductQualityFilter } from "@/lib/admin/product-quality";
+import { QUALITY_FILTERS, type ProductQualityFilter } from "@/lib/admin/product-quality";
 
 export const ADMIN_PRODUCTS_PAGE_SIZE = 30;
 
@@ -29,8 +29,15 @@ export function parseAdminProductsQuery(params: URLSearchParams): AdminProductsQ
     category: params.get("category") ?? "",
     brand: params.get("brand") ?? "",
     status: status === "published" || status === "hidden" ? status : "",
-    quality: (quality as ProductQualityFilter | null) ?? "",
-    page: Number.isFinite(pageRaw) && pageRaw > 0 ? pageRaw : 1,
+    quality: QUALITY_FILTERS.includes(quality as ProductQualityFilter)
+      ? (quality as ProductQualityFilter)
+      : "",
+    page:
+      Number.isSafeInteger(pageRaw) &&
+      pageRaw > 0 &&
+      (pageRaw - 1) * ADMIN_PRODUCTS_PAGE_SIZE <= 2_147_483_647
+        ? pageRaw
+        : 1,
   };
 }
 

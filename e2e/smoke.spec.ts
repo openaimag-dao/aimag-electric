@@ -105,9 +105,29 @@ test("выбранное количество передаётся в корзи
         sku: `TEST-${fixtureId}`,
         title: "Тест расчёта количества",
         unit: "м",
-        prices: { create: { kind: "BASE", amount: 123400, validFrom: new Date(0) } },
+        images: {
+          create: [
+            { url: null, order: 0 },
+            { url: "", order: 1 },
+            { url: "/icon.svg", order: 2 },
+          ],
+        },
+        prices: {
+          create: [
+            { kind: "BASE", amount: 123400, minQty: 1, validFrom: new Date(0) },
+            { kind: "WHOLESALE", amount: 10000, minQty: 100, validFrom: new Date(0) },
+          ],
+        },
       },
     });
+    await page.goto(`/catalog?q=${product.sku}&pmin=1200&pmax=1300`);
+    await expect(
+      page.getByRole("link", { name: product.title, exact: true }).first()
+    ).toBeVisible();
+    await expect(page.getByRole("img", { name: product.title, exact: true })).toHaveAttribute(
+      "src",
+      "/icon.svg"
+    );
     await page.goto(`/catalog/${product.slug}`);
     const actions = page.getByRole("group", { name: "Заказать товар" });
     await actions
@@ -201,4 +221,41 @@ test("заполнение товара из списка сохраняет в�
   } finally {
     await prisma.$disconnect();
   }
+});
+
+test("корзина восстанавливает корректные позиции и не показывает нулевой итог для цены по запросу", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      "aimag-cart-v1",
+      JSON.stringify([
+        { broken: true },
+        {
+          productId: "cart-recovery-test",
+          slug: "cart-recovery-test",
+          sku: "RECOVERY",
+          title: "Товар по запросу",
+          unit: "шт",
+          priceTenge: null,
+          qty: 2,
+        },
+      ])
+    );
+    const originalSetItem = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (key, value) {
+      if (key === "aimag-cart-v1") throw new DOMException("Storage full", "QuotaExceededError");
+      originalSetItem.call(this, key, value);
+    };
+  });
+  await page.goto("/cart");
+  await expect(page.getByRole("link", { name: "Товар по запросу", exact: true })).toBeVisible();
+  const summary = page.getByRole("status", { name: "Итог корзины" });
+  await expect(summary).toContainText("Стоимость по запросу");
+  await expect(summary).not.toContainText("0 ₸");
+  const quantity = page.getByRole("textbox", { name: "Количество, шт", exact: true });
+  await expect(quantity).toHaveValue("2");
+  await page.getByRole("button", { name: "Увеличить количество", exact: true }).click();
+  await expect(quantity).toHaveValue("3");
+  await expect(summary).toContainText("Стоимость по запросу");
 });

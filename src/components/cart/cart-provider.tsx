@@ -3,6 +3,7 @@
 import * as React from "react";
 
 import type { CartItem } from "@/types/cart";
+import { parseStoredCart } from "@/lib/cart-storage";
 import { track } from "@/lib/analytics";
 
 const STORAGE_KEY = "aimag-cart-v1";
@@ -23,10 +24,7 @@ const CartContext = React.createContext<CartContextValue | null>(null);
 function readStorage(): CartItem[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    return parseStoredCart(window.localStorage.getItem(STORAGE_KEY));
   } catch {
     return [];
   }
@@ -39,17 +37,21 @@ function readStorage(): CartItem[] {
  */
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = React.useState<CartItem[]>([]);
-  const hydrated = React.useRef(false);
+  const [hydrated, setHydrated] = React.useState(false);
 
   React.useEffect(() => {
     setItems(readStorage());
-    hydrated.current = true;
+    setHydrated(true);
   }, []);
 
   React.useEffect(() => {
-    if (!hydrated.current) return;
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  }, [items]);
+    if (!hydrated) return;
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    } catch {
+      // Private browsing, quota limits or denied storage must not break the in-memory cart.
+    }
+  }, [items, hydrated]);
 
   const addItem = React.useCallback((item: Omit<CartItem, "qty">, qty = 1) => {
     track("add_to_cart", { productId: item.productId, qty });

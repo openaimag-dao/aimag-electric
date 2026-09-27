@@ -13,7 +13,7 @@ import type { CatalogFilters, SortKey } from "@/types/catalog";
 
 /**
  * Effective price in тиын: prefer a currently-valid PROMO row, else the
- * cheapest other currently-valid row (BASE/WHOLESALE) — mirrors
+ * cheapest other currently-valid row eligible for one unit — mirrors
  * derivePrice() in server/mappers/product.ts exactly. Price has at most one
  * row per (productId, kind) (@@unique constraint), so "cheapest of the
  * active pool" only ever has BASE and WHOLESALE to choose between once PROMO
@@ -22,9 +22,9 @@ import type { CatalogFilters, SortKey } from "@/types/catalog";
 export const EFFECTIVE_PRICE_TIYN = Prisma.sql`(
   COALESCE(
     (SELECT pr.amount FROM "Price" pr WHERE pr."productId" = p.id AND pr.kind = 'PROMO'
-      AND pr.amount IS NOT NULL AND pr."validFrom" <= now() AND (pr."validTo" IS NULL OR pr."validTo" >= now())),
+      AND pr.amount IS NOT NULL AND pr."minQty" <= 1 AND pr."validFrom" <= now() AND (pr."validTo" IS NULL OR pr."validTo" >= now())),
     (SELECT MIN(pr.amount) FROM "Price" pr WHERE pr."productId" = p.id AND pr.kind != 'PROMO'
-      AND pr.amount IS NOT NULL AND pr."validFrom" <= now() AND (pr."validTo" IS NULL OR pr."validTo" >= now()))
+      AND pr.amount IS NOT NULL AND pr."minQty" <= 1 AND pr."validFrom" <= now() AND (pr."validTo" IS NULL OR pr."validTo" >= now()))
   )
 )`;
 
@@ -38,7 +38,7 @@ export const IN_STOCK = Prisma.sql`EXISTS (
  * a missing photo is a data gap, not something the customer asked to sort by.
  */
 export const HAS_IMAGE = Prisma.sql`EXISTS (
-  SELECT 1 FROM "ProductImage" pi WHERE pi."productId" = p.id AND pi.url IS NOT NULL
+  SELECT 1 FROM "ProductImage" pi WHERE pi."productId" = p.id AND pi.url IS NOT NULL AND pi.url != ''
 )`;
 
 /** FROM clause shared by every catalog query — category/brand joined for slug/name filters and search. */

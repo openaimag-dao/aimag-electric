@@ -13,6 +13,7 @@ import { formatTenge } from "@/lib/money";
 
 export function CartView() {
   const { items, totalTenge, hasUnpricedItems, removeItem, setQty, clear } = useCart();
+  const hasPricedItems = items.some((item) => item.priceTenge !== null);
   const [requesting, setRequesting] = React.useState(false);
 
   if (items.length === 0 && !requesting) {
@@ -80,13 +81,26 @@ export function CartView() {
         ))}
 
         {items.length > 0 && (
-          <div className="flex items-center justify-between rounded-xl border border-border bg-secondary/40 p-4">
-            <span className="text-sm text-muted-foreground">
-              Итого{hasUnpricedItems && ", часть позиций — по запросу"}
-            </span>
-            <span className="font-display text-xl font-bold text-primary">
-              {formatTenge(totalTenge)}
-            </span>
+          <div
+            className="rounded-xl border border-border bg-secondary/40 p-4"
+            role="status"
+            aria-label="Итог корзины"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="text-sm text-muted-foreground">
+                {hasUnpricedItems && hasPricedItems
+                  ? "Сумма позиций с ценой"
+                  : "Предварительный итог"}
+              </span>
+              <span className="font-display text-xl font-bold text-primary">
+                {hasPricedItems ? formatTenge(totalTenge) : "Стоимость по запросу"}
+              </span>
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {hasUnpricedItems ? "Стоимость позиций без цены уточним в КП. " : ""}
+              {hasPricedItems ? "Без НДС и доставки. " : ""}
+              Итоговую стоимость и наличие подтвердим в коммерческом предложении.
+            </p>
           </div>
         )}
       </div>
