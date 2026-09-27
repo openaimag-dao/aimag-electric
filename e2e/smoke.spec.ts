@@ -259,3 +259,19 @@ test("корзина восстанавливает корректные поз�
   await expect(quantity).toHaveValue("3");
   await expect(summary).toContainText("Стоимость по запросу");
 });
+
+test("пустой поиск сохраняет запрос при снятии фильтров и переносит его в заявку", async ({
+  page,
+}) => {
+  const query = `НетТакогоАртикула-${crypto.randomUUID()}`;
+  await page.goto(`/catalog?q=${encodeURIComponent(query)}&stock=1`);
+  await page.getByRole("button", { name: "Убрать фильтры, оставить запрос", exact: true }).click();
+  await expect(page).toHaveURL(
+    (url) => url.searchParams.get("q") === query && !url.searchParams.has("stock")
+  );
+  await expect(page.getByRole("heading", { name: "Ничего не найдено", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Запросить подбор", exact: true }).click();
+  await expect(page.getByRole("dialog").getByLabel("Что нужно", { exact: true })).toHaveValue(
+    `Не нашёл в каталоге: «${query}». Прошу уточнить возможность поставки или подобрать аналог.`
+  );
+});
