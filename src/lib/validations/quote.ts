@@ -14,7 +14,11 @@ export const quoteItemSchema = z.object({
 
 export const quoteSchema = z
   .object({
-    title: z.string().max(160).optional().or(z.literal("")),
+    title: z
+      .string()
+      .max(160, "Название проекта — не более 160 символов")
+      .optional()
+      .or(z.literal("")),
     campaign: campaignSchema.optional().catch(undefined),
     sourcePath: z
       .string()
