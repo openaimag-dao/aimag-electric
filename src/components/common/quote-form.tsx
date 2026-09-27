@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle2, Loader2 } from "lucide-react";
@@ -34,6 +35,8 @@ export function QuoteForm({
   defaultMessage,
   messagePlaceholder,
 }: QuoteFormProps) {
+  const formId = React.useId();
+  const fieldId = (name: string) => `${formId}-${name}`;
   const [submitted, setSubmitted] = React.useState(false);
   const [serverError, setServerError] = React.useState<string | null>(null);
   const hasItems = Boolean(items && items.length > 0);
@@ -42,6 +45,7 @@ export function QuoteForm({
     register,
     handleSubmit,
     reset,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<QuoteInput>({
     // Item lines are props, not registered inputs. Include them before validation
@@ -75,6 +79,9 @@ export function QuoteForm({
       return;
     }
     if (!result.ok) {
+      for (const [field, message] of Object.entries(result.fieldErrors ?? {})) {
+        if (message) setError(field as keyof QuoteInput, { type: "server", message });
+      }
       setServerError(result.error ?? "Не удалось отправить заявку");
       return;
     }
@@ -128,49 +135,122 @@ export function QuoteForm({
 
       {hasItems && (
         <div className="grid gap-2">
-          <Label htmlFor="title">Название проекта (необязательно)</Label>
-          <Input id="title" placeholder="Электроснабжение объекта №1" {...register("title")} />
+          <Label htmlFor={fieldId("title")}>Название проекта (необязательно)</Label>
+          <Input
+            id={fieldId("title")}
+            placeholder="Электроснабжение объекта №1"
+            aria-invalid={Boolean(errors.title)}
+            aria-describedby={errors.title ? fieldId("title-error") : undefined}
+            {...register("title")}
+          />
+          {errors.title && (
+            <p id={fieldId("title-error")} className="text-xs text-red-600">
+              {errors.title.message}
+            </p>
+          )}
         </div>
       )}
 
+      {errors.items && (
+        <p role="alert" className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+          Проверьте состав заявки: не более 200 позиций, количество каждой — больше нуля и не более
+          1 000 000. Если ошибка остаётся, удалите проблемную позицию и добавьте её из каталога
+          заново.
+        </p>
+      )}
+
       <div className="grid gap-2">
-        <Label htmlFor="company">Компания</Label>
-        <Input id="company" placeholder="ТОО / ИП" {...register("company")} />
-        {errors.company && <p className="text-xs text-red-600">{errors.company.message}</p>}
+        <Label htmlFor={fieldId("company")}>Компания</Label>
+        <Input
+          id={fieldId("company")}
+          placeholder="ТОО / ИП"
+          autoComplete="organization"
+          aria-invalid={Boolean(errors.company)}
+          aria-describedby={errors.company ? fieldId("company-error") : undefined}
+          {...register("company")}
+        />
+        {errors.company && (
+          <p id={fieldId("company-error")} className="text-xs text-red-600">
+            {errors.company.message}
+          </p>
+        )}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-2">
-          <Label htmlFor="name">Контактное лицо</Label>
-          <Input id="name" placeholder="Имя" {...register("name")} />
-          {errors.name && <p className="text-xs text-red-600">{errors.name.message}</p>}
+          <Label htmlFor={fieldId("name")}>Контактное лицо</Label>
+          <Input
+            id={fieldId("name")}
+            placeholder="Имя"
+            autoComplete="name"
+            aria-invalid={Boolean(errors.name)}
+            aria-describedby={errors.name ? fieldId("name-error") : undefined}
+            {...register("name")}
+          />
+          {errors.name && (
+            <p id={fieldId("name-error")} className="text-xs text-red-600">
+              {errors.name.message}
+            </p>
+          )}
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="phone">Телефон</Label>
-          <Input id="phone" type="tel" placeholder="+7 ___ ___ __ __" {...register("phone")} />
-          {errors.phone && <p className="text-xs text-red-600">{errors.phone.message}</p>}
+          <Label htmlFor={fieldId("phone")}>Телефон</Label>
+          <Input
+            id={fieldId("phone")}
+            type="tel"
+            autoComplete="tel"
+            placeholder="+7 ___ ___ __ __"
+            aria-invalid={Boolean(errors.phone)}
+            aria-describedby={errors.phone ? fieldId("phone-error") : undefined}
+            {...register("phone")}
+          />
+          {errors.phone && (
+            <p id={fieldId("phone-error")} className="text-xs text-red-600">
+              {errors.phone.message}
+            </p>
+          )}
         </div>
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="email">E-mail (необязательно)</Label>
-        <Input id="email" type="email" placeholder="sales@company.kz" {...register("email")} />
-        {errors.email && <p className="text-xs text-red-600">{errors.email.message}</p>}
+        <Label htmlFor={fieldId("email")}>E-mail (необязательно)</Label>
+        <Input
+          id={fieldId("email")}
+          type="email"
+          autoComplete="email"
+          placeholder="sales@company.kz"
+          aria-invalid={Boolean(errors.email)}
+          aria-describedby={errors.email ? fieldId("email-error") : undefined}
+          {...register("email")}
+        />
+        {errors.email && (
+          <p id={fieldId("email-error")} className="text-xs text-red-600">
+            {errors.email.message}
+          </p>
+        )}
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="message">{hasItems ? "Комментарий (необязательно)" : "Что нужно"}</Label>
+        <Label htmlFor={fieldId("message")}>
+          {hasItems ? "Комментарий (необязательно)" : "Что нужно"}
+        </Label>
         <Textarea
-          id="message"
+          id={fieldId("message")}
           placeholder={
             hasItems
               ? "Особые условия, адрес доставки, сроки…"
               : (messagePlaceholder ??
                 "Марка кабеля, сечение, метраж, регион доставки или ссылка на спецификацию")
           }
+          aria-invalid={Boolean(errors.message)}
+          aria-describedby={errors.message ? fieldId("message-error") : undefined}
           {...register("message")}
         />
-        {errors.message && <p className="text-xs text-red-600">{errors.message.message}</p>}
+        {errors.message && (
+          <p id={fieldId("message-error")} className="text-xs text-red-600">
+            {errors.message.message}
+          </p>
+        )}
       </div>
 
       {serverError && (
@@ -183,7 +263,11 @@ export function QuoteForm({
         {isSubmitting ? "Отправляем…" : "Отправить заявку"}
       </Button>
       <p className="text-center text-xs text-muted-foreground">
-        Нажимая кнопку, вы соглашаетесь на обработку данных для подготовки КП.
+        Нажимая кнопку, вы соглашаетесь на обработку данных для подготовки КП. Подробнее — в{" "}
+        <Link href="/privacy" className="underline underline-offset-2">
+          политике конфиденциальности
+        </Link>
+        .
       </p>
     </form>
   );

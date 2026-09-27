@@ -170,6 +170,29 @@ test("выбранное количество передаётся в корзи
     await expect(
       page.getByRole("textbox", { name: `Количество, ${product.unit}`, exact: true })
     ).toHaveValue("37");
+    const cartCompany = `${company} корзина`;
+    await page.getByLabel("Компания", { exact: true }).fill(cartCompany);
+    await page.getByLabel("Контактное лицо", { exact: true }).fill("Тест корзины");
+    await page.getByLabel("Телефон", { exact: true }).fill("+7 700 000 00 00");
+    await page.getByRole("button", { name: "Отправить заявку", exact: true }).click();
+    await expect(page.getByText("Заявка отправлена", { exact: true })).toBeVisible();
+    const cartQuote = await prisma.quote.findFirstOrThrow({
+      where: { company: cartCompany },
+      include: { items: true },
+    });
+    expect(cartQuote.sourcePath).toBe("/cart");
+    expect(cartQuote.items).toHaveLength(1);
+    expect(cartQuote.items[0]).toMatchObject({
+      productId: product.id,
+      qty: 37,
+      amountTiyn: 123400,
+    });
+    expect(
+      await prisma.notification.count({
+        where: { type: "quote.created", link: `/admin/quotes?quote=${cartQuote.id}` },
+      })
+    ).toBe(1);
+    await expect.poll(() => page.evaluate(() => localStorage.getItem("aimag-cart-v1"))).toBe("[]");
   } finally {
     await prisma.$disconnect();
   }
@@ -309,4 +332,44 @@ test("пустой поиск сохраняет запрос при сняти�
   } finally {
     await prisma.$disconnect();
   }
+});
+
+test("ошибки состава корзины видны, а открытая форма имеет собственные подписи полей", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      "aimag-cart-v1",
+      JSON.stringify([
+        {
+          productId: "validation-test",
+          slug: "validation-test",
+          sku: "VALIDATION",
+          title: "Тест лимита количества",
+          unit: "шт",
+          priceTenge: null,
+          qty: 1_000_001,
+        },
+      ])
+    );
+  });
+  await page.goto("/cart");
+  await page.getByLabel("Компания", { exact: true }).fill("Тест проверки");
+  await page.getByLabel("Контактное лицо", { exact: true }).fill("Покупатель");
+  await page.getByLabel("Телефон", { exact: true }).fill("+7 700 000 00 00");
+  const title = page.getByLabel("Название проекта (необязательно)", { exact: true });
+  await title.fill("а".repeat(161));
+  await page.getByRole("button", { name: "Отправить заявку", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("Проверьте состав заявки");
+  await expect(title).toHaveAttribute("aria-invalid", "true");
+  await expect(
+    page.getByText("Название проекта — не более 160 символов", { exact: true })
+  ).toBeVisible();
+  const cartCompanyId = await page.getByLabel("Компания", { exact: true }).getAttribute("id");
+  await page.getByRole("banner").getByRole("button", { name: "Получить КП", exact: true }).click();
+  const dialog = page.getByRole("dialog");
+  const dialogCompany = dialog.getByLabel("Компания", { exact: true });
+  await dialogCompany.fill("Отдельная заявка");
+  expect(await dialogCompany.getAttribute("id")).not.toBe(cartCompanyId);
+  await expect(dialogCompany).toHaveValue("Отдельная заявка");
 });
