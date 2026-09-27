@@ -30,10 +30,12 @@ export interface TopQueryRow {
  * an actual search).
  */
 export const searchLogRepository = {
-  logSearch(query: string, resultCount: number) {
-    return withTable(() =>
-      prisma.searchLog.create({ data: { query, kind: "search", resultCount } })
-    );
+  logSearch(
+    query: string,
+    resultCount: number,
+    kind: "suggestion" | "search_submitted" | "search_filtered"
+  ) {
+    return withTable(() => prisma.searchLog.create({ data: { query, kind, resultCount } }));
   },
 
   logClick(query: string, productSlug: string) {
@@ -42,13 +44,13 @@ export const searchLogRepository = {
     );
   },
 
-  /** Most frequent search queries in the last `days` days. */
+  /** Confirmed catalog searches only; legacy mixed events and autocomplete are excluded. */
   async topQueries(days = 30, take = 10): Promise<TopQueryRow[]> {
     return withTable(async () => {
       const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
       const rows = await prisma.searchLog.groupBy({
         by: ["query"],
-        where: { kind: "search", createdAt: { gte: since } },
+        where: { kind: { in: ["search_submitted", "search_filtered"] }, createdAt: { gte: since } },
         _count: { _all: true },
         orderBy: { _count: { query: "desc" } },
         take,
@@ -57,13 +59,13 @@ export const searchLogRepository = {
     });
   },
 
-  /** Queries that returned zero results — the concrete "what are we missing" signal. */
+  /** Full-catalog searches only: restrictive facets must not masquerade as missing assortment. */
   async topZeroResultQueries(days = 30, take = 10): Promise<TopQueryRow[]> {
     return withTable(async () => {
       const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
       const rows = await prisma.searchLog.groupBy({
         by: ["query"],
-        where: { kind: "search", resultCount: 0, createdAt: { gte: since } },
+        where: { kind: "search_submitted", resultCount: 0, createdAt: { gte: since } },
         _count: { _all: true },
         orderBy: { _count: { query: "desc" } },
         take,

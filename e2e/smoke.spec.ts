@@ -201,6 +201,22 @@ test("заполнение товара из списка сохраняет в�
     await page.getByLabel("Пароль", { exact: true }).fill(password);
     await page.getByRole("button", { name: "Войти", exact: true }).click();
     await expect(page).toHaveURL((url) => url.pathname === "/admin/products");
+    const searchEvents = ["suggestion", "search", "search_filtered", "search_submitted"];
+    await prisma.searchLog.createMany({
+      data: searchEvents.map((kind) => ({
+        query: `${suffix}-${kind}`,
+        kind,
+        resultCount: 0,
+      })),
+    });
+    await page.goto("/admin");
+    await expect(page.getByText(`${suffix}-suggestion`, { exact: true })).toHaveCount(0);
+    await expect(page.getByText(`${suffix}-search`, { exact: true })).toHaveCount(0);
+    await expect(page.getByText(`${suffix}-search_filtered`, { exact: true })).toHaveCount(1);
+    await expect(page.getByText(`${suffix}-search_submitted`, { exact: true })).toHaveCount(2);
+    await expect(
+      page.getByRole("link", { name: `${suffix}-search_submitted`, exact: true })
+    ).toHaveAttribute("href", `/catalog?q=${suffix}-search_submitted`);
     await page.goto(`/admin/products?quality=no-description&q=${product.sku}`);
     const rows = page.locator("tbody tr");
     await expect(rows).toHaveCount(1);
@@ -264,14 +280,33 @@ test("пустой поиск сохраняет запрос при сняти�
   page,
 }) => {
   const query = `НетТакогоАртикула-${crypto.randomUUID()}`;
-  await page.goto(`/catalog?q=${encodeURIComponent(query)}&stock=1`);
-  await page.getByRole("button", { name: "Убрать фильтры, оставить запрос", exact: true }).click();
-  await expect(page).toHaveURL(
-    (url) => url.searchParams.get("q") === query && !url.searchParams.has("stock")
-  );
-  await expect(page.getByRole("heading", { name: "Ничего не найдено", exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "Запросить подбор", exact: true }).click();
-  await expect(page.getByRole("dialog").getByLabel("Что нужно", { exact: true })).toHaveValue(
-    `Не нашёл в каталоге: «${query}». Прошу уточнить возможность поставки или подобрать аналог.`
-  );
+  const prisma = new PrismaClient();
+  try {
+    await page.goto(`/catalog?q=${encodeURIComponent(query)}&stock=1`);
+    await expect
+      .poll(() =>
+        prisma.searchLog.count({ where: { query, kind: "search_filtered", resultCount: 0 } })
+      )
+      .toBe(1);
+    await page
+      .getByRole("button", { name: "Убрать фильтры, оставить запрос", exact: true })
+      .click();
+    await expect(page).toHaveURL(
+      (url) => url.searchParams.get("q") === query && !url.searchParams.has("stock")
+    );
+    await expect(
+      page.getByRole("heading", { name: "Ничего не найдено", exact: true })
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Запросить подбор", exact: true }).click();
+    await expect(page.getByRole("dialog").getByLabel("Что нужно", { exact: true })).toHaveValue(
+      `Не нашёл в каталоге: «${query}». Прошу уточнить возможность поставки или подобрать аналог.`
+    );
+    await expect
+      .poll(() =>
+        prisma.searchLog.count({ where: { query, kind: "search_submitted", resultCount: 0 } })
+      )
+      .toBe(1);
+  } finally {
+    await prisma.$disconnect();
+  }
 });

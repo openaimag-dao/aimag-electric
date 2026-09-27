@@ -58,17 +58,22 @@ export function CatalogView({ items, total, page, pageCount, facets }: CatalogVi
     [items, companyPrices]
   );
 
-  // `q` only ever changes via a full navigation from the header search box
-  // (never live-typed on this page), so logging once per distinct query text
-  // — not on every unrelated filter/page tweak — mirrors a real search event.
+  // Log once per query and scope, not once per filter or page change. Removing
+  // facets must record the full-catalog result separately from a restricted search.
+  const hasSearchFilters = activeFilterCount({ ...filters, q: "" }) > 0;
   const loggedQueryRef = React.useRef<string | null>(null);
   React.useEffect(() => {
     const q = filters.q.trim();
-    if (!q || loggedQueryRef.current === q) return;
-    loggedQueryRef.current = q;
-    logCatalogSearch(q, total);
+    if (!q) {
+      loggedQueryRef.current = null;
+      return;
+    }
+    const key = JSON.stringify([q, hasSearchFilters]);
+    if (loggedQueryRef.current === key) return;
+    loggedQueryRef.current = key;
+    void logCatalogSearch(q, total, hasSearchFilters).catch(() => undefined);
     track("search", { query: q, results: total });
-  }, [filters.q, total]);
+  }, [filters.q, hasSearchFilters, total]);
 
   const from = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const to = Math.min(page * PAGE_SIZE, total);

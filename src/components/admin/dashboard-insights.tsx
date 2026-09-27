@@ -160,6 +160,10 @@ export async function DashboardInsights() {
               Популярные запросы (30 дней)
             </h3>
           </div>
+          <p className="mb-3 text-xs text-muted-foreground">
+            Подтверждённые поиски в каталоге. Подсказки при вводе и старые записи без уточнения типа
+            поиска не учитываются.
+          </p>
           {topQueries.length === 0 ? (
             <p className="text-sm text-muted-foreground">Запросов пока нет.</p>
           ) : (
@@ -183,13 +187,25 @@ export async function DashboardInsights() {
               Запросы без результата (30 дней)
             </h3>
           </div>
+          <p className="mb-3 text-xs text-muted-foreground">
+            Поиски по всему каталогу без дополнительных фильтров. Нажмите запрос, чтобы проверить
+            выдачу.
+          </p>
           {topZeroResultQueries.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Все запросы находят товары.</p>
+            <p className="text-sm text-muted-foreground">
+              Подтверждённых поисков без результата пока нет.
+            </p>
           ) : (
             <ul className="divide-y divide-border">
               {topZeroResultQueries.map((q, i) => (
                 <li key={i} className="flex items-center justify-between gap-3 py-2 text-sm">
-                  <span className="min-w-0 truncate text-primary">{q.query}</span>
+                  <Link
+                    href={`/catalog?q=${encodeURIComponent(q.query)}`}
+                    className="min-w-0 truncate text-primary underline-offset-4 hover:underline"
+                    title={q.query}
+                  >
+                    {q.query}
+                  </Link>
                   <span className="shrink-0 font-mono text-xs font-semibold text-amber-600">
                     {q.count}
                   </span>

@@ -44,10 +44,10 @@ export async function searchSuggestions(query: string): Promise<SearchSuggestion
     image: p.image ?? null,
   }));
 
-  // Real, unfabricated demand signal for the admin "top queries" / "no-result
-  // queries" widget — best-effort: a logging failure must never break search.
+  // Keep autocomplete telemetry separate from confirmed catalog searches.
+  // Logging is best-effort and must never break search.
   try {
-    await searchLogRepository.logSearch(q, suggestions.length);
+    await searchLogRepository.logSearch(q, suggestions.length, "suggestion");
   } catch (e) {
     logger.error("search.log_failed", { error: String(e) });
   }
@@ -55,15 +55,19 @@ export async function searchSuggestions(query: string): Promise<SearchSuggestion
   return suggestions;
 }
 
-/**
- * Records a catalog-page search (`/catalog?q=...`) as the same `kind: "search"`
- * signal header search logs, so it shows up in the existing admin "top
- * queries" / "no-result queries" widgets without a separate one. The catalog
- * page filters client-side over an already-loaded product list, so unlike
- * `searchSuggestions` above it doesn't need to fetch anything — the caller
- * already has the query and its result count, this just records them.
- */
-export async function logCatalogSearch(query: string, resultCount: number): Promise<void> {
+/** Records a confirmed catalog search, distinguishing filtered searches from full-catalog demand. */
+export async function logCatalogSearch(
+  query: string,
+  resultCount: number,
+  hasFilters = false
+): Promise<void> {
+  if (
+    typeof query !== "string" ||
+    !Number.isSafeInteger(resultCount) ||
+    resultCount < 0 ||
+    resultCount > 2_147_483_647
+  )
+    return;
   const q = query.trim().slice(0, 100);
   if (!q) return;
 
@@ -74,7 +78,11 @@ export async function logCatalogSearch(query: string, resultCount: number): Prom
   if (!limit.ok) return;
 
   try {
-    await searchLogRepository.logSearch(q, resultCount);
+    await searchLogRepository.logSearch(
+      q,
+      resultCount,
+      hasFilters === true ? "search_filtered" : "search_submitted"
+    );
   } catch (e) {
     logger.error("search.log_catalog_failed", { error: String(e) });
   }
