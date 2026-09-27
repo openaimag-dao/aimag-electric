@@ -211,3 +211,40 @@ test("заполнение товара из списка сохраняет в�
     await prisma.$disconnect();
   }
 });
+
+test("корзина восстанавливает корректные позиции и не показывает нулевой итог для цены по запросу", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      "aimag-cart-v1",
+      JSON.stringify([
+        { broken: true },
+        {
+          productId: "cart-recovery-test",
+          slug: "cart-recovery-test",
+          sku: "RECOVERY",
+          title: "Товар по запросу",
+          unit: "шт",
+          priceTenge: null,
+          qty: 2,
+        },
+      ])
+    );
+    const originalSetItem = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (key, value) {
+      if (key === "aimag-cart-v1") throw new DOMException("Storage full", "QuotaExceededError");
+      originalSetItem.call(this, key, value);
+    };
+  });
+  await page.goto("/cart");
+  await expect(page.getByRole("link", { name: "Товар по запросу", exact: true })).toBeVisible();
+  const summary = page.getByRole("status", { name: "Итог корзины" });
+  await expect(summary).toContainText("Стоимость по запросу");
+  await expect(summary).not.toContainText("0 ₸");
+  const quantity = page.getByRole("textbox", { name: "Количество, шт", exact: true });
+  await expect(quantity).toHaveValue("2");
+  await page.getByRole("button", { name: "Увеличить количество", exact: true }).click();
+  await expect(quantity).toHaveValue("3");
+  await expect(summary).toContainText("Стоимость по запросу");
+});
