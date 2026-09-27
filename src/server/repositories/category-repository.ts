@@ -42,12 +42,12 @@ export const categoryRepository = {
                 where: {
                   categoryId: category.id,
                   published: true,
-                  images: { some: { url: { not: null } } },
+                  images: { some: { AND: [{ url: { not: null } }, { NOT: { url: "" } }] } },
                 },
                 orderBy: { popularity: "desc" },
                 select: {
                   images: {
-                    where: { url: { not: null } },
+                    where: { AND: [{ url: { not: null } }, { NOT: { url: "" } }] },
                     orderBy: { order: "asc" },
                     take: 1,
                     select: { url: true },
@@ -58,7 +58,7 @@ export const categoryRepository = {
         return {
           ...category,
           productCount,
-          image: category.image ?? topProduct?.images[0]?.url ?? null,
+          image: category.image || topProduct?.images[0]?.url || null,
         };
       })
     );

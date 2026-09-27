@@ -105,6 +105,13 @@ test("выбранное количество передаётся в корзи
         sku: `TEST-${fixtureId}`,
         title: "Тест расчёта количества",
         unit: "м",
+        images: {
+          create: [
+            { url: null, order: 0 },
+            { url: "", order: 1 },
+            { url: "/icon.svg", order: 2 },
+          ],
+        },
         prices: {
           create: [
             { kind: "BASE", amount: 123400, minQty: 1, validFrom: new Date(0) },
@@ -117,6 +124,10 @@ test("выбранное количество передаётся в корзи
     await expect(
       page.getByRole("link", { name: product.title, exact: true }).first()
     ).toBeVisible();
+    await expect(page.getByRole("img", { name: product.title, exact: true })).toHaveAttribute(
+      "src",
+      "/icon.svg"
+    );
     await page.goto(`/catalog/${product.slug}`);
     const actions = page.getByRole("group", { name: "Заказать товар" });
     await actions

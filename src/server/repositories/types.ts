@@ -32,7 +32,12 @@ export const productListSelect = {
   badge: true,
   category: { select: { slug: true, title: true } },
   brand: { select: { name: true } },
-  images: { select: { url: true }, orderBy: { order: "asc" }, take: 1 },
+  images: {
+    where: { AND: [{ url: { not: null } }, { NOT: { url: "" } }] },
+    select: { url: true },
+    orderBy: { order: "asc" },
+    take: 1,
+  },
   prices: {
     select: { kind: true, amount: true, minQty: true, validFrom: true, validTo: true },
   },

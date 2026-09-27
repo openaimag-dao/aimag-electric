@@ -38,7 +38,7 @@ export const IN_STOCK = Prisma.sql`EXISTS (
  * a missing photo is a data gap, not something the customer asked to sort by.
  */
 export const HAS_IMAGE = Prisma.sql`EXISTS (
-  SELECT 1 FROM "ProductImage" pi WHERE pi."productId" = p.id AND pi.url IS NOT NULL
+  SELECT 1 FROM "ProductImage" pi WHERE pi."productId" = p.id AND pi.url IS NOT NULL AND pi.url != ''
 )`;
 
 /** FROM clause shared by every catalog query — category/brand joined for slug/name filters and search. */
