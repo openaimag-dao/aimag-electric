@@ -203,7 +203,7 @@ export function SearchBar({ className, onSubmitted }: SearchBarProps) {
                   Ничего не найдено по «{query.trim()}»
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Есть под заказ или подберём аналог — оставьте запрос инженеру.
+                  Уточним возможность поставки или подберём аналог — оставьте запрос инженеру.
                 </p>
                 <div className="mt-3">
                   <QuoteDialog

@@ -8,7 +8,16 @@ function numList(v: string | null): number[] {
   return v
     .split(",")
     .map((x) => Number(x))
-    .filter((x) => !Number.isNaN(x));
+    .filter((x) => Number.isFinite(x) && x > 0);
+}
+
+/** Price comparisons convert tenge to tiyn; reject values that would overflow that conversion. */
+function priceBound(v: string | null): number | null {
+  if (!v || !v.trim()) return null;
+  const value = Number(v);
+  return Number.isFinite(value) && value >= 0 && value <= Number.MAX_SAFE_INTEGER / 100
+    ? value
+    : null;
 }
 
 function strList(v: string | null): string[] {
@@ -38,8 +47,8 @@ export function parseFilters(params: URLSearchParams): CatalogFilters {
     crossSections: numList(params.get("cs")),
     voltages: numList(params.get("v")),
     attrs,
-    priceMin: params.get("pmin") ? Number(params.get("pmin")) : null,
-    priceMax: params.get("pmax") ? Number(params.get("pmax")) : null,
+    priceMin: priceBound(params.get("pmin")),
+    priceMax: priceBound(params.get("pmax")),
     inStockOnly: params.get("stock") === "1",
     sort,
     page: Number.isSafeInteger(pageRaw) && pageRaw > 0 ? pageRaw : 1,
