@@ -360,7 +360,9 @@ test("ошибки состава корзины видны, а открытая
   const title = page.getByLabel("Название проекта (необязательно)", { exact: true });
   await title.fill("а".repeat(161));
   await page.getByRole("button", { name: "Отправить заявку", exact: true }).click();
-  await expect(page.getByRole("alert")).toContainText("Проверьте состав заявки");
+  await expect(
+    page.getByRole("alert").filter({ hasText: "Проверьте состав заявки" })
+  ).toBeVisible();
   await expect(title).toHaveAttribute("aria-invalid", "true");
   await expect(
     page.getByText("Название проекта — не более 160 символов", { exact: true })
