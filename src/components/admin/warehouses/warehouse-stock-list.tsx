@@ -17,6 +17,10 @@ import { Button } from "@/components/ui/button";
 import { TableToolbar } from "@/components/admin/table-toolbar";
 import { updateStockQuantity } from "@/server/actions/admin";
 import { cn } from "@/lib/utils";
+import {
+  WarehousePriceCell,
+  type WarehousePriceRow,
+} from "@/components/admin/warehouses/warehouse-price-cell";
 
 export interface WarehouseStockRow {
   id: string;
@@ -26,6 +30,7 @@ export interface WarehouseStockRow {
   title: string;
   unit: string;
   quantity: number;
+  prices: WarehousePriceRow[];
   restockAt: string | null;
 }
 
@@ -216,6 +221,7 @@ export function WarehouseStockList({
               <TableHead>Товар</TableHead>
               <TableHead>Артикул</TableHead>
               <TableHead className="text-right">Остаток</TableHead>
+              <TableHead>Цена, ₸ за единицу</TableHead>
               <TableHead>Пополнение</TableHead>
             </TableRow>
           </TableHeader>
@@ -242,6 +248,15 @@ export function WarehouseStockList({
                     }
                   />
                 </TableCell>
+                <TableCell>
+                  <WarehousePriceCell
+                    productId={row.productId}
+                    title={row.title}
+                    sku={row.sku}
+                    unit={row.unit}
+                    prices={row.prices}
+                  />
+                </TableCell>
                 <TableCell className="text-muted-foreground">
                   {row.restockAt ? formatDate(row.restockAt) : "—"}
                 </TableCell>
@@ -249,7 +264,7 @@ export function WarehouseStockList({
             ))}
             {filtered.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} className="text-center text-muted-foreground">
+                <TableCell colSpan={5} className="text-center text-muted-foreground">
                   {rows.length === 0 ? "На складе нет позиций." : "Ничего не найдено."}
                 </TableCell>
               </TableRow>

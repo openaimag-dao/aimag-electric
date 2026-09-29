@@ -284,6 +284,48 @@ test("заполнение товара из списка сохраняет в�
     await dialog.getByRole("button", { name: "Отмена", exact: true }).click();
     await rows.getByRole("button", { name: "Добавить описание", exact: true }).click();
     await expect(dialog).toContainText("Редактировать товар");
+    await dialog.getByRole("button", { name: "Отмена", exact: true }).click();
+
+    const warehouse = await prisma.warehouse.create({
+      data: { code: `TEST-${suffix}`, name: "Проверка складских цен", city: "Тест" },
+    });
+    await prisma.stock.create({
+      data: { warehouseId: warehouse.id, productId: product.id, quantity: 42 },
+    });
+    const wholesale = await prisma.price.create({
+      data: { productId: product.id, kind: "WHOLESALE", amount: 50000, minQty: 100 },
+    });
+    await page.goto(`/admin/warehouses/${warehouse.id}`);
+    const stockRow = page.locator("tbody tr").filter({ hasText: product.sku });
+    await stockRow.getByRole("button", { name: "Добавить цену", exact: true }).click();
+    await expect(dialog.getByLabel("Товар", { exact: true })).toHaveValue(product.id);
+    await dialog.getByLabel("Цена, ₸", { exact: true }).fill("1250.50");
+    await dialog.getByRole("button", { name: "Создать", exact: true }).click();
+    await expect(dialog).not.toBeVisible();
+    const basePriceButton = stockRow.getByRole("button", { name: /^Изменить цену: Базовая,/ });
+    await expect(basePriceButton).toContainText("1 250,5".replace(" ", "\u00a0"));
+    await basePriceButton.click();
+    await dialog.getByLabel("Цена, ₸", { exact: true }).fill("875.25");
+    await dialog.getByRole("button", { name: "Сохранить", exact: true }).click();
+    await expect(dialog).not.toBeVisible();
+    await expect(basePriceButton).toContainText("875,25");
+    await page.reload();
+    await expect(basePriceButton).toContainText("875,25");
+    const basePrices = await prisma.price.findMany({
+      where: { productId: product.id, kind: "BASE" },
+    });
+    expect(basePrices).toHaveLength(1);
+    expect(basePrices[0]).toMatchObject({ amount: 87525, minQty: 1 });
+    expect(await prisma.price.findUniqueOrThrow({ where: { id: wholesale.id } })).toMatchObject({
+      amount: 50000,
+      minQty: 100,
+      kind: "WHOLESALE",
+    });
+    expect(
+      await prisma.stock.findUniqueOrThrow({
+        where: { productId_warehouseId: { productId: product.id, warehouseId: warehouse.id } },
+      })
+    ).toMatchObject({ quantity: 42 });
   } finally {
     await prisma.$disconnect();
   }

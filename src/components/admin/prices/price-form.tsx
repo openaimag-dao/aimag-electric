@@ -25,10 +25,12 @@ interface Ref {
 
 export function PriceForm({
   initial,
+  defaultProductId,
   products,
   onDone,
 }: {
   initial?: PriceRow;
+  defaultProductId?: string;
   products: Ref[];
   onDone: () => void;
 }) {
@@ -41,7 +43,7 @@ export function PriceForm({
   } = useForm<PriceFormInput>({
     resolver: zodResolver(priceFormSchema),
     defaultValues: {
-      productId: initial?.productId ?? "",
+      productId: initial?.productId ?? defaultProductId ?? "",
       kind: (initial?.kind as PriceFormInput["kind"]) ?? "BASE",
       amountTenge: initial?.amountTenge ?? "",
       minQty: initial?.minQty ?? 1,
@@ -49,16 +51,28 @@ export function PriceForm({
   });
 
   async function onSubmit(values: PriceFormInput) {
-    const result = isEdit ? await updatePrice(initial!.id, values) : await createPrice(values);
-    handleFormResult<PriceFormInput>(result, {
-      setError,
-      onDone,
-      successMessage: isEdit ? "Цена обновлена" : "Цена добавлена",
-    });
+    try {
+      const result = isEdit ? await updatePrice(initial!.id, values) : await createPrice(values);
+      handleFormResult<PriceFormInput>(result, {
+        setError,
+        onDone,
+        successMessage: isEdit ? "Цена обновлена" : "Цена добавлена",
+      });
+    } catch {
+      setError("root", {
+        message:
+          "Не удалось подтвердить сохранение. Проверьте соединение и обновите список цен перед повторной отправкой.",
+      });
+    }
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+      {errors.root && (
+        <p role="alert" className="text-sm text-red-600">
+          {errors.root.message}
+        </p>
+      )}
       <Field label="Товар" htmlFor="productId" error={errors.productId}>
         <NativeSelect id="productId" {...register("productId")}>
           <option value="">— выберите —</option>
