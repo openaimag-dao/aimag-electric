@@ -2,6 +2,7 @@ import type { ProductBadge } from "@prisma/client";
 
 import { publicPriceTiyn, type PublicPriceRow } from "@/lib/public-price";
 import { tiynToTenge } from "@/lib/money";
+import { productSpecRows } from "@/lib/product-specs";
 import { deriveAvailabilityFromStock } from "@/lib/availability";
 import {
   isLegacySeedDescription,
@@ -119,30 +120,19 @@ export function toCatalogDTO(p: ProductForCatalog): CatalogProductDTO {
 }
 
 function buildSpecGroups(p: ProductWithRelations): SpecGroup[] {
-  const attrs = attrMap(p);
   const main = [
     { label: "Производитель", value: p.brand.name },
     { label: "Артикул", value: p.sku },
     { label: "Категория", value: p.category.title },
   ];
-  const material = attrs.get("material");
-  if (material) main.push({ label: "Материал", value: String(material) });
-
-  const electrical: { label: string; value: string }[] = [];
-  const voltage = attrs.get("voltage");
-  const cores = attrs.get("cores");
-  const cs = attrs.get("crossSection");
-  if (voltage !== undefined)
-    electrical.push({ label: "Номинальное напряжение", value: `${voltage} кВ` });
-  if (cores !== undefined) electrical.push({ label: "Количество жил", value: String(cores) });
-  if (cs !== undefined) electrical.push({ label: "Сечение", value: `${cs} мм²` });
+  const parameters = productSpecRows(p.values);
 
   const operational = [{ label: "Единица измерения", value: p.unit }];
   if (p.warranty && p.warranty !== "12 месяцев")
     operational.push({ label: "Гарантия", value: p.warranty });
 
   const groups: SpecGroup[] = [{ title: "Основные параметры", rows: main }];
-  if (electrical.length) groups.push({ title: "Электрические характеристики", rows: electrical });
+  if (parameters.length) groups.push({ title: "Параметры товара", rows: parameters });
   groups.push({ title: "Эксплуатация и стандарты", rows: operational });
   return groups;
 }
@@ -178,7 +168,10 @@ export function toDetailDTO(p: ProductWithRelations): ProductDetailDTO {
     ...base,
     description: hasSeedDescription
       ? [`${p.title}. Артикул ${p.sku}. Уточните параметры и документы при запросе КП.`]
-      : (p.description ?? "").split("\n\n").filter(Boolean),
+      : (p.description ?? "")
+          .split("\n\n")
+          .map((paragraph) => paragraph.trim())
+          .filter(Boolean),
     images,
     specGroups: buildSpecGroups(p),
     documents: mapDocuments(p),
