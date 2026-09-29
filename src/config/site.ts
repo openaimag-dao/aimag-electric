@@ -13,7 +13,7 @@ export const siteConfig = {
     phone: "+7 705 615-17-17",
     /** WhatsApp в международном формате без плюса и пробелов. */
     whatsapp: "77056151717",
-    email: "sales@aimag-electric.kz",
+    email: "sales@aimag.kz",
     city: "Шымкент, Казахстан",
     address: {
       streetAddress: "ул. Байтерекова, 202",
