@@ -21,7 +21,16 @@ export const warehouseAdminRepository = {
         stock: {
           orderBy: { quantity: "desc" },
           include: {
-            product: { select: { id: true, slug: true, sku: true, title: true, unit: true } },
+            product: {
+              select: {
+                id: true,
+                slug: true,
+                sku: true,
+                title: true,
+                unit: true,
+                prices: { orderBy: [{ kind: "asc" }, { minQty: "asc" }, { id: "asc" }] },
+              },
+            },
           },
         },
       },

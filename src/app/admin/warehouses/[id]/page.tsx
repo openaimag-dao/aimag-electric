@@ -19,6 +19,7 @@ export default async function WarehouseDetailPage({ params }: PageProps) {
   const { id } = await params;
   const warehouse = await warehouseAdminRepository.byIdWithStock(id);
   if (!warehouse) notFound();
+  const now = new Date();
 
   const rows: WarehouseStockRow[] = warehouse.stock.map((s) => ({
     id: s.id,
@@ -28,6 +29,19 @@ export default async function WarehouseDetailPage({ params }: PageProps) {
     title: s.product.title,
     unit: s.product.unit,
     quantity: s.quantity,
+    prices: s.product.prices.map((price) => ({
+      id: price.id,
+      productId: s.product.id,
+      kind: price.kind,
+      amountTenge: price.amount === null ? "" : price.amount / 100,
+      minQty: price.minQty,
+      status:
+        price.validFrom > now
+          ? "Будущая"
+          : price.validTo && price.validTo < now
+            ? "Истекла"
+            : "Действует",
+    })),
     restockAt: s.restockAt ? s.restockAt.toISOString() : null,
   }));
 

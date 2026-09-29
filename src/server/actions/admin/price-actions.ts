@@ -12,7 +12,9 @@ import { audit } from "@/server/audit";
 function revalidate() {
   revalidatePath("/admin/prices");
   revalidatePath("/admin/products");
-  revalidatePath("/catalog");
+  revalidatePath("/admin/warehouses", "layout");
+  revalidatePath("/catalog", "layout");
+  revalidatePath("/");
 }
 
 // Форма принимает тенге; в БД цена хранится в тиынах (×100).
