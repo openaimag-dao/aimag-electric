@@ -105,6 +105,21 @@ test("выбранное количество передаётся в корзи
         sku: `TEST-${fixtureId}`,
         title: "Тест расчёта количества",
         unit: "м",
+        description: " \n\n ",
+        values: {
+          create: {
+            valueNumber: 16,
+            attribute: {
+              create: {
+                key: `test-current-${fixtureId}`,
+                name: "Проверочный ток",
+                type: "NUMBER",
+                unit: "А",
+                filterable: false,
+              },
+            },
+          },
+        },
         images: {
           create: [
             { url: null, order: 0 },
@@ -129,6 +144,18 @@ test("выбранное количество передаётся в корзи
       "/icon.svg"
     );
     await page.goto(`/catalog/${product.slug}`);
+    await expect(page.locator("#specs")).toContainText("Проверочный ток");
+    await expect(page.locator("#specs")).toContainText("16 А");
+    await expect(page.locator("#description")).toContainText(
+      "Подробное описание пока не добавлено"
+    );
+    await page
+      .getByRole("button", { name: "Уточнить характеристики и документы", exact: true })
+      .click();
+    await expect(page.getByRole("dialog").getByLabel("Что нужно", { exact: true })).toHaveValue(
+      `Прошу уточнить характеристики и доступные документы на «${product.title}», артикул ${product.sku}.`
+    );
+    await page.getByRole("dialog").getByRole("button", { name: "Закрыть", exact: true }).click();
     const actions = page.getByRole("group", { name: "Заказать товар" });
     await actions
       .getByRole("textbox", { name: `Количество, ${product.unit}`, exact: true })

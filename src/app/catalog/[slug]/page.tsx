@@ -22,6 +22,7 @@ import { RelatedProducts } from "@/components/product/related-products";
 import { AnalogsCallout } from "@/components/product/analogs-callout";
 import { RecordRecentlyViewed } from "@/components/recently-viewed/record-recently-viewed";
 import { RecentlyViewedSection } from "@/components/recently-viewed/recently-viewed-section";
+import { QuoteDialog } from "@/components/common/quote-dialog";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -193,9 +194,22 @@ export default async function ProductPage({ params }: PageProps) {
           <section id="description" className="scroll-mt-32">
             <h2 className="font-display text-xl font-bold text-primary">Описание</h2>
             <div className="mt-4 space-y-3 text-sm leading-relaxed text-steel-700">
-              {product.description.map((para, i) => (
-                <p key={i}>{para}</p>
-              ))}
+              {product.description.length ? (
+                product.description.map((para, i) => <p key={i}>{para}</p>)
+              ) : (
+                <div className="rounded-xl border border-border bg-card p-5">
+                  <p>
+                    Подробное описание пока не добавлено. Запросите характеристики и документы на «
+                    {product.title}» (артикул {product.sku}) перед заказом.
+                  </p>
+                  <QuoteDialog
+                    triggerLabel="Уточнить характеристики и документы"
+                    variant="outline"
+                    className="mt-4 h-auto whitespace-normal text-left"
+                    defaultMessage={`Прошу уточнить характеристики и доступные документы на «${product.title}», артикул ${product.sku}.`}
+                  />
+                </div>
+              )}
             </div>
           </section>
 
