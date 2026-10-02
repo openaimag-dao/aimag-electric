@@ -10,6 +10,30 @@ import { articles } from "@/config/articles";
 import { siteConfig } from "@/config/site";
 
 const relatedCatalog: Record<string, { href: string; label: string }> = {
+  "kak-vybrat-sechenie-kabelya": {
+    href: "/catalog?cat=kabel-provod",
+    label: "Посмотреть кабели и провода",
+  },
+  "zakupki-samruk-kazyna": {
+    href: "/quick-order",
+    label: "Подобрать товары по списку артикулов",
+  },
+  "uzo-vs-difavtomat": {
+    href: "/catalog?cat=avtomaty",
+    label: "Посмотреть защитные аппараты",
+  },
+  "avtomaticheskie-vyklyuchateli-b-c-d": {
+    href: "/catalog?cat=avtomaty",
+    label: "Посмотреть автоматические выключатели",
+  },
+  "khranenie-i-uchet-kabelnoy-produktsii": {
+    href: "/catalog?cat=kabel-provod",
+    label: "Посмотреть кабели и провода",
+  },
+  "gofra-metallorukav-kabel-kanal": {
+    href: "/catalog?q=%D0%BA%D0%B0%D0%BD%D0%B0%D0%BB",
+    label: "Найти кабель-каналы в каталоге",
+  },
   "izolyatory-vl-shtyrevye-i-podvesnye": {
     href: "/catalog?cat=izolyatory-armatura",
     label: "Посмотреть изоляторы и арматуру ВЛ",
@@ -45,7 +69,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const article = findArticle(slug);
   if (!article) return {};
   return {
-    title: `${article.title} — AIMAG ELECTRIC`,
+    title: article.title,
     description: article.excerpt,
     alternates: { canonical: `/blog/${article.slug}` },
     openGraph: {
@@ -53,7 +77,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description: article.excerpt,
       url: `${siteConfig.url}/blog/${article.slug}`,
       type: "article",
+      publishedTime: article.date,
     },
+    twitter: { card: "summary", title: article.title, description: article.excerpt },
   };
 }
 
@@ -70,11 +96,39 @@ export default async function ArticlePage({ params }: PageProps) {
   const article = findArticle(slug);
   if (!article) notFound();
 
-  const others = articles.filter((a) => a.slug !== article.slug).slice(0, 2);
   const related = relatedCatalog[article.slug];
+  const others = articles
+    .filter((a) => a.slug !== article.slug)
+    .sort((a, b) => {
+      const score = (slug: string, category: string) =>
+        (related && relatedCatalog[slug]?.href === related.href ? 2 : 0) +
+        (category === article.category ? 1 : 0);
+      return score(b.slug, b.category) - score(a.slug, a.category);
+    })
+    .slice(0, 2);
+  const articleUrl = `${siteConfig.url}/blog/${article.slug}`;
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "@id": `${articleUrl}#article`,
+    url: articleUrl,
+    mainEntityOfPage: articleUrl,
+    headline: article.title,
+    description: article.excerpt,
+    datePublished: article.date,
+    inLanguage: "ru",
+    articleSection: article.category,
+    publisher: { "@type": "Organization", name: siteConfig.name, url: siteConfig.url },
+  };
 
   return (
     <div className="container max-w-3xl py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
+        }}
+      />
       <Link
         href="/blog"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary"
@@ -125,7 +179,10 @@ export default async function ArticlePage({ params }: PageProps) {
             Пришлите спецификацию — подготовим коммерческое предложение.
           </p>
         </div>
-        <QuoteDialog triggerLabel="Запросить КП" />
+        <QuoteDialog
+          triggerLabel="Запросить КП"
+          defaultMessage={`Нужен подбор по теме «${article.title}».\nТовары и количество: \nГород доставки: `}
+        />
       </div>
 
       {others.length > 0 && (

@@ -2,6 +2,33 @@ import { test, expect } from "@playwright/test";
 import { PrismaClient } from "@prisma/client";
 
 test.describe("Публичные страницы", () => {
+  test("статья ведёт к товарам и передаёт тему в запрос КП", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/blog/avtomaticheskie-vyklyuchateli-b-c-d");
+    const title = await page.getByRole("heading", { level: 1 }).innerText();
+    expect((await page.title()).match(/AIMAG ELECTRIC/g)).toHaveLength(1);
+    const articleData = await page.locator('script[type="application/ld+json"]').allTextContents();
+    const article = articleData
+      .map((text) => JSON.parse(text))
+      .find((data) => data["@type"] === "BlogPosting");
+    expect(article).toMatchObject({
+      headline: title,
+      datePublished: "2026-03-16",
+      inLanguage: "ru",
+    });
+    await expect(
+      page.getByRole("link", { name: /Посмотреть автоматические выключатели/ })
+    ).toHaveAttribute("href", "/catalog?cat=avtomaty");
+    await page.getByRole("button", { name: "Запросить КП", exact: true }).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog.getByLabel("Что нужно", { exact: true })).toHaveValue(
+      `Нужен подбор по теме «${title}».\nТовары и количество: \nГород доставки: `
+    );
+    await dialog.getByRole("button", { name: "Закрыть", exact: true }).click();
+    await page.getByRole("link", { name: /Посмотреть автоматические выключатели/ }).click();
+    await expect(page).toHaveURL(/\/catalog\?cat=avtomaty$/);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  });
   test("главная загружается и содержит бренд", async ({ page }) => {
     await page.goto("/");
     await expect(page).toHaveTitle(/AIMAG ELECTRIC/i);
