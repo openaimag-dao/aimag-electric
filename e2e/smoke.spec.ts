@@ -6,6 +6,9 @@ test.describe("Публичные страницы", () => {
     ["kupit-sip-3-kazakhstan", "/kabeli-sip"],
     ["kupit-sip-4-kazakhstan", "/kabeli-sip"],
     ["kupit-vvgng-kazakhstan", "/kabeli-vvg-avvg"],
+    ["kupit-izolyatory-kazakhstan", "/catalog?cat=izolyatory-armatura"],
+    ["kupit-silovoy-transformator-kazakhstan", "/catalog?cat=vysokovoltnoe"],
+    ["kupit-ktp-kazakhstan", "/catalog?cat=vysokovoltnoe"],
   ]) {
     test(`статья о закупке ${slug}: ссылки и запрос КП`, async ({ page }) => {
       await page.setViewportSize({ width: 390, height: 844 });
