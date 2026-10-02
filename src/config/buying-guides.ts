@@ -1,7 +1,9 @@
 import type { Article } from "@/config/articles";
+import { powerBuyingGuides } from "@/config/power-buying-guides";
 
 /** Buying guides use confirmed manufacturer facts, not prices or stock from demo records. */
 export const buyingGuides: Article[] = [
+  ...powerBuyingGuides,
   {
     slug: "kupit-sip-3-kazakhstan",
     title: "Купить СИП-3 в Казахстане: маркировка и данные для заказа",
@@ -71,6 +73,10 @@ export const buyingGuides: Article[] = [
             label: "Изоляторы для воздушных линий: отдельный разбор",
           },
           { href: "/catalog?cat=izolyatory-armatura", label: "Изоляторы и арматура ВЛ в каталоге" },
+          {
+            href: "/blog/kupit-izolyatory-kazakhstan",
+            label: "Как заказать изоляторы вместе с проводом",
+          },
           { href: "/blog/kupit-sip-4-kazakhstan", label: "Если нужен СИП-4: что указать в заказе" },
         ],
       },
@@ -278,6 +284,10 @@ export const buyingGuides: Article[] = [
             label: "СИП-4: подготовка заказа для воздушного участка",
           },
           { href: "/quick-order", label: "Собрать запрос по списку артикулов" },
+          {
+            href: "/blog/kupit-ktp-kazakhstan",
+            label: "Комплектация КТП: оборудование, кабели и монтаж",
+          },
           { href: "/elektromontazh", label: "Обсудить электромонтаж под ключ" },
         ],
       },
