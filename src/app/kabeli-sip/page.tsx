@@ -32,7 +32,7 @@ export const metadata: Metadata = {
 const content: ArticleBlock[] = [
   {
     kind: "p",
-    text: "СИП (самонесущий изолированный провод) заменил голый алюминиевый провод на большинстве новых и реконструируемых воздушных линий: изоляция жил снижает число аварий от схлёстывания и наброса, упрощает работу под напряжением и допускает меньшие габариты опор.",
+    text: "Провода СИП применяют для воздушных линий и ответвлений. Марки различаются конструкцией и классом напряжения: для закупки нужны полное обозначение из проекта и совместимая арматура. Защитное покрытие или изоляция не разрешают касаться провода под напряжением.",
   },
   { kind: "h2", text: "Марки СИП" },
   {
@@ -140,6 +140,24 @@ export default async function SipPage() {
 
         <div className="mt-12 max-w-3xl">
           <ContentBlocks blocks={content} />
+          <ContentBlocks
+            blocks={[
+              { kind: "h2", text: "Как подготовить заказ" },
+              {
+                kind: "links",
+                items: [
+                  {
+                    href: "/blog/kupit-sip-3-kazakhstan",
+                    label: "СИП-3: маркировка, цена и комплект линии",
+                  },
+                  {
+                    href: "/blog/kupit-sip-4-kazakhstan",
+                    label: "СИП-4: данные для заказа и арматура",
+                  },
+                ],
+              },
+            ]}
+          />
 
           <div className="mt-10">
             <h2 className="font-display text-xl font-semibold text-primary">Частые вопросы</h2>
