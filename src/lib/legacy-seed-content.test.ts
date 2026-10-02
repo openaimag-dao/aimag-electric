@@ -6,6 +6,19 @@ import {
 } from "@/lib/legacy-seed-content";
 
 describe("legacy catalog demo content", () => {
+  it("recognizes the short seed placeholder only for its exact product and preserves added content", () => {
+    const title = "Кабель ВВГ";
+    const sku = "KAB-1001";
+    const placeholder = `${title}. Артикул ${sku}. Уточните параметры и документы при запросе КП.`;
+    expect(isLegacySeedDescription(placeholder, title, "Завод", sku)).toBe(true);
+    expect(isLegacySeedDescription(placeholder, title, "Завод", "KAB-1002")).toBe(false);
+    expect(isLegacySeedDescription(placeholder, "Другой товар", "Завод", sku)).toBe(false);
+    expect(isLegacySeedDescription(`${placeholder} Длина: 100 м.`, title, "Завод", sku)).toBe(
+      false
+    );
+    expect(isLegacySeedDescription(null, title, "Завод", sku)).toBe(false);
+  });
+
   it("recognizes the three published sample reviews without hiding an edited customer review", () => {
     const review = {
       author: "Асхат Н.",

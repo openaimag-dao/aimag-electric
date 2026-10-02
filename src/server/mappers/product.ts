@@ -163,11 +163,11 @@ function mapReviews(p: ProductWithRelations): ProductReview[] {
 export function toDetailDTO(p: ProductWithRelations): ProductDetailDTO {
   const base = toCatalogDTO(p);
   const images = productImages(p);
-  const hasSeedDescription = isLegacySeedDescription(p.description, p.title, p.brand.name);
+  const hasSeedDescription = isLegacySeedDescription(p.description, p.title, p.brand.name, p.sku);
   return {
     ...base,
     description: hasSeedDescription
-      ? [`${p.title}. Артикул ${p.sku}. Уточните параметры и документы при запросе КП.`]
+      ? []
       : (p.description ?? "")
           .split("\n\n")
           .map((paragraph) => paragraph.trim())
