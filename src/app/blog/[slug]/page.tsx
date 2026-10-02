@@ -96,14 +96,15 @@ export default async function ArticlePage({ params }: PageProps) {
   const article = findArticle(slug);
   if (!article) notFound();
 
-  const related = relatedCatalog[article.slug];
+  const related = article.catalogLink ?? relatedCatalog[article.slug];
   const others = articles
     .filter((a) => a.slug !== article.slug)
     .sort((a, b) => {
-      const score = (slug: string, category: string) =>
-        (related && relatedCatalog[slug]?.href === related.href ? 2 : 0) +
-        (category === article.category ? 1 : 0);
-      return score(b.slug, b.category) - score(a.slug, a.category);
+      const score = (candidate: (typeof articles)[number]) =>
+        (related && (candidate.catalogLink ?? relatedCatalog[candidate.slug])?.href === related.href
+          ? 2
+          : 0) + (candidate.category === article.category ? 1 : 0);
+      return score(b) - score(a);
     })
     .slice(0, 2);
   const articleUrl = `${siteConfig.url}/blog/${article.slug}`;

@@ -2,6 +2,29 @@ import { test, expect } from "@playwright/test";
 import { PrismaClient } from "@prisma/client";
 
 test.describe("Публичные страницы", () => {
+  for (const [slug, catalog] of [
+    ["kupit-sip-3-kazakhstan", "/kabeli-sip"],
+    ["kupit-sip-4-kazakhstan", "/kabeli-sip"],
+    ["kupit-vvgng-kazakhstan", "/kabeli-vvg-avvg"],
+  ]) {
+    test(`статья о закупке ${slug}: ссылки и запрос КП`, async ({ page }) => {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.goto(`/blog/${slug}`);
+      const main = page.getByRole("main");
+      const title = await main.getByRole("heading", { level: 1 }).innerText();
+      await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+        "href",
+        `https://www.aimag.kz/blog/${slug}`
+      );
+      await expect(main.locator(`a[href="${catalog}"]`).first()).toBeVisible();
+      await expect(main.locator('a[href^="/blog/kupit-"]').first()).toBeVisible();
+      await main.getByRole("button", { name: "Запросить КП", exact: true }).click();
+      await expect(page.getByRole("dialog").getByLabel("Что нужно", { exact: true })).toHaveValue(
+        `Нужен подбор по теме «${title}».\nТовары и количество: \nГород доставки: `
+      );
+    });
+  }
+
   test("статья ведёт к товарам и передаёт тему в запрос КП", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/blog/avtomaticheskie-vyklyuchateli-b-c-d");
@@ -171,9 +194,9 @@ test("выбранное количество передаётся в корзи
       "/icon.svg"
     );
     await page.goto(`/catalog/${product.slug}`);
-    await expect(page.locator("#specs")).toContainText("Проверочный ток");
-    await expect(page.locator("#specs")).toContainText("16 А");
-    await expect(page.locator("#description")).toContainText(
+    await expect(page.getByRole("main").locator("#specs")).toContainText("Проверочный ток");
+    await expect(page.getByRole("main").locator("#specs")).toContainText("16 А");
+    await expect(page.getByRole("main").locator("#description")).toContainText(
       "Подробное описание пока не добавлено"
     );
     await page

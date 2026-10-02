@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ArticleBlock } from "@/config/articles";
 
 /** Renders a block of long-form SEO/editorial content — shared by blog articles, category landing copy, and standalone SEO pages. */
@@ -13,6 +14,18 @@ export function ContentBlocks({ blocks }: { blocks: ArticleBlock[] }) {
 
 function Block({ block }: { block: ArticleBlock }) {
   switch (block.kind) {
+    case "links":
+      return (
+        <ul className="mt-4 list-disc space-y-2 pl-5 leading-relaxed">
+          {block.items.map((item) => (
+            <li key={item.href}>
+              <Link href={item.href} className="text-signal-700 underline underline-offset-4">
+                {item.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      );
     case "h2":
       return <h2 className="mt-8 font-display text-xl font-semibold text-primary">{block.text}</h2>;
     case "p":

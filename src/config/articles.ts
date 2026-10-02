@@ -1,9 +1,12 @@
+import { buyingGuides } from "@/config/buying-guides";
+
 export type ArticleBlock =
   | { kind: "p"; text: string }
   | { kind: "h2"; text: string }
   | { kind: "list"; items: string[] }
   | { kind: "table"; headers: string[]; rows: string[][] }
-  | { kind: "note"; text: string };
+  | { kind: "note"; text: string }
+  | { kind: "links"; items: { href: string; label: string }[] };
 
 export interface Article {
   slug: string;
@@ -12,10 +15,12 @@ export interface Article {
   category: string;
   date: string;
   readingTime: string;
+  catalogLink?: { href: string; label: string };
   content: ArticleBlock[];
 }
 
 export const articles: Article[] = [
+  ...buyingGuides,
   {
     slug: "kak-vybrat-sechenie-kabelya",
     title: "Как выбрать сечение кабеля под нагрузку: методика и таблицы",
