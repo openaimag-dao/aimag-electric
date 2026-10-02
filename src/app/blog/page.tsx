@@ -7,7 +7,7 @@ import { articles } from "@/config/articles";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/blog" },
-  title: "Блог — AIMAG ELECTRIC",
+  title: "Блог",
   description:
     "Практические материалы для инженеров, снабженцев и энергетиков: выбор сечения кабеля, СИП против голого провода, закупки Samruk-Kazyna.",
 };
