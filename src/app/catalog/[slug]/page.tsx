@@ -10,6 +10,7 @@ import { availabilityLabels } from "@/config/catalog-sort";
 import { productService } from "@/server/services";
 import { buildProductJsonLd, averageRating, productImageUrls } from "@/lib/product-jsonld";
 import { formatTenge, tiynToTenge } from "@/lib/money";
+import { productGuides } from "@/lib/product-guides";
 import { currentUser } from "@/server/auth/session";
 import { companyAdminRepository, companyPriceAdminRepository } from "@/server/repositories/admin";
 import { ProductGallery } from "@/components/product/product-gallery";
@@ -83,6 +84,7 @@ export default async function ProductPage({ params }: PageProps) {
   const analogs =
     product.availability === "in_stock" ? [] : await productService.getAnalogsInStock(product);
   const avgRating = averageRating(product.reviews);
+  const guides = productGuides(product.title);
 
   // A logged-in company member's negotiated reference price, if staff has
   // set one — real data only, never guessed: resolved through the same
@@ -110,6 +112,7 @@ export default async function ProductPage({ params }: PageProps) {
 
   const sections = [
     { id: "description", label: "Описание" },
+    ...(guides.length ? [{ id: "guides", label: "Как выбрать" }] : []),
     { id: "specs", label: "Характеристики" },
     ...(product.documents.length ? [{ id: "documents", label: "Документы" }] : []),
     ...(product.reviews.length ? [{ id: "reviews", label: "Отзывы" }] : []),
@@ -212,6 +215,30 @@ export default async function ProductPage({ params }: PageProps) {
               )}
             </div>
           </section>
+
+          {guides.length > 0 && (
+            <section
+              id="guides"
+              className="scroll-mt-32 rounded-xl border border-border bg-card p-5"
+            >
+              <h2 className="font-display text-xl font-bold text-primary">Как подготовить заказ</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Проверьте параметры конкретной модели и условия поставки перед заказом.
+              </p>
+              <ul className="mt-4 space-y-2 text-sm">
+                {guides.map((guide) => (
+                  <li key={guide.href}>
+                    <Link
+                      href={guide.href}
+                      className="text-steel-700 underline underline-offset-2 hover:text-signal-700"
+                    >
+                      {guide.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           <section id="specs" className="scroll-mt-32">
             <h2 className="font-display text-xl font-bold text-primary">
