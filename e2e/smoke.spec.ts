@@ -9,6 +9,7 @@ test.describe("Публичные страницы", () => {
     ["kupit-izolyatory-kazakhstan", "/catalog?cat=izolyatory-armatura"],
     ["kupit-silovoy-transformator-kazakhstan", "/catalog?cat=vysokovoltnoe"],
     ["kupit-ktp-kazakhstan", "/catalog?cat=vysokovoltnoe"],
+    ["komplektaciya-obekta-elektromontazh-pod-klyuch", "/elektromontazh"],
   ]) {
     test(`статья о закупке ${slug}: ссылки и запрос КП`, async ({ page }) => {
       await page.setViewportSize({ width: 390, height: 844 });
@@ -25,6 +26,14 @@ test.describe("Публичные страницы", () => {
       await expect(page.getByRole("dialog").getByLabel("Что нужно", { exact: true })).toHaveValue(
         `Нужен подбор по теме «${title}».\nТовары и количество: \nГород доставки: `
       );
+      if (slug === "komplektaciya-obekta-elektromontazh-pod-klyuch") {
+        await page.getByRole("dialog").getByRole("button", { name: "Закрыть" }).click();
+        await main.locator('a[href="/elektromontazh"]').first().click();
+        await expect(page).toHaveURL(/\/elektromontazh$/);
+        await expect(
+          page.getByRole("link", { name: "Как подготовить заявку на объект" })
+        ).toHaveAttribute("href", `/blog/${slug}`);
+      }
     });
   }
 

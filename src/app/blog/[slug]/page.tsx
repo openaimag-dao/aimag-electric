@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { QuoteDialog } from "@/components/common/quote-dialog";
 import { ContentBlocks } from "@/components/common/content-blocks";
 import { articles } from "@/config/articles";
+import { buyingGuides } from "@/config/buying-guides";
 import { siteConfig } from "@/config/site";
 
 const relatedCatalog: Record<string, { href: string; label: string }> = {
@@ -158,11 +159,28 @@ export default async function ArticlePage({ params }: PageProps) {
         <ContentBlocks blocks={article.content} />
       </div>
 
+      {buyingGuides.some((guide) => guide.slug === article.slug) && (
+        <div className="mt-10 rounded-2xl border border-border bg-card p-6">
+          <h2 className="font-display text-lg font-semibold text-primary">
+            Материалы и монтаж для одного объекта
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Соберите кабель, оборудование и работы в одну заявку с понятным составом поставки.
+          </p>
+          <Link
+            href="/blog/komplektaciya-obekta-elektromontazh-pod-klyuch"
+            className="mt-3 inline-block text-sm font-semibold text-signal-700 underline-offset-2 hover:underline"
+          >
+            Как подготовить общий запрос →
+          </Link>
+        </div>
+      )}
+
       {related && (
         <div className="mt-10 rounded-2xl border border-border bg-secondary/30 p-6">
-          <h2 className="font-display text-lg font-semibold text-primary">Товары по теме</h2>
+          <h2 className="font-display text-lg font-semibold text-primary">Следующий шаг</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Проверьте доступные позиции в каталоге и запросите условия поставки для вашего проекта.
+            Перейдите к товарам или обсудите состав поставки и работ для вашего проекта.
           </p>
           <Link
             href={related.href}
