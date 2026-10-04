@@ -5,7 +5,7 @@ import { ChevronRight } from "lucide-react";
 import { QuoteForm } from "@/components/common/quote-form";
 
 export const metadata: Metadata = {
-  title: "Электромонтажные работы под ключ — AIMAG ELECTRIC",
+  title: "Электромонтажные работы под ключ",
   description:
     "AIMAG ELECTRIC принимает заявки на электромонтажные работы под ключ для объектов любой сложности. Расскажите о проекте — обсудим состав работ, сроки и стоимость.",
   alternates: { canonical: "/elektromontazh" },
@@ -50,6 +50,21 @@ export default function ElectricalInstallationPage() {
           <p className="mt-8 text-sm text-muted-foreground">
             Географию выполнения, сроки и состав бригады уточняем для каждого проекта отдельно.
           </p>
+          <div className="mt-8 rounded-2xl border border-border bg-card p-6">
+            <h2 className="font-display text-xl font-semibold text-primary">
+              Материалы и работы в одной заявке
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-steel-700">
+              Кабели, СИП, изоляторы, трансформатор и КТП удобно обсудить вместе с монтажом.
+              Подготовили список исходных данных, чтобы уточнить комплектацию и объём работ.
+            </p>
+            <Link
+              href="/blog/komplektaciya-obekta-elektromontazh-pod-klyuch"
+              className="mt-3 inline-block text-sm font-semibold text-signal-700 underline-offset-2 hover:underline"
+            >
+              Как подготовить заявку на объект →
+            </Link>
+          </div>
         </div>
         <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
           <h2 className="font-display text-xl font-semibold text-primary">

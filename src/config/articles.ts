@@ -1,4 +1,5 @@
 import { buyingGuides } from "@/config/buying-guides";
+import { projectGuide } from "@/config/project-guide";
 
 export type ArticleBlock =
   | { kind: "p"; text: string }
@@ -20,6 +21,7 @@ export interface Article {
 }
 
 export const articles: Article[] = [
+  projectGuide,
   ...buyingGuides,
   {
     slug: "kak-vybrat-sechenie-kabelya",
