@@ -104,6 +104,7 @@ export const adminService = {
       noPrice,
       noSpecs,
       noDescription,
+      templateDescription,
       noDocuments,
       lowStockList,
       recentAudit,
@@ -116,6 +117,7 @@ export const adminService = {
       prisma.product.count({ where: qualityWhere("no-price") }),
       prisma.product.count({ where: qualityWhere("no-specs") }),
       prisma.product.count({ where: qualityWhere("no-description") }),
+      prisma.product.count({ where: qualityWhere("template-description") }),
       prisma.product.count({ where: qualityWhere("no-documents") }),
       prisma.stock.findMany({
         where: { quantity: { lte: 5 } },
@@ -136,15 +138,24 @@ export const adminService = {
       searchLogRepository.topZeroResultQueries(30, 8),
     ]);
 
-    // Average gap rate across the 5 checks, inverted — a single honest number, not a fabricated score.
-    const gapChecks = [noImages, noPrice, noSpecs, noDescription, noDocuments];
+    // Average gap rate across the six independently actionable checks.
+    const gapChecks = [noImages, noPrice, noSpecs, noDescription, templateDescription, noDocuments];
     const healthScore =
       total === 0
         ? 100
         : Math.round(100 * (1 - gapChecks.reduce((a, b) => a + b, 0) / (gapChecks.length * total)));
 
     return {
-      quality: { total, noImages, noPrice, noSpecs, noDescription, noDocuments, healthScore },
+      quality: {
+        total,
+        noImages,
+        noPrice,
+        noSpecs,
+        noDescription,
+        templateDescription,
+        noDocuments,
+        healthScore,
+      },
       lowStock: lowStockList.map((s) => ({
         title: s.product.title,
         sku: s.product.sku,
