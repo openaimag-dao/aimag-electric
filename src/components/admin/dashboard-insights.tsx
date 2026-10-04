@@ -61,7 +61,7 @@ export async function DashboardInsights() {
             </span>
           </span>
         </div>
-        <div className="grid gap-4 sm:grid-cols-3 xl:grid-cols-5">
+        <div className="grid gap-4 sm:grid-cols-3 xl:grid-cols-6">
           <QualityCard
             icon={ImageOff}
             label="Без фото"
@@ -85,6 +85,12 @@ export async function DashboardInsights() {
             label="Без описания (SEO)"
             value={quality.noDescription}
             href="/admin/products?quality=no-description"
+          />
+          <QualityCard
+            icon={FileWarning}
+            label="Проверить шаблон описания"
+            value={quality.templateDescription}
+            href="/admin/products?quality=template-description"
           />
           <QualityCard
             icon={FileX}
