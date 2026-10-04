@@ -41,7 +41,12 @@ export function qualityWhere(filter: ProductQualityFilter): Prisma.ProductWhereI
       return {
         OR: [
           { description: { endsWith: "Уточните параметры и документы при запросе КП." } },
-          { description: { contains: "AIMAG ELECTRIC обеспечивает подбор аналогов, расчёт под проект и доставку по всему Казахстану." } },
+          {
+            description: {
+              contains:
+                "AIMAG ELECTRIC обеспечивает подбор аналогов, расчёт под проект и доставку по всему Казахстану.",
+            },
+          },
         ],
       };
     case "no-documents":

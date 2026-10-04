@@ -146,7 +146,16 @@ export const adminService = {
         : Math.round(100 * (1 - gapChecks.reduce((a, b) => a + b, 0) / (gapChecks.length * total)));
 
     return {
-      quality: { total, noImages, noPrice, noSpecs, noDescription, templateDescription, noDocuments, healthScore },
+      quality: {
+        total,
+        noImages,
+        noPrice,
+        noSpecs,
+        noDescription,
+        templateDescription,
+        noDocuments,
+        healthScore,
+      },
       lowStock: lowStockList.map((s) => ({
         title: s.product.title,
         sku: s.product.sku,
