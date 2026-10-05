@@ -114,7 +114,7 @@ export default async function ProductPage({ params }: PageProps) {
     { id: "description", label: "Описание" },
     ...(guides.length ? [{ id: "guides", label: "Как выбрать" }] : []),
     { id: "specs", label: "Характеристики" },
-    ...(product.documents.length ? [{ id: "documents", label: "Документы" }] : []),
+    { id: "documents", label: "Документы" },
     ...(product.reviews.length ? [{ id: "reviews", label: "Отзывы" }] : []),
     { id: "related", label: "Похожие" },
   ];
@@ -162,6 +162,17 @@ export default async function ProductPage({ params }: PageProps) {
               badge={product.badge}
               title={product.title}
             />
+            <div className="mt-4 rounded-xl border border-border bg-card p-4">
+              <p className="text-sm text-muted-foreground">
+                Нужны фото товара и маркировки перед закупкой?
+              </p>
+              <QuoteDialog
+                triggerLabel="Запросить фото и маркировку"
+                variant="outline"
+                className="mt-3 h-auto whitespace-normal text-left"
+                defaultMessage={`Прошу предоставить фото товара и маркировки на «${product.title}», артикул ${product.sku}, и уточнить соответствие предлагаемой модели заказу.`}
+              />
+            </div>
           </div>
 
           <div className="lg:row-span-2">
@@ -249,19 +260,32 @@ export default async function ProductPage({ params }: PageProps) {
             </div>
           </section>
 
-          {product.documents.length > 0 && (
-            <section id="documents" className="scroll-mt-32">
-              <h2 className="font-display text-xl font-bold text-primary">
-                Документы и сертификаты
-              </h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Паспорта, сертификаты соответствия и инструкции в формате PDF.
-              </p>
-              <div className="mt-4">
-                <DocumentList documents={product.documents} />
+          <section id="documents" className="scroll-mt-32">
+            <h2 className="font-display text-xl font-bold text-primary">Документы и сертификаты</h2>
+            {product.documents.length > 0 ? (
+              <>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Паспорта, сертификаты соответствия и инструкции в формате PDF.
+                </p>
+                <div className="mt-4">
+                  <DocumentList documents={product.documents} />
+                </div>
+              </>
+            ) : (
+              <div className="mt-4 rounded-xl border border-border bg-card p-5">
+                <p className="text-sm leading-relaxed text-steel-700">
+                  Документы пока не опубликованы. Уточните наличие паспорта, сертификатов и
+                  инструкций для конкретной модели перед закупкой.
+                </p>
+                <QuoteDialog
+                  triggerLabel="Запросить документы на товар"
+                  variant="outline"
+                  className="mt-4 h-auto whitespace-normal text-left"
+                  defaultMessage={`Прошу уточнить наличие паспорта, сертификатов и инструкций для «${product.title}», артикул ${product.sku}, и предоставить доступные документы на предлагаемую модель.`}
+                />
               </div>
-            </section>
-          )}
+            )}
+          </section>
 
           {product.reviews.length > 0 && (
             <section id="reviews" className="scroll-mt-32">
