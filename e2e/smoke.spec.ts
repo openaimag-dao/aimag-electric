@@ -218,6 +218,23 @@ test("выбранное количество передаётся в корзи
       `Прошу уточнить характеристики и доступные документы на «${product.title}», артикул ${product.sku}.`
     );
     await page.getByRole("dialog").getByRole("button", { name: "Закрыть", exact: true }).click();
+    await expect(page.locator("#documents")).toContainText("Документы пока не опубликованы");
+    for (const [button, message] of [
+      [
+        "Запросить документы на товар",
+        `Прошу уточнить наличие паспорта, сертификатов и инструкций для «${product.title}», артикул ${product.sku}, и предоставить доступные документы на предлагаемую модель.`,
+      ],
+      [
+        "Запросить фото и маркировку",
+        `Прошу предоставить фото товара и маркировки на «${product.title}», артикул ${product.sku}, и уточнить соответствие предлагаемой модели заказу.`,
+      ],
+    ]) {
+      await page.getByRole("button", { name: button, exact: true }).click();
+      await expect(page.getByRole("dialog").getByLabel("Что нужно", { exact: true })).toHaveValue(
+        message
+      );
+      await page.getByRole("dialog").getByRole("button", { name: "Закрыть", exact: true }).click();
+    }
     const actions = page.getByRole("group", { name: "Заказать товар" });
     await actions
       .getByRole("textbox", { name: `Количество, ${product.unit}`, exact: true })
