@@ -6,7 +6,7 @@ describe("product buying guides", () => {
     ["Провод СИП-3 1×35", "kupit-sip-3-kazakhstan"],
     ["Провод СИП-4 1×16", "kupit-sip-4-kazakhstan"],
     ["Кабель ВВГнг(А)-LS 2×1.5", "kupit-vvgng-kazakhstan"],
-    ["Муфта концевая 3×25", "kabelnye-mufty-kak-vybrat"],
+    ["Муфта концевая 3×25", "kupit-kabelnye-mufty-kazakhstan"],
     ["Изолятор ШС-6", "kupit-izolyatory-kazakhstan"],
     ["КТП 400 кВА", "kupit-ktp-kazakhstan"],
     ["Трансформатор ТМГ", "kupit-silovoy-transformator-kazakhstan"],

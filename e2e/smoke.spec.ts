@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 
 test.describe("Публичные страницы", () => {
   for (const [slug, catalog] of [
+    ["kupit-kabelnye-mufty-kazakhstan", "/catalog?cat=kabelnaya-armatura"],
     ["kupit-sip-3-kazakhstan", "/kabeli-sip"],
     ["kupit-sip-4-kazakhstan", "/kabeli-sip"],
     ["kupit-vvgng-kazakhstan", "/kabeli-vvg-avvg"],

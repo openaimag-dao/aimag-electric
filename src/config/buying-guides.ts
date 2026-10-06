@@ -1,8 +1,10 @@
 import type { Article } from "@/config/articles";
 import { powerBuyingGuides } from "@/config/power-buying-guides";
+import { muftyBuyingGuide } from "@/config/mufty-buying-guide";
 
 /** Buying guides use confirmed manufacturer facts, not prices or stock from demo records. */
 export const buyingGuides: Article[] = [
+  muftyBuyingGuide,
   ...powerBuyingGuides,
   {
     slug: "kupit-sip-3-kazakhstan",
