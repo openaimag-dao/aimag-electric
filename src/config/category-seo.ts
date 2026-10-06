@@ -23,6 +23,52 @@ export interface CategorySeo {
 }
 
 export const categorySeo: Record<string, CategorySeo> = {
+  vysokovoltnoe: {
+    metaTitle: "Высоковольтное оборудование, КТП и трансформаторы — запросить КП",
+    metaDescription:
+      "Подбор высоковольтного оборудования, КТП и силовых трансформаторов под проект в Казахстане. Уточните комплектацию, цену и доставку в AIMAG ELECTRIC.",
+    content: [
+      { kind: "h2", text: "Заказ высоковольтного оборудования под проект" },
+      {
+        kind: "p",
+        text: "Для запроса цены на КТП, силовой трансформатор или коммутационное оборудование укажите модель, количество, параметры по проекту и город доставки. Доступность конкретного исполнения и состав поставки уточняются при подготовке коммерческого предложения.",
+      },
+      { kind: "h2", text: "Какие данные подготовить для коммерческого предложения" },
+      {
+        kind: "list",
+        items: [
+          "Для трансформатора: мощность, напряжения ВН/НН, исполнение и требования проекта.",
+          "Для КТП: опросный лист или проект, состав оборудования и требования к размещению.",
+          "Для аппаратов: полная маркировка, параметры по спецификации и необходимый комплект поставки.",
+          "Для всей заявки: количество, город доставки, желаемый срок и необходимость электромонтажных работ.",
+        ],
+      },
+      {
+        kind: "note",
+        text: "Если модель ещё не выбрана, передайте исходные данные объекта для подбора. Совместимость оборудования и решения по монтажу необходимо сверить с проектом перед закупкой.",
+      },
+    ],
+    faq: [
+      {
+        q: "Как узнать цену КТП или силового трансформатора?",
+        a: "Отправьте запрос с мощностью, напряжениями, исполнением, количеством и городом доставки. Для КТП приложите данные опросного листа в сообщение заявки. Состав и стоимость поставки уточняются в КП.",
+      },
+      {
+        q: "Можно ли запросить поставку вместе с электромонтажом?",
+        a: "Да, в заявке укажите объект, перечень оборудования и необходимые работы. AIMAG принимает заявки на электромонтаж под ключ; объём и условия согласовываются по данным проекта.",
+      },
+    ],
+    relatedArticles: [
+      "kupit-ktp-kazakhstan",
+      "kupit-silovoy-transformator-kazakhstan",
+      "komplektaciya-obekta-elektromontazh-pod-klyuch",
+    ],
+    relatedPages: [
+      { label: "Изоляторы и арматура ВЛ", href: "/catalog?cat=izolyatory-armatura" },
+      { label: "Кабель и провод", href: "/catalog?cat=kabel-provod" },
+      { label: "Электромонтаж под ключ", href: "/elektromontazh" },
+    ],
+  },
   "izolyatory-armatura": {
     metaTitle: "Купить высоковольтные изоляторы в Шымкенте — цены и наличие",
     metaDescription:
@@ -77,7 +123,11 @@ export const categorySeo: Record<string, CategorySeo> = {
         a: "Стеклянные изоляторы саморазрушаются при пробое (видимый дефект на линии), что упрощает диагностику; фарфоровые — прочнее к механическим ударам. Выбор обычно определяется проектом и принятой на объекте практикой эксплуатации.",
       },
     ],
-    relatedArticles: ["izolyatory-vl-shtyrevye-i-podvesnye"],
+    relatedArticles: [
+      "izolyatory-vl-shtyrevye-i-podvesnye",
+      "kupit-izolyatory-kazakhstan",
+      "kupit-sip-3-kazakhstan",
+    ],
     relatedPages: [
       { label: "Кабельная арматура", href: "/catalog?cat=kabelnaya-armatura" },
       { label: "Арматура СИП", href: "/catalog?cat=armatura-sip" },
@@ -181,7 +231,14 @@ export const categorySeo: Record<string, CategorySeo> = {
         a: "Отгружаем и отрезками под проектный расчёт, и полными бухтами/барабанами — способ отгрузки укажите в заявке на КП.",
       },
     ],
-    relatedArticles: ["vvg-vs-vvgng-ls", "sip-vs-golyj-provod", "kak-vybrat-sechenie-kabelya"],
+    relatedArticles: [
+      "vvg-vs-vvgng-ls",
+      "sip-vs-golyj-provod",
+      "kak-vybrat-sechenie-kabelya",
+      "kupit-vvgng-kazakhstan",
+      "kupit-sip-3-kazakhstan",
+      "kupit-sip-4-kazakhstan",
+    ],
     relatedPages: [
       { label: "Кабели ВВГ / АВВГ", href: "/kabeli-vvg-avvg" },
       { label: "Провод СИП", href: "/kabeli-sip" },
@@ -705,7 +762,7 @@ export const categorySeo: Record<string, CategorySeo> = {
         a: "Прокалывающий зажим устанавливается без разрезания несущей жилы магистрали, но работы на действующей воздушной линии в любом случае выполняются с соблюдением правил электробезопасности — это определяет регламент вашей эксплуатирующей организации.",
       },
     ],
-    relatedArticles: ["sip-vs-golyj-provod"],
+    relatedArticles: ["sip-vs-golyj-provod", "kupit-sip-4-kazakhstan"],
     relatedPages: [
       { label: "Кабель и провод", href: "/catalog?cat=kabel-provod" },
       { label: "Изоляторы и арматура ВЛ", href: "/catalog?cat=izolyatory-armatura" },
