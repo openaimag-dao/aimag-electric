@@ -176,7 +176,11 @@ export const categorySeo: Record<string, CategorySeo> = {
         a: "Да, основные диаметры от 16 до 63 мм — лёгкая и тяжёлая гофра, металлорукав в ПВХ-оболочке. Точный ассортимент по диаметру — в каталоге ниже.",
       },
     ],
-    relatedArticles: ["kabelnye-mufty-kak-vybrat", "gofra-metallorukav-kabel-kanal"],
+    relatedArticles: [
+      "kabelnye-mufty-kak-vybrat",
+      "kupit-kabelnye-mufty-kazakhstan",
+      "gofra-metallorukav-kabel-kanal",
+    ],
     relatedPages: [
       { label: "Кабели ВВГ / АВВГ", href: "/kabeli-vvg-avvg" },
       { label: "Изоляторы и арматура ВЛ", href: "/catalog?cat=izolyatory-armatura" },

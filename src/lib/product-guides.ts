@@ -9,7 +9,7 @@ export function productGuides(title: string): { href: string; label: string }[] 
     return [{ href: "/blog/kupit-vvgng-kazakhstan", label: "Маркировка и заказ кабеля ВВГнг" }];
   if (/МУФТА/u.test(name))
     return [
-      { href: "/blog/kabelnye-mufty-kak-vybrat", label: "Какие данные нужны для подбора муфты" },
+      { href: "/blog/kupit-kabelnye-mufty-kazakhstan", label: "Подбор и заказ кабельной муфты" },
     ];
   if (/ИЗОЛЯТОР/u.test(name))
     return [
