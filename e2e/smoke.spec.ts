@@ -23,9 +23,17 @@ test.describe("Публичные страницы", () => {
       await expect(main.locator(`a[href="${catalog}"]`).first()).toBeVisible();
       await expect(main.locator('a[href^="/blog/kupit-"]').first()).toBeVisible();
       await main.getByRole("button", { name: "Запросить КП", exact: true }).click();
-      await expect(page.getByRole("dialog").getByLabel("Что нужно", { exact: true })).toHaveValue(
-        `Нужен подбор по теме «${title}».\nТовары и количество: \nГород доставки: `
-      );
+      const request = await page
+        .getByRole("dialog")
+        .getByLabel("Что нужно", { exact: true })
+        .inputValue();
+      expect(request).toContain(`Нужен подбор по теме «${title}».`);
+      expect(request).toContain("Город доставки: ");
+      expect(request).toContain("Желаемый срок поставки: ");
+      if (slug === "kupit-ktp-kazakhstan")
+        expect(request).toContain("Мощность, напряжения и исполнение КТП: ");
+      if (slug === "kupit-vvgng-kazakhstan")
+        expect(request).toContain("Длина по каждой позиции, м: ");
       if (slug === "komplektaciya-obekta-elektromontazh-pod-klyuch") {
         await page.getByRole("dialog").getByRole("button", { name: "Закрыть" }).click();
         await main.locator('a[href="/elektromontazh"]').first().click();
@@ -57,7 +65,7 @@ test.describe("Публичные страницы", () => {
     await page.getByRole("button", { name: "Запросить КП", exact: true }).click();
     const dialog = page.getByRole("dialog");
     await expect(dialog.getByLabel("Что нужно", { exact: true })).toHaveValue(
-      `Нужен подбор по теме «${title}».\nТовары и количество: \nГород доставки: `
+      `Нужен подбор по теме «${title}».\nТовары и количество: \nГород доставки: \nЖелаемый срок поставки: `
     );
     await dialog.getByRole("button", { name: "Закрыть", exact: true }).click();
     await page.getByRole("link", { name: /Посмотреть автоматические выключатели/ }).click();

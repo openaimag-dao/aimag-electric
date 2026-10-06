@@ -9,6 +9,7 @@ import { ContentBlocks } from "@/components/common/content-blocks";
 import { articles } from "@/config/articles";
 import { buyingGuides } from "@/config/buying-guides";
 import { siteConfig } from "@/config/site";
+import { articleQuote } from "@/config/article-quote";
 
 const relatedCatalog: Record<string, { href: string; label: string }> = {
   "kak-vybrat-sechenie-kabelya": {
@@ -195,12 +196,18 @@ export default async function ArticlePage({ params }: PageProps) {
         <div>
           <p className="font-display font-semibold text-primary">Нужен подбор под ваш проект?</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Пришлите спецификацию — подготовим коммерческое предложение.
+            Укажите данные ниже в заявке — подготовим коммерческое предложение. Если параметр
+            неизвестен, напишите, что нужен подбор.
           </p>
+          <ul className="mt-3 list-inside list-disc space-y-1 text-sm text-steel-700">
+            {articleQuote(article.slug, article.title).checklist.map((field) => (
+              <li key={field}>{field}</li>
+            ))}
+          </ul>
         </div>
         <QuoteDialog
           triggerLabel="Запросить КП"
-          defaultMessage={`Нужен подбор по теме «${article.title}».\nТовары и количество: \nГород доставки: `}
+          defaultMessage={articleQuote(article.slug, article.title).message}
         />
       </div>
 
