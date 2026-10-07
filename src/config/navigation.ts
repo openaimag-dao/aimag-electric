@@ -12,6 +12,7 @@ export const footerNav: { title: string; items: NavItem[] }[] = [
     title: "Продукция",
     items: [
       { label: "Кабель ВВГ / АВВГ", href: "/kabeli-vvg-avvg" },
+      { label: "Промышленные кабели", href: "/promyshlennye-kabeli" },
       { label: "Провод СИП", href: "/kabeli-sip" },
       { label: "Кабельная арматура", href: "/catalog?cat=kabelnaya-armatura" },
       { label: "Изоляторы и арматура ВЛ", href: "/catalog?cat=izolyatory-armatura" },

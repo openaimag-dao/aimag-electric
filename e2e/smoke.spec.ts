@@ -2,6 +2,22 @@ import { test, expect } from "@playwright/test";
 import { PrismaClient } from "@prisma/client";
 
 test.describe("Публичные страницы", () => {
+  test("промышленные кабели: выбор размера передаётся в запрос цены", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/promyshlennye-kabeli");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Промышленные кабели");
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      "href",
+      "https://www.aimag.kz/promyshlennye-kabeli"
+    );
+    const main = page.getByRole("main");
+    await expect(main.getByRole("button", { name: /^Запросить цену / })).toHaveCount(32);
+    await main.getByRole("button", { name: "Запросить цену АСБл 3×120", exact: true }).click();
+    const message = page.getByRole("dialog").getByLabel("Что нужно", { exact: true });
+    await expect(message).toHaveValue(/кабеля АСБл 3×120 мм²/);
+    await expect(message).toHaveValue(/10 кВ/);
+    await expect(message).toHaveValue(/Длина, м:/);
+  });
   for (const [slug, catalog] of [
     ["kupit-kabelnye-mufty-kazakhstan", "/catalog?cat=kabelnaya-armatura"],
     ["kupit-sip-3-kazakhstan", "/kabeli-sip"],

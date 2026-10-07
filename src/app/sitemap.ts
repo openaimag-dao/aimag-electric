@@ -25,7 +25,7 @@ const STATIC_PAGES = [
 ];
 
 /** SEO landing pages targeting specific product-family keywords — same priority tier as category pages. */
-const SEO_LANDING_PAGES = ["/kabeli-vvg-avvg", "/kabeli-sip"];
+const SEO_LANDING_PAGES = ["/kabeli-vvg-avvg", "/kabeli-sip", "/promyshlennye-kabeli"];
 
 /**
  * Sitemap crawler traffic must not trigger two full catalog queries per request.
