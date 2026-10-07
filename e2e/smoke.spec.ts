@@ -2,6 +2,37 @@ import { test, expect } from "@playwright/test";
 import { PrismaClient } from "@prisma/client";
 
 test.describe("Публичные страницы", () => {
+  for (const [slug, name, request] of [
+    ["asbl-10", "АСБл-10", "АСБл 3×95"],
+    ["kvvg", "КВВГ", "КВВГ 7×1,5"],
+    ["kg", "КГ", "КГ 3×2,5"],
+  ]) {
+    test(`страница кабеля ${slug}: переход из подборки и запрос`, async ({ page }) => {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.goto("/promyshlennye-kabeli");
+      await page.getByRole("link", { name: `Подбор и заказ кабеля ${name}`, exact: true }).click();
+      await expect(page.getByRole("heading", { level: 1 })).toContainText(name);
+      await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+        "href",
+        `https://www.aimag.kz/promyshlennye-kabeli/${slug}`
+      );
+      await expect(
+        page.getByRole("main").getByRole("button", { name: /^Запросить цену / })
+      ).toHaveCount(4);
+      await page
+        .getByRole("main")
+        .getByRole("button", { name: /^Запросить цену / })
+        .first()
+        .click();
+      await expect(page.getByRole("dialog").getByLabel("Что нужно", { exact: true })).toHaveValue(
+        new RegExp(request)
+      );
+    });
+  }
+  test("неизвестная марка кабеля возвращает 404", async ({ page }) => {
+    const response = await page.goto("/promyshlennye-kabeli/unknown-cable");
+    expect(response?.status()).toBe(404);
+  });
   test("промышленные кабели: выбор размера передаётся в запрос цены", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/promyshlennye-kabeli");
