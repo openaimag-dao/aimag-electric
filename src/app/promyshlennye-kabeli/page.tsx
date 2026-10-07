@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { QuoteDialog } from "@/components/common/quote-dialog";
 import { industrialCables, industrialCableRequest } from "@/config/industrial-cables";
+import { industrialCablePages } from "@/config/industrial-cable-pages";
 import { siteConfig } from "@/config/site";
 
 const title = "Промышленные кабели — АСБл, КВВГ, КГ, силовые и бронированные";
@@ -54,6 +55,17 @@ export default function IndustrialCablesPage() {
             <p className="mt-1 text-sm text-muted-foreground">
               {group.execution}. Цена и возможность поставки — по запросу.
             </p>
+            {industrialCablePages
+              .filter((item) => item.groupId === group.id)
+              .map((item) => (
+                <Link
+                  key={item.slug}
+                  href={`/promyshlennye-kabeli/${item.slug}`}
+                  className="mt-3 inline-block text-sm underline"
+                >
+                  Подбор и заказ кабеля {item.name}
+                </Link>
+              ))}
             <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {group.sizes.map((size) => (
                 <li key={size} className="rounded-lg border border-border p-4">

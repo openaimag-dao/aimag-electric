@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { unstable_cache } from "next/cache";
 
+import { industrialCablePages } from "@/config/industrial-cable-pages";
 import { siteConfig } from "@/config/site";
 import { productRepository, categoryRepository } from "@/server/repositories";
 import { articles } from "@/config/articles";
@@ -25,7 +26,12 @@ const STATIC_PAGES = [
 ];
 
 /** SEO landing pages targeting specific product-family keywords — same priority tier as category pages. */
-const SEO_LANDING_PAGES = ["/kabeli-vvg-avvg", "/kabeli-sip", "/promyshlennye-kabeli"];
+const SEO_LANDING_PAGES = [
+  "/kabeli-vvg-avvg",
+  "/kabeli-sip",
+  "/promyshlennye-kabeli",
+  ...industrialCablePages.map(({ slug }) => `/promyshlennye-kabeli/${slug}`),
+];
 
 /**
  * Sitemap crawler traffic must not trigger two full catalog queries per request.
