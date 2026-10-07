@@ -15,6 +15,7 @@ export interface Article {
   excerpt: string;
   category: string;
   date: string;
+  updatedDate?: string;
   readingTime: string;
   catalogLink?: { href: string; label: string };
   content: ArticleBlock[];
@@ -429,6 +430,7 @@ export const articles: Article[] = [
   },
   {
     slug: "kabelnye-mufty-kak-vybrat",
+    updatedDate: "2026-10-07",
     title: "Кабельные муфты: какую выбрать для соединения и заделки кабеля",
     excerpt:
       "Соединительные и концевые муфты, термоусаживаемые против литых и эпоксидных — что учитывать при подборе под конкретный кабель.",
@@ -493,6 +495,19 @@ export const articles: Article[] = [
       {
         kind: "note",
         text: "Монтаж муфты — операция, где именно квалификация монтажника и соблюдение технологии производителя определяют надёжность соединения; материал не заменяет инструкцию конкретного комплекта муфты.",
+      },
+      {
+        kind: "links",
+        items: [
+          {
+            href: "/blog/kupit-kabelnye-mufty-kazakhstan",
+            label: "Запрос цены на концевые и соединительные муфты",
+          },
+          {
+            href: "/blog/komplektaciya-obekta-elektromontazh-pod-klyuch",
+            label: "Комплектация кабельной линии вместе с монтажом",
+          },
+        ],
       },
     ],
   },
