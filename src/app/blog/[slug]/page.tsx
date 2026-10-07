@@ -80,6 +80,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       url: `${siteConfig.url}/blog/${article.slug}`,
       type: "article",
       publishedTime: article.date,
+      modifiedTime: article.updatedDate ?? article.date,
     },
     twitter: { card: "summary", title: article.title, description: article.excerpt },
   };
@@ -119,6 +120,7 @@ export default async function ArticlePage({ params }: PageProps) {
     headline: article.title,
     description: article.excerpt,
     datePublished: article.date,
+    dateModified: article.updatedDate ?? article.date,
     inLanguage: "ru",
     articleSection: article.category,
     publisher: { "@type": "Organization", name: siteConfig.name, url: siteConfig.url },
@@ -140,7 +142,7 @@ export default async function ArticlePage({ params }: PageProps) {
         Все статьи
       </Link>
 
-      <div className="mt-6 flex items-center gap-3">
+      <div className="mt-6 flex flex-wrap items-center gap-3">
         <Badge variant="muted">{article.category}</Badge>
         <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
           <Clock className="size-3.5" />
@@ -149,6 +151,11 @@ export default async function ArticlePage({ params }: PageProps) {
         <time className="text-xs text-muted-foreground" dateTime={article.date}>
           {formatDate(article.date)}
         </time>
+        {article.updatedDate && (
+          <time className="text-xs text-muted-foreground" dateTime={article.updatedDate}>
+            Обновлено: {formatDate(article.updatedDate)}
+          </time>
+        )}
       </div>
 
       <h1 className="mt-3 font-display text-3xl font-bold text-primary md:text-4xl">
