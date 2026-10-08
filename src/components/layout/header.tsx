@@ -97,6 +97,35 @@ export function Header({
 
         <MobileNav dict={dict} />
       </div>
+      {navCategories.length > 0 && (
+        <div className="border-t border-border bg-background xl:hidden">
+          <div className="container py-2">
+            <p className="mb-1 text-xs font-medium text-muted-foreground">
+              {locale === "kk" ? "Санаттар · жылжытыңыз →" : "Категории · листайте →"}
+            </p>
+            <nav
+              aria-label={locale === "kk" ? "Тауар санаттары" : "Категории товаров"}
+              className="flex max-w-full gap-2 overflow-x-auto overscroll-x-contain pb-1"
+            >
+              <Link
+                href="/catalog"
+                className="inline-flex min-h-11 shrink-0 items-center rounded-lg border border-border bg-secondary px-3 text-sm font-semibold text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-signal"
+              >
+                {locale === "kk" ? "Барлық тауарлар" : "Все товары"}
+              </Link>
+              {navCategories.map((category) => (
+                <Link
+                  key={category.slug}
+                  href={`/catalog?cat=${encodeURIComponent(category.slug)}`}
+                  className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-lg border border-border px-3 text-sm font-medium text-primary hover:bg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-signal"
+                >
+                  {category.title}
+                </Link>
+              ))}
+            </nav>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
