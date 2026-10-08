@@ -57,11 +57,9 @@ test.describe("Публичные страницы", () => {
       .locator("aside")
       .filter({ has: page.getByRole("heading", { name: "Фильтры", exact: true }) });
     await expect(sidebar.getByRole("button", { name: "Тип / марка", exact: true })).toBeVisible();
-    const filterItem = sidebar
-      .locator('[data-state="open"]')
-      .filter({ has: sidebar.getByRole("button", { name: "Тип / марка", exact: true }) })
-      .first();
-    const checkbox = filterItem.getByRole("checkbox").first();
+    const typeTrigger = sidebar.getByRole("button", { name: "Тип / марка", exact: true });
+    const contentId = await typeTrigger.getAttribute("aria-controls");
+    const checkbox = sidebar.locator(`[id="${contentId}"]`).getByRole("checkbox").first();
     await checkbox.click();
     await expect(page).toHaveURL((url) => Boolean(url.searchParams.get("attr:catalogType")));
     const selected = new URL(page.url()).searchParams.get("attr:catalogType")!;
@@ -74,23 +72,37 @@ test.describe("Публичные страницы", () => {
     await expect(sidebar.getByRole("checkbox", { checked: true })).toHaveCount(1);
   });
   test("одна марка кабеля идёт по числу жил и сечению через страницы", async ({ page }) => {
-    const query = new URLSearchParams({ "attr:catalogType": "ВВГНГ(А)-LS" });
+    const query = new URLSearchParams({ q: "Кабель" });
     await page.goto(`/catalog?${query}`);
     const titles = page.getByRole("main").locator("article h3");
     await expect(titles.first()).toBeVisible();
-    const dimensions = (values: string[]) =>
-      values.map((value) => {
-        const match = value.match(/(\d+)\s*[×хx]\s*(\d+(?:[.,]\d+)?)/);
-        expect(match).not.toBeNull();
-        return [Number(match![1]), Number(match![2].replace(",", "."))];
-      });
-    const first = dimensions(await titles.allTextContents());
+    const first = await titles.allTextContents();
     query.set("page", "2");
     await page.goto(`/catalog?${query}`);
     await expect(titles.first()).toBeVisible();
-    const second = dimensions(await titles.allTextContents());
-    const all = [...first, ...second];
-    expect(all).toEqual([...all].sort((a, b) => a[0] - b[0] || a[1] - b[1]));
+    const all = [...first, ...(await titles.allTextContents())].map((title) => {
+      const match = title.trim().match(/^Кабель (\S+) (\d+)\s*[×хx]\s*(\d+(?:[.,]\d+)?)/);
+      expect(match).not.toBeNull();
+      return {
+        mark: match![1],
+        cores: Number(match![2]),
+        size: Number(match![3].replace(",", ".")),
+      };
+    });
+    const runs = all
+      .filter((item, index) => index === 0 || item.mark !== all[index - 1].mark)
+      .map((item) => item.mark);
+    expect(runs.length).toBe(new Set(runs).size);
+    for (let index = 1; index < all.length; index++) {
+      const previous = all[index - 1],
+        current = all[index];
+      if (previous.mark === current.mark) {
+        expect(
+          current.cores > previous.cores ||
+            (current.cores === previous.cores && current.size >= previous.size)
+        ).toBe(true);
+      }
+    }
   });
   for (const [slug, name, request] of [
     ["asbl-10", "АСБл-10", "АСБл 3×95"],
