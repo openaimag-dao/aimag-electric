@@ -15,7 +15,7 @@ export const emptyFilters: CatalogFilters = {
   priceMin: null,
   priceMax: null,
   inStockOnly: false,
-  sort: "popular",
+  sort: "grouped",
   page: 1,
 };
 

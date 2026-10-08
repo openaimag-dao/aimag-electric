@@ -1,6 +1,7 @@
 import type { SortOption } from "@/types/catalog";
 
 export const sortOptions: SortOption[] = [
+  { key: "grouped", label: "По типу и названию" },
   { key: "popular", label: "По популярности" },
   { key: "price_asc", label: "Цена: по возрастанию" },
   { key: "price_desc", label: "Цена: по убыванию" },

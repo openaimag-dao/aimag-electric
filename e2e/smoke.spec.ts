@@ -49,6 +49,49 @@ test.describe("Публичные страницы", () => {
       page.locator("header").getByRole("combobox", { name: "Поиск по каталогу" })
     ).toBeVisible();
   });
+  test("типы товаров фильтруются в боковой панели и сортируются вместе", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    // CI's seed retains the old cable slug; production uses its consolidated category.
+    await page.goto("/catalog");
+    const sidebar = page
+      .locator("aside")
+      .filter({ has: page.getByRole("heading", { name: "Фильтры", exact: true }) });
+    await expect(sidebar.getByRole("button", { name: "Тип / марка", exact: true })).toBeVisible();
+    const filterItem = sidebar
+      .locator('[data-state="open"]')
+      .filter({ has: sidebar.getByRole("button", { name: "Тип / марка", exact: true }) })
+      .first();
+    const checkbox = filterItem.getByRole("checkbox").first();
+    await checkbox.click();
+    await expect(page).toHaveURL((url) => Boolean(url.searchParams.get("attr:catalogType")));
+    const selected = new URL(page.url()).searchParams.get("attr:catalogType")!;
+    const titles = page.getByRole("main").locator("article h3");
+    await expect(titles.first()).toBeVisible();
+    for (const title of await titles.allTextContents()) {
+      expect(title.trim().toUpperCase()).toContain(selected);
+    }
+    await page.reload();
+    await expect(sidebar.getByRole("checkbox", { checked: true })).toHaveCount(1);
+  });
+  test("одна марка кабеля идёт по числу жил и сечению через страницы", async ({ page }) => {
+    const query = new URLSearchParams({ "attr:catalogType": "ВВГНГ(А)-LS" });
+    await page.goto(`/catalog?${query}`);
+    const titles = page.getByRole("main").locator("article h3");
+    await expect(titles.first()).toBeVisible();
+    const dimensions = (values: string[]) =>
+      values.map((value) => {
+        const match = value.match(/(\d+)\s*[×хx]\s*(\d+(?:[.,]\d+)?)/);
+        expect(match).not.toBeNull();
+        return [Number(match![1]), Number(match![2].replace(",", "."))];
+      });
+    const first = dimensions(await titles.allTextContents());
+    query.set("page", "2");
+    await page.goto(`/catalog?${query}`);
+    await expect(titles.first()).toBeVisible();
+    const second = dimensions(await titles.allTextContents());
+    const all = [...first, ...second];
+    expect(all).toEqual([...all].sort((a, b) => a[0] - b[0] || a[1] - b[1]));
+  });
   for (const [slug, name, request] of [
     ["asbl-10", "АСБл-10", "АСБл 3×95"],
     ["kvvg", "КВВГ", "КВВГ 7×1,5"],

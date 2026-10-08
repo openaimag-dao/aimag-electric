@@ -1,7 +1,7 @@
 import type { CatalogFilters, SortKey } from "@/types/catalog";
 import { emptyFilters } from "@/lib/catalog";
 
-const SORT_KEYS: SortKey[] = ["popular", "price_asc", "price_desc", "new", "title"];
+const SORT_KEYS: SortKey[] = ["grouped", "popular", "price_asc", "price_desc", "new", "title"];
 
 function numList(v: string | null): number[] {
   if (!v) return [];
@@ -29,7 +29,7 @@ const ATTR_PREFIX = "attr:";
 /** Parse filters from URL search params. Unknown/absent → defaults. */
 export function parseFilters(params: URLSearchParams): CatalogFilters {
   const sortRaw = params.get("sort") as SortKey | null;
-  const sort = sortRaw && SORT_KEYS.includes(sortRaw) ? sortRaw : "popular";
+  const sort = sortRaw && SORT_KEYS.includes(sortRaw) ? sortRaw : "grouped";
   const pageRaw = Number(params.get("page"));
 
   const attrs: Record<string, string[]> = {};
@@ -83,7 +83,7 @@ export function filtersToParams(f: CatalogFilters): URLSearchParams {
   if (f.priceMin !== null) p.set("pmin", String(f.priceMin));
   if (f.priceMax !== null) p.set("pmax", String(f.priceMax));
   if (f.inStockOnly) p.set("stock", "1");
-  if (f.sort !== "popular") p.set("sort", f.sort);
+  if (f.sort !== "grouped") p.set("sort", f.sort);
   if (f.page > 1) p.set("page", String(f.page));
   return p;
 }

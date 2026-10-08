@@ -6,6 +6,7 @@ import { productRepository, categoryRepository, attributeRepository } from "@/se
 import {
   findCatalogPageIds,
   findPriceBoundsTenge,
+  facetProductTypes,
   facetCategories,
   facetManufacturers,
   facetAttribute,
@@ -21,6 +22,7 @@ import {
   type DynamicAttributeFacet,
 } from "@/lib/catalog";
 import type { AttributeDef, CatalogFilters, FacetOption } from "@/types/catalog";
+import { PRODUCT_TYPE_KEY } from "@/lib/catalog-query-builder";
 import { mergedCategorySlugs } from "@/config/category-merges";
 
 /**
@@ -122,6 +124,7 @@ export const catalogService = {
       crossSections,
       voltages,
       priceBounds,
+      productTypes,
     ] = await Promise.all([
       this.getCategoryNames(),
       loadAttributes(),
@@ -132,10 +135,12 @@ export const catalogService = {
       facetAttribute(filters, "crossSection", "crossSections"),
       facetAttribute(filters, "voltage", "voltages"),
       findPriceBoundsTenge(),
+      facetProductTypes(filters),
     ]);
 
     const dynamicDefs = attributeDefs.filter(
-      (def) => !FIXED_ATTRIBUTE_KEYS.has(def.key) && def.type !== "BOOLEAN"
+      (def) =>
+        def.key !== PRODUCT_TYPE_KEY && !FIXED_ATTRIBUTE_KEYS.has(def.key) && def.type !== "BOOLEAN"
     );
     const dynamicAttributes: DynamicAttributeFacet[] = (
       await Promise.all(
@@ -163,7 +168,15 @@ export const catalogService = {
       cores: toNumericOptions(cores, (v) => `${v} жил.`),
       crossSections: toNumericOptions(crossSections, (v) => `${v} мм²`),
       voltages: toNumericOptions(voltages, (v) => `${v} кВ`),
-      dynamicAttributes,
+      dynamicAttributes: [
+        {
+          key: PRODUCT_TYPE_KEY,
+          name: "Тип / марка",
+          unit: null,
+          options: productTypes.map(({ value, count }) => ({ value, label: value, count })),
+        },
+        ...dynamicAttributes,
+      ],
       priceBounds,
     };
   },

@@ -41,6 +41,12 @@ export const HAS_IMAGE = Prisma.sql`EXISTS (
   SELECT 1 FROM "ProductImage" pi WHERE pi."productId" = p.id AND pi.url IS NOT NULL AND pi.url != ''
 )`;
 
+/** Derived browsing label; not a technical specification. No inventory or attribute writes. */
+export const PRODUCT_TYPE_KEY = "catalogType";
+export const PRODUCT_TYPE = Prisma.sql`COALESCE(NULLIF(UPPER(SUBSTRING(
+  REGEXP_REPLACE(BTRIM(p.title), '^(кабель|провод)[[:space:]]+((силовой|контрольный|гибкий|бронированный|самонесущий|изолированный)[[:space:]]+)*', '', 'i')
+  FROM '^[^[:space:]]+')), ''), 'Другое')`;
+
 /** FROM clause shared by every catalog query — category/brand joined for slug/name filters and search. */
 export const FROM = Prisma.sql`FROM "Product" p
   JOIN "Category" c ON c.id = p."categoryId"
@@ -107,7 +113,11 @@ export function buildConditions(filters: CatalogFilters, exclude?: FilterDimensi
   }
   for (const [key, values] of Object.entries(filters.attrs)) {
     if (!values.length || exclude === `attr:${key}`) continue;
-    conds.push(attrValueCond(key, values));
+    conds.push(
+      key === PRODUCT_TYPE_KEY
+        ? Prisma.sql`${PRODUCT_TYPE} IN (${Prisma.join(values)})`
+        : attrValueCond(key, values)
+    );
   }
   if (filters.inStockOnly && exclude !== "inStockOnly") {
     conds.push(IN_STOCK);
@@ -131,6 +141,13 @@ export function whereSql(filters: CatalogFilters, exclude?: FilterDimension): Pr
 }
 
 export function orderBySql(sort: SortKey): Prisma.Sql {
+  if (sort === "grouped" || sort === "title") {
+    // Keep families together across pagination; images must not split a family.
+    return Prisma.sql`c.title ASC, ${PRODUCT_TYPE} ASC,
+      REPLACE(SUBSTRING(p.title FROM '([0-9]+)[[:space:]]*[xх×*]'), ',', '.')::numeric ASC NULLS LAST,
+      REPLACE(SUBSTRING(p.title FROM '[xх×*][[:space:]]*([0-9]+([.,][0-9]+)?)'), ',', '.')::numeric ASC NULLS LAST,
+      p.title ASC, p.id`;
+  }
   const primary =
     sort === "popular"
       ? Prisma.sql`p.popularity DESC`

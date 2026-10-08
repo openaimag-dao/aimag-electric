@@ -5,6 +5,8 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { PAGE_SIZE } from "@/config/catalog-sort";
 import {
+  PRODUCT_TYPE,
+  PRODUCT_TYPE_KEY,
   EFFECTIVE_PRICE_TIYN,
   FROM,
   whereSql,
@@ -105,4 +107,13 @@ export async function facetAttribute(
       GROUP BY value`
   );
   return rows.map((r) => ({ value: r.value, count: Number(r.count) }));
+}
+
+/** Counts ignore their own type selection while respecting all other filters. */
+export async function facetProductTypes(filters: CatalogFilters): Promise<RawFacetRow[]> {
+  const rows = await prisma.$queryRaw<{ value: string; count: bigint }[]>(
+    Prisma.sql`SELECT ${PRODUCT_TYPE} AS value, COUNT(*)::bigint AS count
+      ${FROM} WHERE ${whereSql(filters, `attr:${PRODUCT_TYPE_KEY}`)} GROUP BY value ORDER BY value`
+  );
+  return rows.map((row) => ({ value: row.value, count: Number(row.count) }));
 }

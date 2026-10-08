@@ -33,7 +33,7 @@ export interface CatalogProduct {
   image?: string | null;
 }
 
-export type SortKey = "popular" | "price_asc" | "price_desc" | "new" | "title";
+export type SortKey = "grouped" | "popular" | "price_asc" | "price_desc" | "new" | "title";
 
 export interface SortOption {
   key: SortKey;
