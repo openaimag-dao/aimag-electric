@@ -13,7 +13,7 @@ test.describe("Публичные страницы", () => {
     const dialog = page.getByRole("dialog", { name: "Категории товаров" });
     await expect(dialog).toBeVisible();
     await expect.poll(async () => (await dialog.boundingBox())?.x).toBe(0);
-    await expect(dialog.getByRole("searchbox")).toBeVisible();
+    await expect(dialog.getByRole("combobox", { name: "Поиск по каталогу" })).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(dialog).toHaveCount(0);
     await page.getByRole("button", { name: "Каталог", exact: true }).click();
@@ -34,16 +34,20 @@ test.describe("Публичные страницы", () => {
   test("поиск в боковом каталоге закрывает панель и остаётся в шапке", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
-    await expect(page.locator("header").getByRole("searchbox")).toBeVisible();
+    await expect(
+      page.locator("header").getByRole("combobox", { name: "Поиск по каталогу" })
+    ).toBeVisible();
     await page.getByRole("button", { name: "Каталог", exact: true }).click();
     const dialog = page.getByRole("dialog", { name: "Категории товаров" });
-    await dialog.getByRole("searchbox").fill("кабель");
-    await dialog.getByRole("searchbox").press("Enter");
+    await dialog.getByRole("combobox", { name: "Поиск по каталогу" }).fill("кабель");
+    await dialog.getByRole("combobox", { name: "Поиск по каталогу" }).press("Enter");
     await expect(page).toHaveURL(
       (url) => url.pathname === "/catalog" && url.searchParams.get("q") === "кабель"
     );
     await expect(dialog).toHaveCount(0);
-    await expect(page.locator("header").getByRole("searchbox")).toBeVisible();
+    await expect(
+      page.locator("header").getByRole("combobox", { name: "Поиск по каталогу" })
+    ).toBeVisible();
   });
   for (const [slug, name, request] of [
     ["asbl-10", "АСБл-10", "АСБл 3×95"],
