@@ -2,6 +2,25 @@ import { test, expect } from "@playwright/test";
 import { PrismaClient } from "@prisma/client";
 
 test.describe("Публичные страницы", () => {
+  test("мобильные категории видны в шапке и открывают выбранный раздел", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    const nav = page.getByRole("navigation", { name: "Категории товаров", exact: true });
+    await expect(nav).toBeVisible();
+    await expect(nav.getByRole("link", { name: "Все товары", exact: true })).toBeInViewport();
+    const categoryLink = nav.locator('a[href*="?cat="]').last();
+    const href = await categoryLink.getAttribute("href");
+    expect(href).toBeTruthy();
+    await categoryLink.scrollIntoViewIfNeeded();
+    await categoryLink.click();
+    await expect(page).toHaveURL(new RegExp(href!.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "$"));
+    await expect(nav).toBeVisible();
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)
+    ).toBe(true);
+    await nav.getByRole("link", { name: "Все товары", exact: true }).click();
+    await expect(page).toHaveURL(/\/catalog$/);
+  });
   for (const [slug, name, request] of [
     ["asbl-10", "АСБл-10", "АСБл 3×95"],
     ["kvvg", "КВВГ", "КВВГ 7×1,5"],
