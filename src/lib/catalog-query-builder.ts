@@ -43,9 +43,12 @@ export const HAS_IMAGE = Prisma.sql`EXISTS (
 
 /** Derived browsing label; not a technical specification. No inventory or attribute writes. */
 export const PRODUCT_TYPE_KEY = "catalogType";
-export const PRODUCT_TYPE = Prisma.sql`COALESCE(NULLIF(UPPER(SUBSTRING(
-  REGEXP_REPLACE(BTRIM(p.title), '^(кабель|провод)[[:space:]]+((силовой|контрольный|гибкий|бронированный|самонесущий|изолированный)[[:space:]]+)*', '', 'i')
-  FROM '^[^[:space:]]+')), ''), 'Другое')`;
+export const PRODUCT_TYPE = Prisma.sql`COALESCE(NULLIF(UPPER(CASE
+  WHEN BTRIM(p.title) ~* '^(кабель|провод)[[:space:]]' THEN SUBSTRING(
+    REGEXP_REPLACE(BTRIM(p.title), '^(кабель|провод)[[:space:]]+((силовой|контрольный|гибкий|бронированный|самонесущий|изолированный)[[:space:]]+)*', '', 'i')
+    FROM '^[^[:space:]]+')
+  ELSE BTRIM(REGEXP_REPLACE(BTRIM(p.title), '[[:space:]]+([0-9]|[A-ZА-Я][0-9]).*$', '', 'i'))
+END), ''), 'Другое')`;
 
 /** FROM clause shared by every catalog query — category/brand joined for slug/name filters and search. */
 export const FROM = Prisma.sql`FROM "Product" p
