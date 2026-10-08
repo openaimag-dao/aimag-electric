@@ -23,6 +23,8 @@ describe("catalog crawl policy", () => {
     { brand: "ABB" },
     { pmin: "500" },
     { "attr:color": "чёрный" },
+    { "attr:catalogType": "СИП-4" },
+    { sort: "popular" },
   ])("excludes search/filter pages for both generic crawlers and Google: %j", (params) => {
     const result = catalogSeo(searchParamsToFilters(params), true);
     expect(result.robots).toMatchObject({

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildConditions, orderBySql } from "./catalog-query-builder";
+import { buildConditions, orderBySql, PRODUCT_TYPE_KEY } from "./catalog-query-builder";
 import { emptyFilters } from "./catalog";
 import type { CatalogFilters } from "@/types/catalog";
 
@@ -93,5 +93,25 @@ describe("orderBySql", () => {
 
   it("breaks remaining ties by id for stable pagination", () => {
     expect(orderBySql("popular").sql.trim().endsWith("p.id")).toBe(true);
+  });
+});
+
+describe("type browsing", () => {
+  it("uses parameterized family values and omits its own facet selection", () => {
+    const selected = {
+      ...emptyFilters,
+      categories: ["kabel-provod"],
+      attrs: { [PRODUCT_TYPE_KEY]: ["ВВГНГ(А)-LS", "СИП-4"] },
+    };
+    const conditions = buildConditions(selected);
+    expect(conditions.at(-1)?.values).toEqual(["ВВГНГ(А)-LS", "СИП-4"]);
+    expect(buildConditions(selected, `attr:${PRODUCT_TYPE_KEY}`)).toHaveLength(2);
+  });
+  it("keeps families and numeric sizes before title and id, without photo priority", () => {
+    const sql = orderBySql("grouped").sql;
+    expect(sql).toContain("REGEXP_REPLACE");
+    expect(sql).toContain("::numeric ASC NULLS LAST");
+    expect(sql).not.toContain("ProductImage");
+    expect(sql.trim().endsWith("p.title ASC, p.id")).toBe(true);
   });
 });

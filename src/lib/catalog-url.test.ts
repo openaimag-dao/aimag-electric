@@ -26,3 +26,14 @@ describe("catalog numeric URL filters", () => {
     expect(filters.voltages).toEqual([0.4]);
   });
 });
+
+describe("type and default sorting URL", () => {
+  it("defaults to grouped order and roundtrips family and explicit popularity", () => {
+    expect(parseFilters(new URLSearchParams()).sort).toBe("grouped");
+    const filters = parseFilters(
+      new URLSearchParams("cat=kabel-provod&attr:catalogType=СИП-4&sort=popular")
+    );
+    expect(parseFilters(filtersToParams(filters))).toEqual(filters);
+    expect(filtersToParams(filters).get("sort")).toBe("popular");
+  });
+});

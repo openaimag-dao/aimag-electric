@@ -16,6 +16,7 @@ import { useCatalogFilters } from "@/hooks/use-catalog-filters";
 import { activeFilterCount, emptyFilters, type CatalogFacets } from "@/lib/catalog";
 
 const DEFAULT_OPEN = [
+  "attr-catalogType",
   "categories",
   "manufacturers",
   "price",
@@ -52,6 +53,21 @@ export function FilterSidebar({ facets }: { facets: CatalogFacets }) {
       </div>
 
       <Accordion type="multiple" defaultValue={DEFAULT_OPEN} className="px-4">
+        {facets.dynamicAttributes
+          .filter((facet) => facet.key === "catalogType")
+          .map((facet) => (
+            <AccordionItem key={facet.key} value={`attr-${facet.key}`}>
+              <AccordionTrigger>{facet.name}</AccordionTrigger>
+              <AccordionContent>
+                <FacetCheckboxList
+                  options={facet.options}
+                  selected={filters.attrs[facet.key] ?? []}
+                  onToggle={(value) => toggleAttr(facet.key, value)}
+                  collapseAfter={8}
+                />
+              </AccordionContent>
+            </AccordionItem>
+          ))}
         {/* Категории */}
         <AccordionItem value="categories">
           <AccordionTrigger>Категории</AccordionTrigger>
@@ -164,25 +180,27 @@ export function FilterSidebar({ facets }: { facets: CatalogFacets }) {
         </AccordionItem>
 
         {/* Прочие характеристики — генерируются из реально присутствующих в выборке атрибутов */}
-        {facets.dynamicAttributes.map((facet, i) => (
-          <AccordionItem
-            key={facet.key}
-            value={`attr-${facet.key}`}
-            className={i === facets.dynamicAttributes.length - 1 ? "border-b-0" : ""}
-          >
-            <AccordionTrigger>
-              {facet.name}
-              {facet.unit ? `, ${facet.unit}` : ""}
-            </AccordionTrigger>
-            <AccordionContent>
-              <FacetCheckboxList
-                options={facet.options}
-                selected={filters.attrs[facet.key] ?? []}
-                onToggle={(v) => toggleAttr(facet.key, v)}
-              />
-            </AccordionContent>
-          </AccordionItem>
-        ))}
+        {facets.dynamicAttributes
+          .filter((facet) => facet.key !== "catalogType")
+          .map((facet, i) => (
+            <AccordionItem
+              key={facet.key}
+              value={`attr-${facet.key}`}
+              className={i === facets.dynamicAttributes.length - 1 ? "border-b-0" : ""}
+            >
+              <AccordionTrigger>
+                {facet.name}
+                {facet.unit ? `, ${facet.unit}` : ""}
+              </AccordionTrigger>
+              <AccordionContent>
+                <FacetCheckboxList
+                  options={facet.options}
+                  selected={filters.attrs[facet.key] ?? []}
+                  onToggle={(v) => toggleAttr(facet.key, v)}
+                />
+              </AccordionContent>
+            </AccordionItem>
+          ))}
       </Accordion>
 
       <Separator />

@@ -15,7 +15,7 @@ export function catalogSeo(filters: CatalogFilters, categoryExists: boolean) {
     filters.priceMin === null &&
     filters.priceMax === null &&
     !filters.inStockOnly &&
-    filters.sort === "popular";
+    filters.sort === "grouped";
   const query = filtersToParams(filters).toString();
 
   return {
