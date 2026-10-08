@@ -71,8 +71,8 @@ test.describe("Публичные страницы", () => {
     await page.reload();
     await expect(sidebar.getByRole("checkbox", { checked: true })).toHaveCount(1);
   });
-  test("одна марка кабеля идёт по числу жил и сечению через страницы", async ({ page }) => {
-    const query = new URLSearchParams({ q: "Кабель" });
+  test("марки кабеля сгруппированы и размеры идут по порядку через страницы", async ({ page }) => {
+    const query = new URLSearchParams({ "attr:catalogType": "ВВГНГ(А)-LS,АВВГ,ВББШВ,КГ,ПВББШП" });
     await page.goto(`/catalog?${query}`);
     const titles = page.getByRole("main").locator("article h3");
     await expect(titles.first()).toBeVisible();
