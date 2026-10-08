@@ -2,24 +2,48 @@ import { test, expect } from "@playwright/test";
 import { PrismaClient } from "@prisma/client";
 
 test.describe("Публичные страницы", () => {
-  test("мобильные категории видны в шапке и открывают выбранный раздел", async ({ page }) => {
+  test("мобильный Каталог открывает категории слева без перехода с главной", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
-    const nav = page.getByRole("navigation", { name: "Категории товаров", exact: true });
-    await expect(nav).toBeVisible();
-    await expect(nav.getByRole("link", { name: "Все товары", exact: true })).toBeInViewport();
-    const categoryLink = nav.locator('a[href*="?cat="]').last();
-    const href = await categoryLink.getAttribute("href");
+    await expect(
+      page.getByRole("navigation", { name: "Категории товаров", exact: true })
+    ).toHaveCount(0);
+    await page.getByRole("button", { name: "Каталог", exact: true }).click();
+    await expect(page).toHaveURL(/\/$/);
+    const dialog = page.getByRole("dialog", { name: "Категории товаров" });
+    await expect(dialog).toBeVisible();
+    await expect.poll(async () => (await dialog.boundingBox())?.x).toBe(0);
+    await expect(dialog.getByRole("searchbox")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(dialog).toHaveCount(0);
+    await page.getByRole("button", { name: "Каталог", exact: true }).click();
+    const category = dialog.locator('a[href*="?cat="]').last();
+    const href = await category.getAttribute("href");
     expect(href).toBeTruthy();
-    await categoryLink.scrollIntoViewIfNeeded();
-    await categoryLink.click();
-    await expect(page).toHaveURL(new RegExp(href!.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "$"));
-    await expect(nav).toBeVisible();
+    await category.scrollIntoViewIfNeeded();
+    await category.click();
+    await expect(page).toHaveURL((url) => url.pathname + url.search === href);
+    await expect(dialog).toHaveCount(0);
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)
     ).toBe(true);
-    await nav.getByRole("link", { name: "Все товары", exact: true }).click();
+    await page.getByRole("button", { name: "Каталог", exact: true }).click();
+    await dialog.getByRole("link", { name: "Все товары", exact: true }).click();
     await expect(page).toHaveURL(/\/catalog$/);
+  });
+  test("поиск в боковом каталоге закрывает панель и остаётся в шапке", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    await expect(page.locator("header").getByRole("searchbox")).toBeVisible();
+    await page.getByRole("button", { name: "Каталог", exact: true }).click();
+    const dialog = page.getByRole("dialog", { name: "Категории товаров" });
+    await dialog.getByRole("searchbox").fill("кабель");
+    await dialog.getByRole("searchbox").press("Enter");
+    await expect(page).toHaveURL(
+      (url) => url.pathname === "/catalog" && url.searchParams.get("q") === "кабель"
+    );
+    await expect(dialog).toHaveCount(0);
+    await expect(page.locator("header").getByRole("searchbox")).toBeVisible();
   });
   for (const [slug, name, request] of [
     ["asbl-10", "АСБл-10", "АСБл 3×95"],
