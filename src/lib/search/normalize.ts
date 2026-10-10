@@ -11,11 +11,16 @@ const SEPARATOR_CHARS = ["x", "х", "×", "*"] as const;
  * — the common case, so most searches do zero extra work.
  */
 export function expandSeparatorVariants(query: string): string[] {
-  if (!/\d[xх×*]\d/.test(query)) return [query];
-
+  if (!/\d\s*[xх×*]\s*\d/i.test(query)) return [query];
+  const compact = query.replace(/(\d)\s*[xх×*]\s*(\d)/gi, "$1×$2");
   const variants = new Set<string>([query]);
-  for (const sep of SEPARATOR_CHARS) {
-    variants.add(query.replace(/(\d)[xх×*](\d)/g, `$1${sep}$2`));
+  for (const decimal of [".", ","]) {
+    const dimensions = compact.replace(/(\d)[.,](\d)/g, `$1${decimal}$2`);
+    for (const sep of SEPARATOR_CHARS) {
+      for (const spacing of ["", " "]) {
+        variants.add(dimensions.replace(/(\d)×(\d)/g, `$1${spacing}${sep}${spacing}$2`));
+      }
+    }
   }
   return Array.from(variants);
 }

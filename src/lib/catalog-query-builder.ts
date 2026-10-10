@@ -43,11 +43,12 @@ export const HAS_IMAGE = Prisma.sql`EXISTS (
 
 /** Derived browsing label; not a technical specification. No inventory or attribute writes. */
 export const PRODUCT_TYPE_KEY = "catalogType";
+export const PRODUCT_TITLE = Prisma.sql`REGEXP_REPLACE(BTRIM(p.title), '[[:space:]]+', ' ', 'g')`;
 export const PRODUCT_TYPE = Prisma.sql`COALESCE(NULLIF(UPPER(CASE
-  WHEN BTRIM(p.title) ~* '^(кабель|провод)[[:space:]]' THEN SUBSTRING(
-    REGEXP_REPLACE(BTRIM(p.title), '^(кабель|провод)[[:space:]]+((силовой|контрольный|гибкий|бронированный|самонесущий|изолированный)[[:space:]]+)*', '', 'i')
+  WHEN ${PRODUCT_TITLE} ~* '^(кабель|провод)[[:space:]]' THEN SUBSTRING(
+    REGEXP_REPLACE(${PRODUCT_TITLE}, '^(кабель|провод)[[:space:]]+((силовой|контрольный|гибкий|бронированный|самонесущий|изолированный)[[:space:]]+)*', '', 'i')
     FROM '^[^[:space:]]+')
-  ELSE BTRIM(REGEXP_REPLACE(BTRIM(p.title), '[[:space:]]+([0-9]|[A-ZА-Я][0-9]).*$', '', 'i'))
+  ELSE BTRIM(REGEXP_REPLACE(${PRODUCT_TITLE}, '[[:space:]]+([0-9]|[A-ZА-Я][0-9]).*$', '', 'i'))
 END), ''), 'Другое')`;
 
 /** FROM clause shared by every catalog query — category/brand joined for slug/name filters and search. */
@@ -147,8 +148,8 @@ export function orderBySql(sort: SortKey): Prisma.Sql {
   if (sort === "grouped" || sort === "title") {
     // Keep families together across pagination; images must not split a family.
     return Prisma.sql`c.title ASC, ${PRODUCT_TYPE} ASC,
-      REPLACE(SUBSTRING(p.title FROM '([0-9]+)[[:space:]]*[xх×*]'), ',', '.')::numeric ASC NULLS LAST,
-      REPLACE(SUBSTRING(p.title FROM '[xх×*][[:space:]]*([0-9]+([.,][0-9]+)?)'), ',', '.')::numeric ASC NULLS LAST,
+      REPLACE(SUBSTRING(p.title FROM '([0-9]+)[[:space:]]*[xXхХ×*]'), ',', '.')::numeric ASC NULLS LAST,
+      REPLACE(SUBSTRING(p.title FROM '[xXхХ×*][[:space:]]*([0-9]+([.,][0-9]+)?)'), ',', '.')::numeric ASC NULLS LAST,
       p.title ASC, p.id`;
   }
   const primary =

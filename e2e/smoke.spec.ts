@@ -104,6 +104,23 @@ test.describe("Публичные страницы", () => {
       }
     }
   });
+  test("разные написания размера находят ту же подборку кабелей", async ({ page }) => {
+    await page.goto(`/catalog?${new URLSearchParams({ q: "2 x 2,5" })}`);
+    const cards = page.getByRole("main").locator("article h3 a");
+    await expect(cards.first()).toBeVisible();
+    const first = await cards.evaluateAll((links) =>
+      links.map((link) => link.getAttribute("href"))
+    );
+    for (const title of await cards.allTextContents()) {
+      expect(title).not.toMatch(/\s{2,}/);
+      expect(title).toContain("2×2,5");
+    }
+    await page.goto(`/catalog?${new URLSearchParams({ q: "2×2.5" })}`);
+    await expect(cards.first()).toBeVisible();
+    expect(
+      await cards.evaluateAll((links) => links.map((link) => link.getAttribute("href")))
+    ).toEqual(first);
+  });
   for (const [slug, name, request] of [
     ["asbl-10", "АСБл-10", "АСБл 3×95"],
     ["kvvg", "КВВГ", "КВВГ 7×1,5"],
