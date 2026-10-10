@@ -171,6 +171,7 @@ test.describe("Публичные страницы", () => {
     await expect(message).toHaveValue(/Длина, м:/);
   });
   for (const [slug, catalog] of [
+    ["komplektaciya-bronirovannoy-kabelnoy-linii", "/promyshlennye-kabeli"],
     ["kupit-kabelnye-mufty-kazakhstan", "/catalog?cat=kabelnaya-armatura"],
     ["kupit-sip-3-kazakhstan", "/kabeli-sip"],
     ["kupit-sip-4-kazakhstan", "/kabeli-sip"],

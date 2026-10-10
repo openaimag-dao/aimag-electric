@@ -117,6 +117,9 @@ export default async function CablePage({ params }: PageProps) {
           defaultMessage={`Прошу рассчитать кабель ${content.name} по спецификации.\nМарки и размеры: \nМетраж по каждой позиции: \nГород доставки: \nЖелаемый срок: \nТребования к документам и монтажу: `}
         />
         <div className="mt-4 flex flex-wrap gap-4 text-sm underline">
+          <Link href="/blog/komplektaciya-bronirovannoy-kabelnoy-linii">
+            Комплектация кабельной линии
+          </Link>
           <Link href="/blog/kupit-kabelnye-mufty-kazakhstan">Кабельные муфты</Link>
           <Link href="/elektromontazh">Электромонтаж под ключ</Link>
           {industrialCablePages
