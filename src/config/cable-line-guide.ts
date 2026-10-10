@@ -50,6 +50,7 @@ export const cableLineGuide: Article = {
     {
       kind: "links",
       items: [
+        { href: "/promyshlennye-kabeli/apvbshv", label: "АПвБШв: изоляция СПЭ и запрос расчёта" },
         { href: "/promyshlennye-kabeli/vbshv", label: "ВБШв: размеры и данные для заказа" },
         { href: "/promyshlennye-kabeli/avbshv", label: "АВБШв: запрос поставки и подключения" },
         { href: "/promyshlennye-kabeli/asbl-10", label: "АСБл на 10 кВ: метраж и комплектация" },
