@@ -31,6 +31,13 @@ describe("expandSeparatorVariants", () => {
     expect(expandSeparatorVariants("Maxi")).toEqual(["Maxi"]);
   });
 
+  it("supports decimal commas and spaces around dimension separators", () => {
+    const values = expandSeparatorVariants("3 x 2,5");
+    expect(values).toContain("3×2.5");
+    expect(values).toContain("3х2,5");
+    expect(values).toContain("3 * 2.5");
+  });
+
   it("returns unique variants only", () => {
     const variants = expandSeparatorVariants("4x120");
     expect(new Set(variants).size).toBe(variants.length);

@@ -1,5 +1,6 @@
 import type { ProductBadge } from "@prisma/client";
 
+import { normalizeProductTitle } from "@/lib/product-title";
 import { publicPriceTiyn, type PublicPriceRow } from "@/lib/public-price";
 import { tiynToTenge } from "@/lib/money";
 import { productSpecRows } from "@/lib/product-specs";
@@ -99,7 +100,7 @@ export function toCatalogDTO(p: ProductForCatalog): CatalogProductDTO {
   return {
     id: p.id,
     slug: p.slug,
-    title: p.title,
+    title: normalizeProductTitle(p.title),
     categorySlug: p.category.slug,
     category: p.category.title,
     manufacturer: p.brand.name,
