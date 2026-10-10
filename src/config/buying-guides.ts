@@ -1,9 +1,11 @@
 import type { Article } from "@/config/articles";
 import { powerBuyingGuides } from "@/config/power-buying-guides";
+import { cableLineGuide } from "@/config/cable-line-guide";
 import { muftyBuyingGuide } from "@/config/mufty-buying-guide";
 
 /** Buying guides use confirmed manufacturer facts, not prices or stock from demo records. */
 export const buyingGuides: Article[] = [
+  cableLineGuide,
   muftyBuyingGuide,
   ...powerBuyingGuides,
   {
