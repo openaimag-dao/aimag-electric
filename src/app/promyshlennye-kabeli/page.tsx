@@ -96,7 +96,7 @@ export default function IndustrialCablesPage() {
         </p>
         <div className="mt-4 flex flex-wrap gap-4 text-sm underline">
           <Link href="/blog/kupit-kabelnye-mufty-kazakhstan">Подбор кабельных муфт</Link>
-          <Link href="/blog/komplektaciya-obekta-elektromontazh-pod-klyuch">
+          <Link href="/blog/komplektaciya-bronirovannoy-kabelnoy-linii">
             Комплектация кабельной линии
           </Link>
           <Link href="/elektromontazh">Электромонтаж под ключ</Link>

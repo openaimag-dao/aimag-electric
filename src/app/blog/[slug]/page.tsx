@@ -10,6 +10,7 @@ import { articles } from "@/config/articles";
 import { buyingGuides } from "@/config/buying-guides";
 import { siteConfig } from "@/config/site";
 import { articleQuote } from "@/config/article-quote";
+import { findBlogTopic } from "@/config/blog-topics";
 
 const relatedCatalog: Record<string, { href: string; label: string }> = {
   "kak-vybrat-sechenie-kabelya": {
@@ -100,13 +101,16 @@ export default async function ArticlePage({ params }: PageProps) {
   if (!article) notFound();
 
   const related = article.catalogLink ?? relatedCatalog[article.slug];
+  const topic = findBlogTopic(article.slug);
   const others = articles
     .filter((a) => a.slug !== article.slug)
     .sort((a, b) => {
       const score = (candidate: (typeof articles)[number]) =>
         (related && (candidate.catalogLink ?? relatedCatalog[candidate.slug])?.href === related.href
           ? 2
-          : 0) + (candidate.category === article.category ? 1 : 0);
+          : 0) +
+        (topic?.slugs.includes(candidate.slug) ? 3 : 0) +
+        (candidate.category === article.category ? 1 : 0);
       return score(b) - score(a);
     })
     .slice(0, 2);
@@ -141,6 +145,14 @@ export default async function ArticlePage({ params }: PageProps) {
         <ArrowLeft className="size-4" />
         Все статьи
       </Link>
+      {topic && (
+        <Link
+          href={`/blog#${topic.id}`}
+          className="ml-4 inline-block text-sm text-muted-foreground underline"
+        >
+          {topic.title}
+        </Link>
+      )}
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <Badge variant="muted">{article.category}</Badge>
