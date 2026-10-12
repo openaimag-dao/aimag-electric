@@ -122,6 +122,7 @@ test.describe("Публичные страницы", () => {
     ).toEqual(first);
   });
   for (const [slug, name, request] of [
+    ["vvgng-ls", "ВВГнг(А)-LS", "ВВГнг\\(А\\)-LS 3×2,5"],
     ["avvg", "АВВГ", "АВВГ 4×16"],
     ["apvbshv", "АПвБШв", "АПвБШв 3×95"],
     ["asbl-10", "АСБл-10", "АСБл 3×95"],
@@ -177,7 +178,7 @@ test.describe("Публичные страницы", () => {
     ["kupit-kabelnye-mufty-kazakhstan", "/catalog?cat=kabelnaya-armatura"],
     ["kupit-sip-3-kazakhstan", "/kabeli-sip"],
     ["kupit-sip-4-kazakhstan", "/kabeli-sip"],
-    ["kupit-vvgng-kazakhstan", "/kabeli-vvg-avvg"],
+    ["kupit-vvgng-kazakhstan", "/promyshlennye-kabeli/vvgng-ls"],
     ["kupit-izolyatory-kazakhstan", "/catalog?cat=izolyatory-armatura"],
     ["kupit-silovoy-transformator-kazakhstan", "/catalog?cat=vysokovoltnoe"],
     ["kupit-ktp-kazakhstan", "/catalog?cat=vysokovoltnoe"],
@@ -216,6 +217,28 @@ test.describe("Публичные страницы", () => {
       }
     });
   }
+
+  test("темы блога: мобильная навигация и переход к заказу кабеля", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/blog");
+    await page
+      .getByRole("navigation", { name: "Темы блога" })
+      .getByRole("link", { name: "Кабели и провода" })
+      .click();
+    await expect(page).toHaveURL(/\/blog#cables$/);
+    const section = page.locator("section#cables");
+    await section
+      .getByRole("link", { name: "Купить кабель ВВГнг в Казахстане: маркировка, цена и заказ" })
+      .click();
+    await expect(
+      page.getByRole("main").getByRole("link", { name: "Кабели и провода", exact: true })
+    ).toHaveAttribute("href", "/blog#cables");
+    await page
+      .getByRole("link", { name: "Выбрать размер ВВГнг(А)-LS и запросить цену →", exact: true })
+      .click();
+    await expect(page).toHaveURL(/\/promyshlennye-kabeli\/vvgng-ls$/);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("ВВГнг(А)-LS");
+  });
 
   test("статья ведёт к товарам и передаёт тему в запрос КП", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });

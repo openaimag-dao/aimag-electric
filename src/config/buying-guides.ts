@@ -215,10 +215,11 @@ export const buyingGuides: Article[] = [
       "Как заказать ВВГнг и ВВГнг(А)-LS без путаницы: полная маркировка, число жил, сечение, напряжение, длина и документы для закупки.",
     category: "Выбор и закупка",
     date: "2026-10-02",
+    updatedDate: "2026-10-12",
     readingTime: "4 мин",
     catalogLink: {
-      href: "/kabeli-vvg-avvg",
-      label: "Посмотреть кабель ВВГ и запросить предложение",
+      href: "/promyshlennye-kabeli/vvgng-ls",
+      label: "Выбрать размер ВВГнг(А)-LS и запросить цену",
     },
     content: [
       {
