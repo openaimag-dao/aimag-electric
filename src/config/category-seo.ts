@@ -177,8 +177,9 @@ export const categorySeo: Record<string, CategorySeo> = {
       },
     ],
     relatedArticles: [
-      "kabelnye-mufty-kak-vybrat",
       "kupit-kabelnye-mufty-kazakhstan",
+      "komplektaciya-bronirovannoy-kabelnoy-linii",
+      "kabelnye-mufty-kak-vybrat",
       "gofra-metallorukav-kabel-kanal",
     ],
     relatedPages: [
@@ -236,14 +237,16 @@ export const categorySeo: Record<string, CategorySeo> = {
       },
     ],
     relatedArticles: [
+      "kupit-vvgng-kazakhstan",
+      "kupit-sip-4-kazakhstan",
+      "komplektaciya-bronirovannoy-kabelnoy-linii",
       "vvg-vs-vvgng-ls",
       "sip-vs-golyj-provod",
       "kak-vybrat-sechenie-kabelya",
-      "kupit-vvgng-kazakhstan",
       "kupit-sip-3-kazakhstan",
-      "kupit-sip-4-kazakhstan",
     ],
     relatedPages: [
+      { label: "Промышленные кабели по маркам и сечениям", href: "/promyshlennye-kabeli" },
       { label: "Кабели ВВГ / АВВГ", href: "/kabeli-vvg-avvg" },
       { label: "Провод СИП", href: "/kabeli-sip" },
       { label: "Кабельная арматура", href: "/catalog?cat=kabelnaya-armatura" },

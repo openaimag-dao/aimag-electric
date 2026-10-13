@@ -245,6 +245,19 @@ test.describe("Публичные страницы", () => {
     });
   }
 
+  test("руководства категории доступны на мобильном экране и скрыты в поиске", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/catalog?cat=kabel-provod");
+    const guides = page.getByRole("navigation", { name: "Руководства по категории" });
+    await expect(guides.getByRole("link")).toHaveCount(3);
+    await guides
+      .getByRole("link", { name: "Купить кабель ВВГнг в Казахстане: маркировка, цена и заказ" })
+      .click();
+    await expect(page).toHaveURL(/\/blog\/kupit-vvgng-kazakhstan$/);
+    await page.goto("/catalog?cat=kabel-provod&q=ВВГ");
+    await expect(guides).toHaveCount(0);
+  });
+
   test("темы блога: мобильная навигация и переход к заказу кабеля", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/blog");
