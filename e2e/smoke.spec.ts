@@ -247,14 +247,12 @@ test.describe("Публичные страницы", () => {
 
   test("руководства категории доступны на мобильном экране и скрыты в поиске", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/catalog?cat=kabel-provod");
+    await page.goto("/catalog?cat=armatura-sip");
     const guides = page.getByRole("navigation", { name: "Руководства по категории" });
-    await expect(guides.getByRole("link")).toHaveCount(3);
-    await guides
-      .getByRole("link", { name: "Купить кабель ВВГнг в Казахстане: маркировка, цена и заказ" })
-      .click();
-    await expect(page).toHaveURL(/\/blog\/kupit-vvgng-kazakhstan$/);
-    await page.goto("/catalog?cat=kabel-provod&q=ВВГ");
+    await expect(guides.getByRole("link")).toHaveCount(2);
+    await guides.locator('a[href="/blog/kupit-sip-4-kazakhstan"]').click();
+    await expect(page).toHaveURL(/\/blog\/kupit-sip-4-kazakhstan$/);
+    await page.goto("/catalog?cat=armatura-sip&q=зажим");
     await expect(guides).toHaveCount(0);
   });
 
