@@ -6,6 +6,7 @@ import { industrialCablePages } from "@/config/industrial-cable-pages";
 import { industrialCables, industrialCableRequest } from "@/config/industrial-cables";
 import { siteConfig } from "@/config/site";
 import { buildFaqJsonLd } from "@/lib/faq-jsonld";
+import { SeoBreadcrumbs } from "@/components/common/seo-breadcrumbs";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -45,9 +46,13 @@ export default async function CablePage({ params }: PageProps) {
           __html: JSON.stringify(buildFaqJsonLd(content.faq)).replace(/</g, "\\u003c"),
         }}
       />
-      <Link href="/promyshlennye-kabeli" className="text-sm underline">
-        Все промышленные кабели
-      </Link>
+      <SeoBreadcrumbs
+        items={[
+          { name: "Главная", href: "/" },
+          { name: "Все промышленные кабели", href: "/promyshlennye-kabeli" },
+          { name: `Кабель ${content.name}`, href: `/promyshlennye-kabeli/${content.slug}` },
+        ]}
+      />
       <h1 className="mt-4 font-display text-3xl font-bold text-primary">
         Купить кабель {content.name} в Казахстане
       </h1>

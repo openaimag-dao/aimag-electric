@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { QuoteDialog } from "@/components/common/quote-dialog";
@@ -11,6 +11,7 @@ import { buyingGuides } from "@/config/buying-guides";
 import { siteConfig } from "@/config/site";
 import { articleQuote } from "@/config/article-quote";
 import { findBlogTopic } from "@/config/blog-topics";
+import { SeoBreadcrumbs } from "@/components/common/seo-breadcrumbs";
 
 const relatedCatalog: Record<string, { href: string; label: string }> = {
   "kak-vybrat-sechenie-kabelya": {
@@ -138,13 +139,13 @@ export default async function ArticlePage({ params }: PageProps) {
           __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
         }}
       />
-      <Link
-        href="/blog"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary"
-      >
-        <ArrowLeft className="size-4" />
-        Все статьи
-      </Link>
+      <SeoBreadcrumbs
+        items={[
+          { name: "Главная", href: "/" },
+          { name: "Все статьи", href: "/blog" },
+          { name: article.title, href: `/blog/${article.slug}` },
+        ]}
+      />
       {topic && (
         <Link
           href={`/blog#${topic.id}`}

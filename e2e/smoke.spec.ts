@@ -136,6 +136,30 @@ test.describe("Публичные страницы", () => {
       await page.goto("/promyshlennye-kabeli");
       await page.getByRole("link", { name: `Подбор и заказ кабеля ${name}`, exact: true }).click();
       await expect(page.getByRole("heading", { level: 1 })).toContainText(name);
+      const breadcrumbs = page.getByRole("navigation", { name: "Путь страницы" });
+      await expect(
+        breadcrumbs.getByRole("link", { name: "Все промышленные кабели" })
+      ).toHaveAttribute("href", "/promyshlennye-kabeli");
+      await expect(breadcrumbs.locator('[aria-current="page"]')).toHaveText(`Кабель ${name}`);
+      const structuredData = (
+        await page.locator('script[type="application/ld+json"]').allTextContents()
+      ).map((text) => JSON.parse(text));
+      const breadcrumbData = structuredData.find((data) => data["@type"] === "BreadcrumbList");
+      expect(breadcrumbData.itemListElement).toEqual([
+        { "@type": "ListItem", position: 1, name: "Главная", item: "https://www.aimag.kz/" },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Все промышленные кабели",
+          item: "https://www.aimag.kz/promyshlennye-kabeli",
+        },
+        {
+          "@type": "ListItem",
+          position: 3,
+          name: `Кабель ${name}`,
+          item: `https://www.aimag.kz/promyshlennye-kabeli/${slug}`,
+        },
+      ]);
       await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
         "href",
         `https://www.aimag.kz/promyshlennye-kabeli/${slug}`
@@ -189,6 +213,9 @@ test.describe("Публичные страницы", () => {
       await page.goto(`/blog/${slug}`);
       const main = page.getByRole("main");
       const title = await main.getByRole("heading", { level: 1 }).innerText();
+      await expect(
+        main.getByRole("navigation", { name: "Путь страницы" }).locator('[aria-current="page"]')
+      ).toHaveText(title);
       await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
         "href",
         `https://www.aimag.kz/blog/${slug}`
