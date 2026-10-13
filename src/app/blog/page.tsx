@@ -5,6 +5,7 @@ import { ArrowUpRight, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { articles } from "@/config/articles";
 import { blogTopics } from "@/config/blog-topics";
+import { SeoBreadcrumbs } from "@/components/common/seo-breadcrumbs";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/blog" },
@@ -24,6 +25,12 @@ function formatDate(iso: string) {
 export default function BlogIndexPage() {
   return (
     <div className="container py-12">
+      <SeoBreadcrumbs
+        items={[
+          { name: "Главная", href: "/" },
+          { name: "Блог", href: "/blog" },
+        ]}
+      />
       <div className="max-w-2xl">
         <span className="font-mono text-xs font-semibold uppercase tracking-widest text-signal-700">
           Блог

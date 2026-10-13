@@ -4,6 +4,7 @@ import { QuoteDialog } from "@/components/common/quote-dialog";
 import { industrialCables, industrialCableRequest } from "@/config/industrial-cables";
 import { industrialCablePages } from "@/config/industrial-cable-pages";
 import { siteConfig } from "@/config/site";
+import { SeoBreadcrumbs } from "@/components/common/seo-breadcrumbs";
 
 const title = "Промышленные кабели — АСБл, КВВГ, КГ, силовые и бронированные";
 const description =
@@ -18,9 +19,13 @@ export const metadata: Metadata = {
 export default function IndustrialCablesPage() {
   return (
     <div className="container py-10">
-      <Link href="/catalog" className="text-sm text-steel-700 underline">
-        Каталог продукции
-      </Link>
+      <SeoBreadcrumbs
+        items={[
+          { name: "Главная", href: "/" },
+          { name: "Каталог продукции", href: "/catalog" },
+          { name: "Промышленные кабели", href: "/promyshlennye-kabeli" },
+        ]}
+      />
       <h1 className="mt-4 font-display text-3xl font-bold text-primary">
         Промышленные кабели для предприятий и объектов
       </h1>
