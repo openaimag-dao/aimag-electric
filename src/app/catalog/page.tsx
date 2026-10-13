@@ -88,7 +88,12 @@ export default async function CatalogPage({ searchParams }: PageProps) {
   const showCategoryContent =
     catalogSeo(filters, Boolean(category)).indexable && filters.page === 1;
   const seo = cat ? categorySeo[cat] : undefined;
-  const seoArticles = seo ? articles.filter((a) => seo.relatedArticles.includes(a.slug)) : [];
+  const seoArticles = seo
+    ? seo.relatedArticles.flatMap((slug) => {
+        const article = articles.find((item) => item.slug === slug);
+        return article ? [article] : [];
+      })
+    : [];
   const faqLd = seo ? buildFaqJsonLd(seo.faq) : null;
 
   return (
@@ -128,6 +133,27 @@ export default async function CatalogPage({ searchParams }: PageProps) {
               </p>
             </div>
           </div>
+
+          {showCategoryContent && seoArticles.length > 0 && (
+            <nav
+              aria-label="Руководства по категории"
+              className="mt-5 rounded-xl border border-border p-4"
+            >
+              <p className="text-sm font-semibold text-primary">Что подготовить для заказа</p>
+              <ul className="mt-2 flex flex-wrap gap-x-5 gap-y-3">
+                {seoArticles.slice(0, 3).map((article) => (
+                  <li key={article.slug}>
+                    <Link
+                      href={`/blog/${article.slug}`}
+                      className="text-sm text-signal-700 underline underline-offset-2"
+                    >
+                      {article.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          )}
 
           {category && (
             <div className="mt-6 flex flex-col gap-4 rounded-xl border border-border bg-secondary/30 p-4 sm:flex-row sm:items-center sm:justify-between">

@@ -245,6 +245,17 @@ test.describe("Публичные страницы", () => {
     });
   }
 
+  test("руководства категории доступны на мобильном экране и скрыты в поиске", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/catalog?cat=armatura-sip");
+    const guides = page.getByRole("navigation", { name: "Руководства по категории" });
+    await expect(guides.getByRole("link")).toHaveCount(2);
+    await guides.locator('a[href="/blog/kupit-sip-4-kazakhstan"]').click();
+    await expect(page).toHaveURL(/\/blog\/kupit-sip-4-kazakhstan$/);
+    await page.goto("/catalog?cat=armatura-sip&q=зажим");
+    await expect(guides).toHaveCount(0);
+  });
+
   test("темы блога: мобильная навигация и переход к заказу кабеля", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/blog");
