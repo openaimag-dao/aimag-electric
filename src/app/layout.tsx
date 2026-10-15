@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { FloatingWhatsApp } from "@/components/common/floating-whatsapp";
 import { Toaster } from "@/components/ui/sonner";
 import { SiteAnalytics } from "@/components/analytics/site-analytics";
 import { siteConfig } from "@/config/site";
@@ -117,6 +118,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
                   <Header locale={locale} dict={dict} navCategories={navCategories} />
                   <main className="flex-1">{children}</main>
                   <Footer />
+                  <FloatingWhatsApp />
                 </RecentlyViewedProvider>
               </CompareProvider>
             </FavoritesProvider>
