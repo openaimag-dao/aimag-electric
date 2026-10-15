@@ -38,6 +38,8 @@ export interface CatalogProductDTO {
   price: number | null; // в тенге (из тиынов)
   unit: string;
   availability: Availability;
+  /** True when total stock across warehouses is positive but low (see lib/availability.ts). */
+  lowStock: boolean;
   material: string | null;
   cores: number | null;
   crossSection: number | null;

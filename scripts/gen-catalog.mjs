@@ -139,6 +139,7 @@ for (const cat of categories) {
 
       const availPick = [0, 0, 0, 1, 1, 2][(idxInCat + counter) % 6];
       const availability = availPick === 0 ? "in_stock" : availPick === 1 ? "on_order" : "out";
+      const lowStock = availability === "in_stock" && counter % 7 === 0;
 
       counter++;
       idxInCat++;
@@ -158,6 +159,7 @@ for (const cat of categories) {
         price: priceFor(cat.slug, cs, voltage),
         unit: cat.unit,
         availability,
+        lowStock,
         material,
         cores: cores,
         crossSection: cs,

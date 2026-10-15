@@ -4,7 +4,7 @@ import { normalizeProductTitle } from "@/lib/product-title";
 import { publicPriceTiyn, type PublicPriceRow } from "@/lib/public-price";
 import { tiynToTenge } from "@/lib/money";
 import { productSpecRows } from "@/lib/product-specs";
-import { deriveAvailabilityFromStock } from "@/lib/availability";
+import { deriveAvailabilityFromStock, isLowStock } from "@/lib/availability";
 import {
   isLegacySeedDescription,
   isLegacySeedDocument,
@@ -108,6 +108,7 @@ export function toCatalogDTO(p: ProductForCatalog): CatalogProductDTO {
     price: derivePrice(p),
     unit: p.unit,
     availability: deriveAvailability(p),
+    lowStock: isLowStock(p.stock),
     material: (attrs.get("material") as string) ?? null,
     cores: (attrs.get("cores") as number) ?? null,
     crossSection: (attrs.get("crossSection") as number) ?? null,

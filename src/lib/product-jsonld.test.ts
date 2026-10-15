@@ -14,6 +14,7 @@ const product: ProductDetailDTO = {
   price: 750,
   unit: "м",
   availability: "in_stock",
+  lowStock: false,
   material: "медь",
   cores: 3,
   crossSection: 2.5,

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { deriveAvailabilityFromStock, leadTimeForAvailability } from "./availability";
+import { deriveAvailabilityFromStock, isLowStock, leadTimeForAvailability } from "./availability";
 
 describe("deriveAvailabilityFromStock", () => {
   it("is in_stock when any warehouse has positive quantity", () => {
@@ -17,6 +17,26 @@ describe("deriveAvailabilityFromStock", () => {
   it("is out when zero stock and no restock", () => {
     expect(deriveAvailabilityFromStock([{ quantity: 0, restockAt: null }])).toBe("out");
     expect(deriveAvailabilityFromStock([])).toBe("out");
+  });
+});
+
+describe("isLowStock", () => {
+  it("is false when out of stock", () => {
+    expect(isLowStock([{ quantity: 0, restockAt: null }])).toBe(false);
+  });
+  it("is false when comfortably in stock", () => {
+    expect(isLowStock([{ quantity: 6, restockAt: null }])).toBe(false);
+    expect(isLowStock([{ quantity: 100, restockAt: null }])).toBe(false);
+  });
+  it("is true when total across warehouses is positive but at or below the threshold", () => {
+    expect(isLowStock([{ quantity: 5, restockAt: null }])).toBe(true);
+    expect(isLowStock([{ quantity: 1, restockAt: null }])).toBe(true);
+    expect(
+      isLowStock([
+        { quantity: 2, restockAt: null },
+        { quantity: 3, restockAt: null },
+      ])
+    ).toBe(true);
   });
 });
 

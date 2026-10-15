@@ -54,6 +54,7 @@ export function ProductCard({
         )}
         <AvailabilityBadge
           status={product.availability}
+          lowStock={product.lowStock}
           className="absolute right-3 top-3 shadow-sm"
         />
         <FavoriteButton productId={product.id} className="absolute bottom-3 right-3" />
