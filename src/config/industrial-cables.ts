@@ -43,6 +43,18 @@ export const industrialCables = [
     execution: "Напряжение и климатическое исполнение по проекту",
     sizes: ["3×2,5", "3×4", "4×6", "4×10"],
   },
+  {
+    id: "avbbshv",
+    mark: "АВБбШв",
+    execution: "Напряжение и исполнение по проекту",
+    sizes: ["4×25", "4×35", "4×50", "4×70"],
+  },
+  {
+    id: "vbbshv",
+    mark: "ВБбШв",
+    execution: "Напряжение и исполнение по проекту",
+    sizes: ["4×16", "4×25", "4×35", "4×50"],
+  },
 ];
 
 export function industrialCableRequest(mark: string, size: string, execution: string) {
