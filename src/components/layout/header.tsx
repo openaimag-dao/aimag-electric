@@ -11,7 +11,6 @@ import { AccountLink } from "@/components/auth/account-link";
 import { CartBadge } from "@/components/cart/cart-badge";
 import { FavoritesBadge } from "@/components/favorites/favorites-badge";
 import { CompareBadge } from "@/components/compare/compare-badge";
-import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { siteConfig } from "@/config/site";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/types";
@@ -75,8 +74,13 @@ export function Header({
           <SearchBar />
         </div>
 
+        {/* LanguageSwitcher (RU/KZ) is intentionally not rendered — see
+            src/i18n/dictionaries/kk.ts: only 5 nav labels have a draft
+            Kazakh translation, the rest of the site stays in Russian, so
+            showing the toggle would make switching to "Қазақша" look
+            broken rather than unfinished. Re-add it once kk.ts has a real,
+            reviewed translation of product/blog/static-page copy. */}
         <div className="ml-auto hidden items-center gap-2 xl:ml-3 xl:flex">
-          <LanguageSwitcher locale={locale} dict={dict} />
           <CompareBadge />
           <FavoritesBadge />
           <CartBadge />
