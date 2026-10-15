@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { PrismaClient } from "@prisma/client";
+import { industrialCables } from "../src/config/industrial-cables";
 
 test.describe("Публичные страницы", () => {
   test("мобильный Каталог открывает категории слева без перехода с главной", async ({ page }) => {
@@ -190,7 +191,10 @@ test.describe("Публичные страницы", () => {
       "https://www.aimag.kz/promyshlennye-kabeli"
     );
     const main = page.getByRole("main");
-    await expect(main.getByRole("button", { name: /^Запросить цену / })).toHaveCount(32);
+    const expectedQuoteButtons = industrialCables.reduce((sum, item) => sum + item.sizes.length, 0);
+    await expect(main.getByRole("button", { name: /^Запросить цену / })).toHaveCount(
+      expectedQuoteButtons
+    );
     await main.getByRole("button", { name: "Запросить цену АСБл 3×120", exact: true }).click();
     const message = page.getByRole("dialog").getByLabel("Что нужно", { exact: true });
     await expect(message).toHaveValue(/кабеля АСБл 3×120 мм²/);
