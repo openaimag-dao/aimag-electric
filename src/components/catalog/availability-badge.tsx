@@ -23,12 +23,16 @@ const config: Record<Availability, { label: string; className: string; icon: typ
 
 export function AvailabilityBadge({
   status,
+  lowStock = false,
   className,
 }: {
   status: Availability;
+  /** Shows "Осталось немного" instead of the plain "В наличии" label. */
+  lowStock?: boolean;
   className?: string;
 }) {
-  const { label, className: tone, icon: Icon } = config[status];
+  const { label: plainLabel, className: tone, icon: Icon } = config[status];
+  const label = status === "in_stock" && lowStock ? "Осталось немного" : plainLabel;
   return (
     <span
       className={cn(

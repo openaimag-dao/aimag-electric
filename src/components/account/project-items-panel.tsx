@@ -224,7 +224,7 @@ export function ProjectItemsPanel({
                                 {p.title}
                               </Link>
                               <div className="mt-1 flex items-center gap-2">
-                                <AvailabilityBadge status={p.availability} />
+                                <AvailabilityBadge status={p.availability} lowStock={p.lowStock} />
                                 <span className="text-xs text-muted-foreground">
                                   {p.price !== null ? formatTenge(p.price) : "по запросу"}
                                 </span>

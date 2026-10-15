@@ -15,6 +15,8 @@ export interface CatalogProduct {
   companyPriceTenge?: number | null;
   unit: string; // м / шт / компл
   availability: Availability;
+  /** True when total stock across warehouses is positive but low (see lib/availability.ts). */
+  lowStock: boolean;
   /** Материал жилы/корпуса: медь, алюминий, стекло, фарфор, пластик, сталь. */
   material: string | null;
   /** Количество жил (для кабелей/проводов). */

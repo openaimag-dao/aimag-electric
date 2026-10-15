@@ -30,7 +30,7 @@ export function PurchasePanel({
   return (
     <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
       <div className="flex items-center justify-between gap-3">
-        <AvailabilityBadge status={product.availability} />
+        <AvailabilityBadge status={product.availability} lowStock={product.lowStock} />
         <span className="font-mono text-xs text-muted-foreground">Арт. {product.sku}</span>
       </div>
 

@@ -34,7 +34,7 @@ const BASE_ROWS: Row[] = [
     key: "availability",
     label: "Наличие",
     value: (p) => p.availability,
-    node: (p) => <AvailabilityBadge status={p.availability} />,
+    node: (p) => <AvailabilityBadge status={p.availability} lowStock={p.lowStock} />,
   },
 ];
 
