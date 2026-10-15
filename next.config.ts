@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import legacyProductSlugs from "./src/config/legacy-product-slugs.json";
 
 // Kept as a literal here (not imported from src/config/category-merges.ts)
 // since next.config.ts runs outside the app's TS path-alias resolution —
@@ -10,6 +11,13 @@ const MERGED_CATEGORY_SLUGS: Record<string, string> = {
   izolyatory: "izolyatory-armatura",
   mufty: "kabelnaya-armatura",
 };
+
+// Old product slugs were bare numeric IDs (or, for a dozen, "kabeli-N-N")
+// with no keyword value. legacy-product-slugs.json maps every one of them
+// to the descriptive slug it was renamed to — generated once from the title
+// (see gen-slug-map.mjs, run alongside the matching DB UPDATE) — so existing
+// bookmarks, backlinks and indexed search results still resolve.
+const LEGACY_PRODUCT_SLUGS: Record<string, string> = legacyProductSlugs;
 
 const securityHeaders = [
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
@@ -60,12 +68,18 @@ const nextConfig: NextConfig = {
   // `cat` are not preserved (destination replaces the query string), which
   // is an acceptable tradeoff for what's normally a bare category link.
   async redirects() {
-    return Object.entries(MERGED_CATEGORY_SLUGS).map(([oldSlug, newSlug]) => ({
+    const categoryRedirects = Object.entries(MERGED_CATEGORY_SLUGS).map(([oldSlug, newSlug]) => ({
       source: "/catalog",
       has: [{ type: "query" as const, key: "cat", value: oldSlug }],
       destination: `/catalog?cat=${newSlug}`,
       permanent: true,
     }));
+    const productRedirects = Object.entries(LEGACY_PRODUCT_SLUGS).map(([oldSlug, newSlug]) => ({
+      source: `/catalog/${oldSlug}`,
+      destination: `/catalog/${newSlug}`,
+      permanent: true,
+    }));
+    return [...categoryRedirects, ...productRedirects];
   },
 };
 
