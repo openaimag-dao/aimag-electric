@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { siteConfig } from "@/config/site";
+
 export function StaticPage({
   title,
   subtitle,
@@ -28,33 +30,36 @@ export function CompanyRequisites() {
       <dl className="grid gap-1.5">
         <div className="flex gap-2">
           <dt className="w-40 shrink-0 text-gray-500">Наименование</dt>
-          <dd>ИП ОРАЗБАЕВ ЕРЛАН ОЖАНОВИЧ (торговая марка AIMAG ELECTRIC)</dd>
+          <dd>{siteConfig.requisites.legalName}</dd>
         </div>
         <div className="flex gap-2">
           <dt className="w-40 shrink-0 text-gray-500">ИИН</dt>
-          <dd>890922301639</dd>
+          <dd>{siteConfig.requisites.iin}</dd>
         </div>
         <div className="flex gap-2">
           <dt className="w-40 shrink-0 text-gray-500">Адрес</dt>
-          <dd>г. Шымкент, ул. Байтерекова, 202</dd>
+          <dd>
+            г. {siteConfig.contacts.address.addressLocality},{" "}
+            {siteConfig.contacts.address.streetAddress}
+          </dd>
         </div>
         <div className="flex gap-2">
           <dt className="w-40 shrink-0 text-gray-500">Банк</dt>
-          <dd>АО «Банк ЦентрКредит»</dd>
+          <dd>{siteConfig.requisites.bank}</dd>
         </div>
         <div className="flex gap-2">
           <dt className="w-40 shrink-0 text-gray-500">БИК</dt>
-          <dd>KCJBKZKX</dd>
+          <dd>{siteConfig.requisites.bik}</dd>
         </div>
         <div className="flex gap-2">
           <dt className="w-40 shrink-0 text-gray-500">ИИК</dt>
-          <dd>KZ248562204135637519</dd>
+          <dd>{siteConfig.requisites.iik}</dd>
         </div>
         <div className="flex gap-2">
           <dt className="w-40 shrink-0 text-gray-500">Телефон</dt>
           <dd>
-            <a href="tel:+77056151717" className="underline">
-              +7 (705) 615-17-17
+            <a href={`tel:+${siteConfig.contacts.whatsapp}`} className="underline">
+              {siteConfig.contacts.phone}
             </a>
           </dd>
         </div>

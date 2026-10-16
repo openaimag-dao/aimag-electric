@@ -25,8 +25,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   if (!quote) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const buffer = await renderToBuffer(
-    QuotePdfDocument({
-      quote: {
+    <QuotePdfDocument
+      quote={{
         id: quote.id,
         title: quote.title,
         company: quote.company,
@@ -42,8 +42,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
           unit: i.unit,
           amountTiyn: i.amountTiyn,
         })),
-      },
-    })
+      }}
+    />
   );
 
   return new NextResponse(new Uint8Array(buffer), {

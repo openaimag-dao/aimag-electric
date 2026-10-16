@@ -22,6 +22,14 @@ export const siteConfig = {
     },
     workingHours: "Пн–Пт, 09:00–18:00",
   },
+  /** Real, published bank/registration details — same ones already public on /oplata and /kontakty. Single source so the КП PDF never drifts from the site. */
+  requisites: {
+    legalName: "ИП ОРАЗБАЕВ ЕРЛАН ОЖАНОВИЧ (торговая марка AIMAG ELECTRIC)",
+    iin: "890922301639",
+    bank: "АО «Банк ЦентрКредит»",
+    bik: "KCJBKZKX",
+    iik: "KZ248562204135637519",
+  },
 } as const;
 
 export type SiteConfig = typeof siteConfig;
