@@ -38,7 +38,10 @@ export function PurchasePanel({
         <ProductPrice price={product.price} unit={product.unit} className="text-3xl" />
         {product.price !== null && (
           <p className="mt-1 text-xs text-muted-foreground">
-            Цена указана без НДС. Точную стоимость под объём — в КП.
+            Цена указана без НДС.{" "}
+            {product.volumeDiscountMinQty !== null
+              ? `При заказе от ${product.volumeDiscountMinQty} ${product.unit} — цена ниже, пришлём в КП.`
+              : "Точную стоимость под объём — в КП."}
           </p>
         )}
         {companyPriceTenge !== null && (

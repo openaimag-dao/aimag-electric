@@ -61,4 +61,6 @@ export interface ProductDetailDTO extends CatalogProductDTO {
   leadTime: string;
   warranty: string;
   packaging?: string;
+  /** Lowest quantity threshold with a real, currently-valid WHOLESALE price — never the discounted amount itself (that's negotiated via КП, see lib/public-price.ts). */
+  volumeDiscountMinQty: number | null;
 }

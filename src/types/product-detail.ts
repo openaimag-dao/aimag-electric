@@ -46,4 +46,6 @@ export interface ProductDetail extends CatalogProduct {
   warranty: string;
   /** Единица кратности отгрузки, напр. "бухта 100 м". */
   packaging?: string;
+  /** Lowest quantity with a real wholesale price on record — never the discounted amount itself. */
+  volumeDiscountMinQty: number | null;
 }

@@ -81,6 +81,20 @@ function derivePrice(p: ProductForCatalog): number | null {
   return amount === null ? null : tiynToTenge(amount);
 }
 
+/** Lowest quantity with a real, currently-valid WHOLESALE price — the amount itself stays off the public page; see public-price.ts. */
+function deriveVolumeDiscountMinQty(p: ProductForCatalog): number | null {
+  const now = Date.now();
+  const tiers = p.prices.filter(
+    (price) =>
+      price.kind === "WHOLESALE" &&
+      price.amount !== null &&
+      price.minQty > 1 &&
+      price.validFrom.getTime() <= now &&
+      (price.validTo === null || price.validTo.getTime() >= now)
+  );
+  return tiers.length ? Math.min(...tiers.map((price) => price.minQty)) : null;
+}
+
 /** Ordered, non-empty image URLs for a product. */
 function productImages(p: ProductForCatalog): string[] {
   return p.images.map((i) => i.url).filter((u): u is string => Boolean(u));
@@ -182,5 +196,6 @@ export function toDetailDTO(p: ProductWithRelations): ProductDetailDTO {
       p.leadTime && !isLegacySeedLeadTime(p.leadTime) ? p.leadTime : "Уточняется при заказе",
     warranty: p.warranty && p.warranty !== "12 месяцев" ? p.warranty : "Уточняется при заказе",
     packaging: p.packaging && !isLegacySeedPackaging(p.packaging, p.unit) ? p.packaging : undefined,
+    volumeDiscountMinQty: deriveVolumeDiscountMinQty(p),
   };
 }
