@@ -95,7 +95,20 @@ export const orderRepository = {
     return withTables(() =>
       prisma.order.findMany({
         where: { OR: accessWhere(userId, companyIds) },
-        include: { items: { select: { id: true, qty: true, amountTiyn: true } } },
+        include: {
+          items: {
+            select: {
+              id: true,
+              qty: true,
+              amountTiyn: true,
+              productId: true,
+              slug: true,
+              sku: true,
+              title: true,
+              unit: true,
+            },
+          },
+        },
         orderBy: { createdAt: "desc" },
       })
     );
