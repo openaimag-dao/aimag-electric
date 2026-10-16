@@ -4,8 +4,10 @@ import { PackageSearch } from "lucide-react";
 
 import { getMyOrders } from "@/server/actions/order-actions";
 import { orderStatusMeta } from "@/config/order-meta";
+import { QuoteDialog } from "@/components/common/quote-dialog";
 import { tiynToTenge, formatTenge } from "@/lib/money";
 import { cn } from "@/lib/utils";
+import type { CartItem } from "@/types/cart";
 
 export const dynamic = "force-dynamic";
 
@@ -39,32 +41,56 @@ export default async function OrdersPage() {
             const totalTiyn =
               order.totalTiyn ??
               order.items.reduce((sum, i) => sum + (i.amountTiyn ?? 0) * i.qty, 0);
+            // Same honest-reorder filter as the order detail page: only items
+            // still linked to a real catalog product can be prefilled.
+            const reorderItems: CartItem[] = order.items
+              .filter((i) => i.productId && i.slug)
+              .map((i) => ({
+                productId: i.productId!,
+                slug: i.slug!,
+                sku: i.sku ?? "",
+                title: i.title,
+                unit: i.unit,
+                priceTenge: i.amountTiyn !== null ? tiynToTenge(i.amountTiyn) : null,
+                qty: i.qty,
+              }));
             return (
-              <Link
+              <div
                 key={order.id}
-                href={`/account/orders/${order.id}`}
                 className="rounded-xl border border-border bg-card p-4 transition-colors hover:border-signal/60"
               >
-                <div className="flex items-start justify-between gap-2">
-                  <p className="font-display font-mono text-sm font-semibold text-primary">
-                    {order.number}
-                  </p>
-                  <span
-                    className={cn(
-                      "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium",
-                      meta.className
-                    )}
-                  >
-                    {meta.label}
-                  </span>
-                </div>
-                <div className="mt-3 flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{order.items.length} позиций</span>
-                  <span className="font-medium text-primary">
-                    {totalTiyn > 0 ? formatTenge(tiynToTenge(totalTiyn)) : "—"}
-                  </span>
-                </div>
-              </Link>
+                <Link href={`/account/orders/${order.id}`} className="block">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="font-display font-mono text-sm font-semibold text-primary">
+                      {order.number}
+                    </p>
+                    <span
+                      className={cn(
+                        "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium",
+                        meta.className
+                      )}
+                    >
+                      {meta.label}
+                    </span>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">{order.items.length} позиций</span>
+                    <span className="font-medium text-primary">
+                      {totalTiyn > 0 ? formatTenge(tiynToTenge(totalTiyn)) : "—"}
+                    </span>
+                  </div>
+                </Link>
+                {reorderItems.length > 0 && (
+                  <QuoteDialog
+                    triggerLabel="Заказать повторно"
+                    variant="outline"
+                    size="sm"
+                    className="mt-3 w-full"
+                    items={reorderItems}
+                    defaultTitle={`Повторный заказ ${order.number}`}
+                  />
+                )}
+              </div>
             );
           })}
         </div>
