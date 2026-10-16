@@ -93,9 +93,11 @@ function formatDate(d: Date) {
 }
 
 /**
- * PDF export of a Quote — only fields we actually store are rendered. No
- * invented bank details, VAT numbers, or discounts: those live on paper/
- * in a real accounting system this project doesn't have yet.
+ * PDF export of a Quote — only fields we actually store are rendered, plus
+ * the real bank requisites already published on /oplata (siteConfig.requisites),
+ * so the buyer's accounting can pay straight from this document. No invented
+ * VAT numbers or discounts: those live on paper/in a real accounting system
+ * this project doesn't have yet.
  */
 export function QuotePdfDocument({ quote }: { quote: QuotePdfData }) {
   registerFonts();
@@ -196,6 +198,30 @@ export function QuotePdfDocument({ quote }: { quote: QuotePdfData }) {
             <Text>{quote.message}</Text>
           </View>
         )}
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Реквизиты поставщика</Text>
+          <View style={styles.row}>
+            <Text style={styles.label}>Наименование</Text>
+            <Text style={styles.value}>{siteConfig.requisites.legalName}</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>ИИН</Text>
+            <Text style={styles.value}>{siteConfig.requisites.iin}</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>Банк</Text>
+            <Text style={styles.value}>{siteConfig.requisites.bank}</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>БИК</Text>
+            <Text style={styles.value}>{siteConfig.requisites.bik}</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>ИИК</Text>
+            <Text style={styles.value}>{siteConfig.requisites.iik}</Text>
+          </View>
+        </View>
 
         <Text style={styles.footer}>
           Цены указаны без НДС и подлежат уточнению менеджером с учётом объёма и условий поставки.
