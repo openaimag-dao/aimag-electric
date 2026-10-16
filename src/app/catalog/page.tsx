@@ -6,7 +6,6 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronRight } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
 import { categorySeo } from "@/config/category-seo";
@@ -16,6 +15,7 @@ import { CatalogView } from "@/components/catalog/catalog-view";
 import { CatalogSkeleton } from "@/components/catalog/catalog-skeleton";
 import { QuoteDialog } from "@/components/common/quote-dialog";
 import { ContentBlocks } from "@/components/common/content-blocks";
+import { SeoBreadcrumbs } from "@/components/common/seo-breadcrumbs";
 import { Badge } from "@/components/ui/badge";
 import { catalogService } from "@/server/services";
 import { searchParamsToFilters } from "@/lib/catalog-url";
@@ -101,26 +101,20 @@ export default async function CatalogPage({ searchParams }: PageProps) {
       {/* Page header */}
       <div className="border-b border-border bg-background">
         <div className="container py-8">
-          <nav
-            aria-label="Навигационная цепочка"
-            className="flex items-center gap-1.5 text-sm text-muted-foreground"
-          >
-            <Link href="/" className="hover:text-primary">
-              Главная
-            </Link>
-            <ChevronRight className="size-4" />
-            {category ? (
-              <>
-                <Link href="/catalog" className="hover:text-primary">
-                  Каталог
-                </Link>
-                <ChevronRight className="size-4" />
-                <span className="font-medium text-primary">{category.title}</span>
-              </>
-            ) : (
-              <span className="font-medium text-primary">Каталог</span>
-            )}
-          </nav>
+          <SeoBreadcrumbs
+            items={
+              category
+                ? [
+                    { name: "Главная", href: "/" },
+                    { name: "Каталог", href: "/catalog" },
+                    { name: category.title, href: `/catalog?cat=${category.slug}` },
+                  ]
+                : [
+                    { name: "Главная", href: "/" },
+                    { name: "Каталог", href: "/catalog" },
+                  ]
+            }
+          />
 
           <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
             <div>
