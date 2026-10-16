@@ -49,15 +49,19 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   output: "standalone",
+  // puppeteer-core/@sparticuz/chromium resolve native binaries at runtime —
+  // let Node require() them directly instead of bundling through webpack.
+  serverExternalPackages: ["puppeteer-core", "@sparticuz/chromium"],
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [{ protocol: "https", hostname: "**" }],
   },
-  // The KP-PDF route loads font files via a runtime path.join(), which the
-  // bundler's static file tracer can't always follow — make sure they ship
-  // with the serverless function regardless.
+  // Both PDF routes resolve @sparticuz/chromium's binary via a computed path
+  // at runtime (not a plain require()), which the bundler's static file
+  // tracer can't follow — make sure it ships with each function regardless.
   outputFileTracingIncludes: {
-    "/admin/quotes/[id]/pdf": ["./src/lib/pdf/fonts/**"],
+    "/kp/[token]/pdf": ["./node_modules/@sparticuz/chromium/bin/**"],
+    "/admin/quotes/[id]/pdf": ["./node_modules/@sparticuz/chromium/bin/**"],
   },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
