@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { quoteRepository } from "@/server/repositories";
 import { quoteSchema, type QuoteInput } from "@/lib/validations/quote";
 import { rateLimit } from "@/lib/security/rate-limit";
+import { verifyTurnstile } from "@/lib/security/turnstile";
 import { logger } from "@/lib/logger";
 import { tengeToTiyn } from "@/lib/money";
 import { notificationService } from "@/server/services/notification-service";
@@ -40,6 +41,14 @@ export async function submitQuote(input: QuoteInput): Promise<QuoteActionState> 
       Object.entries(flat).map(([k, v]) => [k, v?.[0] ?? ""])
     ) as QuoteActionState["fieldErrors"];
     return { ok: false, error: "Проверьте заполнение формы", fieldErrors };
+  }
+
+  const humanVerified = await verifyTurnstile(parsed.data.turnstileToken, ip);
+  if (!humanVerified) {
+    return {
+      ok: false,
+      error: "Не удалось подтвердить, что вы не робот. Обновите страницу и попробуйте снова.",
+    };
   }
 
   try {

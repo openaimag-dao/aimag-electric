@@ -34,6 +34,8 @@ export const quoteSchema = z
     email: z.string().email("Некорректный e-mail").optional().or(z.literal("")),
     message: z.string().max(2000, "Слишком длинное сообщение").optional().or(z.literal("")),
     items: z.array(quoteItemSchema).max(200).optional(),
+    /** Cloudflare Turnstile token — present only when NEXT_PUBLIC_TURNSTILE_SITE_KEY is set. */
+    turnstileToken: z.string().optional(),
   })
   .refine((v) => (v.items && v.items.length > 0) || (v.message && v.message.trim().length >= 5), {
     message: "Опишите позицию или добавьте товары в корзину",

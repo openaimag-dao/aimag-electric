@@ -15,6 +15,7 @@ import { submitQuote } from "@/server/actions";
 import { formatTenge } from "@/lib/money";
 import { track } from "@/lib/analytics";
 import { captureCampaignAttribution } from "@/lib/campaign-attribution";
+import { TurnstileWidget } from "@/components/common/turnstile-widget";
 import type { CartItem } from "@/types/cart";
 
 interface QuoteFormProps {
@@ -39,7 +40,9 @@ export function QuoteForm({
   const fieldId = (name: string) => `${formId}-${name}`;
   const [submitted, setSubmitted] = React.useState(false);
   const [serverError, setServerError] = React.useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = React.useState<string | null>(null);
   const hasItems = Boolean(items && items.length > 0);
+  const turnstileRequired = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
 
   const {
     register,
@@ -71,6 +74,7 @@ export function QuoteForm({
         items,
         sourcePath: window.location.pathname,
         campaign: captureCampaignAttribution(),
+        turnstileToken: turnstileToken ?? undefined,
       });
     } catch {
       setServerError(
@@ -253,12 +257,19 @@ export function QuoteForm({
         )}
       </div>
 
+      <TurnstileWidget onToken={setTurnstileToken} />
+
       {serverError && (
         <p role="alert" className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
           {serverError}
         </p>
       )}
-      <Button type="submit" variant="signal" size="lg" disabled={isSubmitting}>
+      <Button
+        type="submit"
+        variant="signal"
+        size="lg"
+        disabled={isSubmitting || (turnstileRequired && !turnstileToken)}
+      >
         {isSubmitting && <Loader2 className="animate-spin" />}
         {isSubmitting ? "Отправляем…" : "Отправить заявку"}
       </Button>
