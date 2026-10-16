@@ -1,18 +1,17 @@
 import { NextResponse } from "next/server";
-import { renderToBuffer } from "@react-pdf/renderer";
 
 import { quoteRepository } from "@/server/repositories";
 import { rateLimit } from "@/lib/security/rate-limit";
-import { QuotePdfDocument } from "@/lib/pdf/quote-pdf";
+import { renderQuotePdf } from "@/lib/pdf/render-pdf";
 
-// react-pdf renders with Node's font/canvas stack — not available on Edge.
+// Headless Chromium rendering needs Node's process/filesystem APIs — not available on Edge.
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
  * Public, token-gated PDF download for /kp/[token] — same access control
  * (the token itself) and rate limiting as getPublicQuote in
- * quote-response-actions.ts. Reuses the admin's QuotePdfDocument rather than
+ * quote-response-actions.ts. Reuses the admin's render-pdf.ts rather than
  * a second PDF layout.
  */
 export async function GET(req: Request, { params }: { params: Promise<{ token: string }> }) {
@@ -36,27 +35,23 @@ export async function GET(req: Request, { params }: { params: Promise<{ token: s
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const buffer = await renderToBuffer(
-    <QuotePdfDocument
-      quote={{
-        id: quote.id,
-        title: quote.title,
-        company: quote.company,
-        name: quote.name,
-        phone: quote.phone,
-        email: quote.email,
-        message: quote.message,
-        createdAt: quote.createdAt,
-        items: quote.items.map((i) => ({
-          title: i.title,
-          sku: i.sku,
-          qty: i.qty,
-          unit: i.unit,
-          amountTiyn: i.amountTiyn,
-        })),
-      }}
-    />
-  );
+  const buffer = await renderQuotePdf({
+    id: quote.id,
+    title: quote.title,
+    company: quote.company,
+    name: quote.name,
+    phone: quote.phone,
+    email: quote.email,
+    message: quote.message,
+    createdAt: quote.createdAt,
+    items: quote.items.map((i) => ({
+      title: i.title,
+      sku: i.sku,
+      qty: i.qty,
+      unit: i.unit,
+      amountTiyn: i.amountTiyn,
+    })),
+  });
 
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
