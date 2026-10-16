@@ -29,6 +29,7 @@ const product: ProductDetailDTO = {
   reviews: [],
   leadTime: "",
   warranty: "",
+  volumeDiscountMinQty: null,
 };
 
 describe("product search markup", () => {
