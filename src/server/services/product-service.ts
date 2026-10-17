@@ -4,6 +4,8 @@ import { cache } from "react";
 
 import { productRepository } from "@/server/repositories";
 import { toDetailDTO, toCatalogDTO } from "@/server/mappers/product";
+import { CROSS_SELL_CATEGORIES } from "@/config/cross-sell-categories";
+import { roundRobinTake } from "@/lib/round-robin";
 import type { CatalogProductDTO, ProductDetailDTO } from "@/server/dto";
 
 /** Nearest-first by voltage/cross-section distance, then by popularity. */
@@ -66,5 +68,27 @@ export const productService = {
       .filter((p) => p.slug !== product.slug && p.availability === "in_stock")
       .sort(bySimilarity(product))
       .slice(0, limit);
+  },
+
+  /**
+   * "С этим покупают" — popular products from the categories this
+   * product's own category is typically installed alongside (see
+   * cross-sell-categories.ts), not more of the same category (that's
+   * getRelated above). [] when the category has no mapped pairing.
+   */
+  async getCrossSell(product: CatalogProductDTO, limit = 4): Promise<CatalogProductDTO[]> {
+    const pairedSlugs = CROSS_SELL_CATEGORIES[product.categorySlug] ?? [];
+    if (pairedSlugs.length === 0) return [];
+
+    // Round-robin across the paired categories so one popular category
+    // doesn't crowd out the others — e.g. with 3 paired categories and a
+    // limit of 4, this still pulls from at least two of them.
+    const perCategory = Math.max(1, Math.ceil(limit / pairedSlugs.length));
+    const lists = await Promise.all(
+      pairedSlugs.map(async (slug) =>
+        (await productRepository.findByCategory(slug, perCategory)).map(toCatalogDTO)
+      )
+    );
+    return roundRobinTake(lists, limit);
   },
 };
