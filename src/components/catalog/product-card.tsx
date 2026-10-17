@@ -8,6 +8,7 @@ import { ProductPrice } from "@/components/catalog/product-price";
 import { AvailabilityBadge } from "@/components/catalog/availability-badge";
 import { FavoriteButton } from "@/components/catalog/favorite-button";
 import { CompareToggleButton } from "@/components/catalog/compare-toggle-button";
+import { QuickViewDialog } from "@/components/catalog/quick-view-dialog";
 import { formatTenge } from "@/lib/money";
 import type { CatalogProduct } from "@/types/catalog";
 
@@ -108,9 +109,12 @@ export function ProductCard({
               priceTenge: product.companyPriceTenge ?? product.price,
             }}
           />
-          <Button asChild variant="outline" size="sm" className="w-full">
-            <Link href={href}>Подробнее</Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild variant="outline" size="sm" className="flex-1">
+              <Link href={href}>Подробнее</Link>
+            </Button>
+            <QuickViewDialog product={product} />
+          </div>
         </div>
       </div>
     </article>
