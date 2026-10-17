@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { StaticPage } from "@/components/static/static-page";
+import { DELIVERY_CITIES } from "@/config/delivery-cities";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/dostavka" },
-  title: "Доставка — AIMAG ELECTRIC",
+  title: "Доставка",
   description:
     "Доставка электротехнической продукции по всему Казахстану транспортными компаниями. Отгрузка со склада в Шымкенте, самовывоз по договорённости.",
 };
@@ -34,6 +36,20 @@ export default function DeliveryPage() {
           Вместе с грузом передаётся полный комплект документов: накладная, счёт-фактура, паспорта и
           сертификаты на продукцию (по запросу).
         </li>
+      </ul>
+
+      <h2 className="text-xl font-semibold">Доставка по городам</h2>
+      <ul className="flex flex-wrap gap-2">
+        {DELIVERY_CITIES.map((city) => (
+          <li key={city.slug}>
+            <Link
+              href={`/dostavka/${city.slug}`}
+              className="inline-block rounded-md border border-border px-3 py-1.5 text-sm hover:border-signal/60 hover:text-signal-700"
+            >
+              {city.name}
+            </Link>
+          </li>
+        ))}
       </ul>
 
       <h2 className="text-xl font-semibold">Самовывоз</h2>

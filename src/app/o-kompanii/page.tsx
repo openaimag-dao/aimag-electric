@@ -3,7 +3,7 @@ import { StaticPage } from "@/components/static/static-page";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/o-kompanii" },
-  title: "О компании — AIMAG ELECTRIC",
+  title: "О компании",
   description:
     "AIMAG ELECTRIC — поставщик электротехнической продукции в Казахстане: кабель, провод, СИП, арматура, низковольтное и высоковольтное оборудование. Работаем с юридическими лицами по всей стране.",
 };

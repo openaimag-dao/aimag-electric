@@ -3,7 +3,7 @@ import { StaticPage } from "@/components/static/static-page";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/terms" },
-  title: "Пользовательское соглашение — AIMAG ELECTRIC",
+  title: "Пользовательское соглашение",
   description:
     "Условия использования сайта AIMAG ELECTRIC: оформление заявок, информация о товарах и ценах, ответственность сторон.",
 };

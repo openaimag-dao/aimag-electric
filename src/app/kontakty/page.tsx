@@ -3,7 +3,7 @@ import { StaticPage, CompanyRequisites } from "@/components/static/static-page";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/kontakty" },
-  title: "Контакты — AIMAG ELECTRIC",
+  title: "Контакты",
   description:
     "Контакты AIMAG ELECTRIC: г. Шымкент, ул. Байтерекова, 202. Телефон +7 (705) 615-17-17. Поставки электротехнической продукции по всему Казахстану.",
 };

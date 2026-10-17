@@ -3,7 +3,7 @@ import { StaticPage } from "@/components/static/static-page";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/privacy" },
-  title: "Политика конфиденциальности — AIMAG ELECTRIC",
+  title: "Политика конфиденциальности",
   description:
     "Политика обработки персональных данных сайта AIMAG ELECTRIC в соответствии с законодательством Республики Казахстан.",
 };
