@@ -151,6 +151,10 @@ export default async function VvgAvvgPage() {
                     href: "/blog/kupit-vvgng-kazakhstan",
                     label: "Как заказать ВВГнг: маркировка, цена и документы",
                   },
+                  {
+                    href: "/kalkulyator-secheniya-kabelya",
+                    label: "Калькулятор сечения кабеля по нагрузке",
+                  },
                 ],
               },
             ]}
