@@ -81,6 +81,7 @@ export default async function ProductPage({ params }: PageProps) {
   if (!product) notFound();
 
   const related = await productService.getRelated(product);
+  const crossSell = await productService.getCrossSell(product);
   const analogs =
     product.availability === "in_stock" ? [] : await productService.getAnalogsInStock(product);
   const avgRating = averageRating(product.reviews);
@@ -98,7 +99,7 @@ export default async function ProductPage({ params }: PageProps) {
   if (membership) {
     const companyPrices = await companyPriceAdminRepository.forCompaniesAndProducts(
       [membership.companyId],
-      [product.id, ...related.map((r) => r.id)]
+      [product.id, ...related.map((r) => r.id), ...crossSell.map((r) => r.id)]
     );
     for (const cp of companyPrices) {
       companyPriceByProductId.set(cp.productId, tiynToTenge(cp.amountTiyn));
@@ -109,6 +110,10 @@ export default async function ProductPage({ params }: PageProps) {
     ...r,
     companyPriceTenge: companyPriceByProductId.get(r.id) ?? null,
   }));
+  const crossSellWithCompanyPrices = crossSell.map((r) => ({
+    ...r,
+    companyPriceTenge: companyPriceByProductId.get(r.id) ?? null,
+  }));
 
   const sections = [
     { id: "description", label: "Описание" },
@@ -116,6 +121,7 @@ export default async function ProductPage({ params }: PageProps) {
     { id: "specs", label: "Характеристики" },
     { id: "documents", label: "Документы" },
     ...(product.reviews.length ? [{ id: "reviews", label: "Отзывы" }] : []),
+    ...(crossSellWithCompanyPrices.length ? [{ id: "cross-sell", label: "С этим покупают" }] : []),
     { id: "related", label: "Похожие" },
   ];
 
@@ -296,6 +302,21 @@ export default async function ProductPage({ params }: PageProps) {
             </section>
           )}
         </div>
+
+        {/* Cross-sell — full width, complementary categories (e.g. cable → lugs/clips) */}
+        {crossSellWithCompanyPrices.length > 0 && (
+          <section id="cross-sell" className="scroll-mt-32 border-t border-border pt-12">
+            <h2 className="font-display text-2xl font-bold tracking-tight text-primary">
+              С этим покупают
+            </h2>
+            <p className="mt-2 text-muted-foreground">
+              Обычно требуется вместе с «{product.title}» для монтажа.
+            </p>
+            <div className="mt-8">
+              <RelatedProducts products={crossSellWithCompanyPrices} />
+            </div>
+          </section>
+        )}
 
         {/* Related — full width */}
         <section id="related" className="scroll-mt-32 border-t border-border pt-12">
