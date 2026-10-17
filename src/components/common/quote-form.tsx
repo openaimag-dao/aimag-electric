@@ -16,6 +16,7 @@ import { formatTenge } from "@/lib/money";
 import { track } from "@/lib/analytics";
 import { captureCampaignAttribution } from "@/lib/campaign-attribution";
 import { TurnstileWidget } from "@/components/common/turnstile-widget";
+import { QuoteTrustBadges } from "@/components/common/quote-trust-badges";
 import type { CartItem } from "@/types/cart";
 
 interface QuoteFormProps {
@@ -258,6 +259,8 @@ export function QuoteForm({
       </div>
 
       <TurnstileWidget onToken={setTurnstileToken} />
+
+      <QuoteTrustBadges />
 
       {serverError && (
         <p role="alert" className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
