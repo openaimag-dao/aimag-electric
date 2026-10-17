@@ -35,7 +35,7 @@ const SheetContent = React.forwardRef<
     <SheetPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed inset-y-0 z-50 flex h-full w-4/5 max-w-sm flex-col gap-6 border-border bg-card p-6 shadow-2xl transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out",
+        "fixed inset-y-0 z-50 flex h-full w-4/5 max-w-sm flex-col gap-6 overflow-y-auto overscroll-contain border-border bg-card p-6 shadow-2xl transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out",
         side === "left"
           ? "left-0 border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left"
           : "right-0 border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right",
