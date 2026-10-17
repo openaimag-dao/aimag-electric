@@ -30,6 +30,7 @@ const SEO_LANDING_PAGES = [
   "/kabeli-vvg-avvg",
   "/kabeli-sip",
   "/promyshlennye-kabeli",
+  "/kalkulyator-secheniya-kabelya",
   ...industrialCablePages.map(({ slug }) => `/promyshlennye-kabeli/${slug}`),
 ];
 
