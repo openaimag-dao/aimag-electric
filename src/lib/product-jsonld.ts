@@ -14,6 +14,13 @@ export function productImageUrls(images: string[]): string[] {
   });
 }
 
+/** ISO date ~90 days out — see the priceValidUntil comment below for why. */
+function priceValidUntilDate(): string {
+  const d = new Date();
+  d.setDate(d.getDate() + 90);
+  return d.toISOString().slice(0, 10);
+}
+
 /**
  * Builds Product + BreadcrumbList JSON-LD for a product page. Pure function,
  * kept out of the page component for readability and reuse.
@@ -52,6 +59,13 @@ export function buildProductJsonLd(product: ProductDetailDTO, avgRating: number 
             url,
             priceCurrency: "KZT",
             price: product.price,
+            // Catalog prices here have no fixed expiry (unlike the staff-only
+            // WHOLESALE tiers, which do carry a validTo) — Google still wants
+            // a bound rather than no field at all, so this is a soft
+            // "confirmed as current for the next 90 days" commitment, same
+            // spirit as the "цена уточняется при оформлении" disclaimers
+            // already shown elsewhere on the site.
+            priceValidUntil: priceValidUntilDate(),
             availability,
             seller: { "@type": "Organization", name: siteConfig.name, url: siteConfig.url },
           },

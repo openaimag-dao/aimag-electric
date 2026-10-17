@@ -45,6 +45,13 @@ describe("product search markup", () => {
     expect(productLd).not.toHaveProperty("aggregateRating");
   });
 
+  it("gives a priced Offer a future priceValidUntil date", () => {
+    const { productLd } = buildProductJsonLd(product, null);
+    const priceValidUntil = (productLd.offers as { priceValidUntil: string }).priceValidUntil;
+    expect(priceValidUntil).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(new Date(priceValidUntil).getTime()).toBeGreaterThan(Date.now());
+  });
+
   it.each([null, NaN, Infinity, -1])("does not invent an Offer for price %s", (price) => {
     expect(buildProductJsonLd({ ...product, price }, null).productLd).not.toHaveProperty("offers");
   });
