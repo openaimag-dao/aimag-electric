@@ -24,7 +24,10 @@ const COPPER_AMPACITY: AmpacityRow[] = [
   { crossSectionMm2: 4, currentA: 38 },
   { crossSectionMm2: 6, currentA: 46 },
   { crossSectionMm2: 10, currentA: 70 },
-  { crossSectionMm2: 16, currentA: 85 },
+  // 90A at 16mm² matches the reference table already published in the
+  // "Как выбрать сечение кабеля" blog article (articles.ts) — kept in sync
+  // so the two pages don't show conflicting numbers for the same size.
+  { crossSectionMm2: 16, currentA: 90 },
   { crossSectionMm2: 25, currentA: 115 },
   { crossSectionMm2: 35, currentA: 135 },
   { crossSectionMm2: 50, currentA: 175 },
