@@ -70,10 +70,20 @@ export const productRepository = {
     return rankSearchResults(rows, query).slice(0, take);
   },
 
+  /** slug + updatedAt + primary image — the sitemap's one query for every published product's own URL entry. */
   allSlugs() {
     return prisma.product.findMany({
       where: { published: true },
-      select: { slug: true, updatedAt: true },
+      select: {
+        slug: true,
+        updatedAt: true,
+        images: {
+          where: { AND: [{ url: { not: null } }, { NOT: { url: "" } }] },
+          select: { url: true },
+          orderBy: { order: "asc" },
+          take: 1,
+        },
+      },
     });
   },
 

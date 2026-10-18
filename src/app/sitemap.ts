@@ -8,6 +8,7 @@ import { productRepository, categoryRepository } from "@/server/repositories";
 import { articles } from "@/config/articles";
 import { mergedCategorySlugs } from "@/config/category-merges";
 import { CACHE_TAGS } from "@/lib/cache-tags";
+import { productImageUrls } from "@/lib/product-jsonld";
 
 export const dynamic = "force-dynamic";
 
@@ -58,12 +59,16 @@ const loadCatalogRoutes = unstable_cache(
             changeFrequency: "weekly" as const,
             priority: 0.6,
           })),
-        ...products.map((product) => ({
-          url: `${siteConfig.url}/catalog/${product.slug}`,
-          lastModified: product.updatedAt,
-          changeFrequency: "weekly" as const,
-          priority: 0.7,
-        })),
+        ...products.map((product) => {
+          const images = productImageUrls(product.images.map((i) => i.url ?? ""));
+          return {
+            url: `${siteConfig.url}/catalog/${product.slug}`,
+            lastModified: product.updatedAt,
+            changeFrequency: "weekly" as const,
+            priority: 0.7,
+            ...(images.length ? { images } : {}),
+          };
+        }),
       ];
     } catch {
       // A temporarily unavailable database must not take robots' sitemap offline.
