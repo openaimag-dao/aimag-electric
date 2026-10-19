@@ -4,6 +4,7 @@ import { ChevronRight } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
 import { buildFaqJsonLd } from "@/lib/faq-jsonld";
+import { buildHowToJsonLd } from "@/lib/howto-jsonld";
 import { ContentBlocks } from "@/components/common/content-blocks";
 import { CableCalculator } from "@/components/tools/cable-calculator";
 import { QuoteDialog } from "@/components/common/quote-dialog";
@@ -70,11 +71,42 @@ const faq = [
   },
 ];
 
+const howToLd = buildHowToJsonLd({
+  name: "Как рассчитать сечение кабеля по нагрузке",
+  description: DESCRIPTION,
+  steps: [
+    {
+      name: "Укажите нагрузку",
+      text: "Введите мощность нагрузки в кВт или, если она уже известна, расчётный ток в А.",
+    },
+    {
+      name: "Выберите тип сети",
+      text: "При расчёте по мощности укажите однофазную сеть 220В или трёхфазную 380В.",
+    },
+    {
+      name: "Выберите материал жилы",
+      text: "Медь (кабель ВВГ) или алюминий (кабель АВВГ) — при одинаковой нагрузке алюминию нужно большее сечение.",
+    },
+    {
+      name: "Укажите длину линии",
+      text: "На линиях длиннее 50 м растёт просадка напряжения — калькулятор отметит это и порекомендует сечение с запасом.",
+    },
+    {
+      name: "Получите рекомендуемое сечение",
+      text: "Калькулятор покажет сечение кабеля по справочной таблице допустимого тока и ссылку на этот кабель в каталоге.",
+    },
+  ],
+});
+
 export default function CableCalculatorPage() {
   const faqLd = buildFaqJsonLd(faq);
 
   return (
     <div className="bg-secondary/20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToLd) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
