@@ -11,6 +11,8 @@ export function buildOrganizationJsonLd() {
     "@type": "Organization",
     name: siteConfig.name,
     url: siteConfig.url,
+    // Square, ≥112×112 per Google's logo guideline for Organization markup.
+    logo: `${siteConfig.url}/apple-icon.png`,
     description: siteConfig.description,
     areaServed: [
       { "@type": "City", name: siteConfig.contacts.address.addressLocality },
