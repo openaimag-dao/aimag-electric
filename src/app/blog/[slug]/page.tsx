@@ -12,6 +12,7 @@ import { siteConfig } from "@/config/site";
 import { articleQuote } from "@/config/article-quote";
 import { findBlogTopic } from "@/config/blog-topics";
 import { SeoBreadcrumbs } from "@/components/common/seo-breadcrumbs";
+import { buildHowToJsonLd } from "@/lib/howto-jsonld";
 
 const relatedCatalog: Record<string, { href: string; label: string }> = {
   "kak-vybrat-sechenie-kabelya": {
@@ -135,6 +136,7 @@ export default async function ArticlePage({ params }: PageProps) {
     author: { "@type": "Organization", name: siteConfig.name, url: siteConfig.url },
     publisher: { "@type": "Organization", name: siteConfig.name, url: siteConfig.url },
   };
+  const howToData = article.howTo ? buildHowToJsonLd(article.howTo) : null;
 
   return (
     <div className="container max-w-3xl py-12">
@@ -144,6 +146,14 @@ export default async function ArticlePage({ params }: PageProps) {
           __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
         }}
       />
+      {howToData && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(howToData).replace(/</g, "\\u003c"),
+          }}
+        />
+      )}
       <SeoBreadcrumbs
         items={[
           { name: "Главная", href: "/" },
