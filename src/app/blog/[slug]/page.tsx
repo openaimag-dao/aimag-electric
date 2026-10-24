@@ -124,10 +124,15 @@ export default async function ArticlePage({ params }: PageProps) {
     mainEntityOfPage: articleUrl,
     headline: article.title,
     description: article.excerpt,
+    // The branded site-wide share image — these are text guides with no
+    // per-article photo, and Google's Article rich-result eligibility
+    // requires at least one image.
+    image: [`${siteConfig.url}/opengraph-image`],
     datePublished: article.date,
     dateModified: article.updatedDate ?? article.date,
     inLanguage: "ru",
     articleSection: article.category,
+    author: { "@type": "Organization", name: siteConfig.name, url: siteConfig.url },
     publisher: { "@type": "Organization", name: siteConfig.name, url: siteConfig.url },
   };
 
