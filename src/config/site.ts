@@ -22,14 +22,20 @@ export const siteConfig = {
     },
     workingHours: "Пн–Пт, 09:00–18:00",
   },
-  /** Real, published bank/registration details — same ones already public on /oplata and /kontakty. Single source so the КП PDF never drifts from the site. */
-  requisites: {
-    legalName: "ИП ОРАЗБАЕВ ЕРЛАН ОЖАНОВИЧ (торговая марка AIMAG ELECTRIC)",
-    iin: "890922301639",
-    bank: "АО «Банк ЦентрКредит»",
-    bik: "KCJBKZKX",
-    iik: "KZ248562204135637519",
-  },
-} as const;
+  /**
+   * Published bank/registration details — single source so the КП PDF never
+   * drifts from the site. Temporarily null: the previous registration was
+   * taken down at the owner's request and a new one hasn't been issued yet.
+   * Every reader of this field (CompanyRequisites, the КП PDF, the Yandex
+   * Market feed) already handles the null case.
+   */
+  requisites: null as {
+    legalName: string;
+    iin: string;
+    bank: string;
+    bik: string;
+    iik: string;
+  } | null,
+};
 
 export type SiteConfig = typeof siteConfig;

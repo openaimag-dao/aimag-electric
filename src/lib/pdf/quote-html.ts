@@ -43,7 +43,8 @@ function esc(value: string): string {
  * already published on /oplata (siteConfig.requisites), so the buyer's
  * accounting can pay straight from this document. No invented VAT numbers
  * or discounts: those live on paper/in a real accounting system this
- * project doesn't have yet.
+ * project doesn't have yet. The requisites block is omitted entirely while
+ * siteConfig.requisites is null.
  */
 export function renderQuoteHtml(quote: QuotePdfData): string {
   const priced = quote.items.filter((i) => i.amountTiyn !== null);
@@ -168,14 +169,18 @@ export function renderQuoteHtml(quote: QuotePdfData): string {
       : ""
   }
 
-  <div class="section">
+  ${
+    r
+      ? `<div class="section">
     <div class="section-title">Реквизиты поставщика</div>
     <div class="row"><span class="label">Наименование</span><span class="value">${esc(r.legalName)}</span></div>
     <div class="row"><span class="label">ИИН</span><span class="value">${esc(r.iin)}</span></div>
     <div class="row"><span class="label">Банк</span><span class="value">${esc(r.bank)}</span></div>
     <div class="row"><span class="label">БИК</span><span class="value">${esc(r.bik)}</span></div>
     <div class="row"><span class="label">ИИК</span><span class="value">${esc(r.iik)}</span></div>
-  </div>
+  </div>`
+      : ""
+  }
 
   <div class="footer">
     Цены указаны без НДС и подлежат уточнению менеджером с учётом объёма и условий поставки.
