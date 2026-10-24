@@ -22,19 +22,25 @@ export function StaticPage({
   );
 }
 
-/** Единый блок реквизитов — используется на страницах «Оплата» и «Контакты». */
+/**
+ * Единый блок реквизитов — используется на страницах «Оплата» и «Контакты».
+ * Ничего не выводит, пока siteConfig.requisites не заполнен.
+ */
 export function CompanyRequisites() {
+  const r = siteConfig.requisites;
+  if (!r) return null;
+
   return (
     <div className="rounded-lg border bg-gray-50 p-5 text-sm">
       <h3 className="mb-3 font-semibold">Реквизиты</h3>
       <dl className="grid gap-1.5">
         <div className="flex gap-2">
           <dt className="w-40 shrink-0 text-gray-500">Наименование</dt>
-          <dd>{siteConfig.requisites.legalName}</dd>
+          <dd>{r.legalName}</dd>
         </div>
         <div className="flex gap-2">
           <dt className="w-40 shrink-0 text-gray-500">ИИН</dt>
-          <dd>{siteConfig.requisites.iin}</dd>
+          <dd>{r.iin}</dd>
         </div>
         <div className="flex gap-2">
           <dt className="w-40 shrink-0 text-gray-500">Адрес</dt>
@@ -45,15 +51,15 @@ export function CompanyRequisites() {
         </div>
         <div className="flex gap-2">
           <dt className="w-40 shrink-0 text-gray-500">Банк</dt>
-          <dd>{siteConfig.requisites.bank}</dd>
+          <dd>{r.bank}</dd>
         </div>
         <div className="flex gap-2">
           <dt className="w-40 shrink-0 text-gray-500">БИК</dt>
-          <dd>{siteConfig.requisites.bik}</dd>
+          <dd>{r.bik}</dd>
         </div>
         <div className="flex gap-2">
           <dt className="w-40 shrink-0 text-gray-500">ИИК</dt>
-          <dd>{siteConfig.requisites.iik}</dd>
+          <dd>{r.iik}</dd>
         </div>
         <div className="flex gap-2">
           <dt className="w-40 shrink-0 text-gray-500">Телефон</dt>

@@ -97,7 +97,7 @@ export async function GET() {
 <yml_catalog date="${formatFeedDate(new Date())}">
   <shop>
     <name>${escapeXml(siteConfig.name)}</name>
-    <company>${escapeXml(siteConfig.requisites.legalName)}</company>
+    <company>${escapeXml(siteConfig.requisites?.legalName ?? siteConfig.name)}</company>
     <url>${escapeXml(siteConfig.url)}</url>
     <currencies>
       <currency id="KZT" rate="1"/>
