@@ -54,7 +54,7 @@ export default async function CablePage({ params }: PageProps) {
         ]}
       />
       <h1 className="mt-4 font-display text-3xl font-bold text-primary">
-        Купить кабель {content.name} в Казахстане
+        Купить кабель {content.name} в Шымкенте и по Казахстану
       </h1>
       <p className="mt-4 max-w-3xl text-steel-700">{content.intro}</p>
       <p className="mt-3 text-sm text-muted-foreground">
