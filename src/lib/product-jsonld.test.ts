@@ -30,6 +30,7 @@ const product: ProductDetailDTO = {
   leadTime: "",
   warranty: "",
   volumeDiscountMinQty: null,
+  priceValidFrom: "2026-01-15",
 };
 
 describe("product search markup", () => {
@@ -43,6 +44,11 @@ describe("product search markup", () => {
     });
     expect(productLd.description).toBe("Силовой кабель. Три медные жилы.");
     expect(productLd).not.toHaveProperty("aggregateRating");
+  });
+
+  it("publishes Offer.validFrom from the current price row", () => {
+    const { productLd } = buildProductJsonLd(product, null);
+    expect(productLd.offers).toMatchObject({ validFrom: "2026-01-15" });
   });
 
   it("gives a priced Offer a future priceValidUntil date", () => {

@@ -65,6 +65,9 @@ export function buildProductJsonLd(product: ProductDetailDTO, avgRating: number 
             // "confirmed as current for the next 90 days" commitment, same
             // spirit as the "цена уточняется при оформлении" disclaimers
             // already shown elsewhere on the site.
+            // Google Merchant listings flag a missing validFrom; use the date the
+            // current price row took effect (falls back to today if unknown).
+            validFrom: product.priceValidFrom ?? new Date().toISOString().slice(0, 10),
             priceValidUntil: priceValidUntilDate(),
             availability,
             seller: { "@type": "Organization", name: siteConfig.name, url: siteConfig.url },
