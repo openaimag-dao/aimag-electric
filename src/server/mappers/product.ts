@@ -1,7 +1,7 @@
 import type { ProductBadge } from "@prisma/client";
 
 import { normalizeProductTitle } from "@/lib/product-title";
-import { publicPriceTiyn, type PublicPriceRow } from "@/lib/public-price";
+import { publicPriceRow, publicPriceTiyn, type PublicPriceRow } from "@/lib/public-price";
 import { tiynToTenge } from "@/lib/money";
 import { productSpecRows } from "@/lib/product-specs";
 import { deriveAvailabilityFromStock, isLowStock } from "@/lib/availability";
@@ -197,5 +197,6 @@ export function toDetailDTO(p: ProductWithRelations): ProductDetailDTO {
     warranty: p.warranty && p.warranty !== "12 месяцев" ? p.warranty : "Уточняется при заказе",
     packaging: p.packaging && !isLegacySeedPackaging(p.packaging, p.unit) ? p.packaging : undefined,
     volumeDiscountMinQty: deriveVolumeDiscountMinQty(p),
+    priceValidFrom: publicPriceRow(p.prices)?.validFrom.toISOString().slice(0, 10) ?? null,
   };
 }
