@@ -29,6 +29,7 @@ export const footerNav: { title: string; items: NavItem[] }[] = [
       { label: "Гарантия", href: "/garantiya" },
       { label: "Возврат товара", href: "/vozvrat" },
       { label: "Вопросы и ответы", href: "/faq" },
+      { label: "Блог", href: "/blog" },
     ],
   },
   {
