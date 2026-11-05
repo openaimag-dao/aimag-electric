@@ -4,6 +4,7 @@ export const ru: Dictionary = {
   nav: [
     { label: "Каталог", href: "/catalog" },
     { label: "Электромонтаж", href: "/elektromontazh" },
+    { label: "Блог", href: "/blog" },
     { label: "О компании", href: "/o-kompanii" },
     { label: "Доставка", href: "/dostavka" },
     { label: "Контакты", href: "/kontakty" },

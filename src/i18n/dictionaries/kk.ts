@@ -13,6 +13,7 @@ export const kk: Dictionary = {
   nav: [
     { label: "Каталог", href: "/catalog" },
     { label: "Электр монтажы", href: "/elektromontazh" },
+    { label: "Блог", href: "/blog" },
     { label: "Компания туралы", href: "/o-kompanii" },
     { label: "Жеткізу", href: "/dostavka" },
     { label: "Байланыс", href: "/kontakty" },
