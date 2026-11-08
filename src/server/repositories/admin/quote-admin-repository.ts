@@ -12,6 +12,7 @@ export const quoteAdminRepository = {
         orderBy: { createdAt: "desc" },
         include: {
           items: true,
+          documents: true,
           _count: { select: { items: true } },
           customer: {
             select: { id: true, owner: { select: { id: true, name: true, email: true } } },
@@ -22,7 +23,7 @@ export const quoteAdminRepository = {
   },
   byId(id: string) {
     return withQuoteColumns(() =>
-      prisma.quote.findUnique({ where: { id }, include: { items: true } })
+      prisma.quote.findUnique({ where: { id }, include: { items: true, documents: true } })
     );
   },
   updateStatus(id: string, status: QuoteStatus) {

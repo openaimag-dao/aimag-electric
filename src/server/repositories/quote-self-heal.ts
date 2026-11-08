@@ -19,4 +19,21 @@ export const withQuoteColumns = tableSelfHeal([
   `ALTER TABLE "Quote" ADD COLUMN IF NOT EXISTS "utmMedium" TEXT`,
   `ALTER TABLE "Quote" ADD COLUMN IF NOT EXISTS "utmCampaign" TEXT`,
   `CREATE UNIQUE INDEX IF NOT EXISTS "Quote_approvalToken_key" ON "Quote"("approvalToken")`,
+  // Data-center B2B RFQ form (and any future specialized B2B flow) — see
+  // schema.prisma comments on these columns.
+  `ALTER TABLE "Quote" ADD COLUMN IF NOT EXISTS "bin" TEXT`,
+  `ALTER TABLE "Quote" ADD COLUMN IF NOT EXISTS "region" TEXT`,
+  `ALTER TABLE "Quote" ADD COLUMN IF NOT EXISTS "categories" TEXT`,
+  `ALTER TABLE "Quote" ADD COLUMN IF NOT EXISTS "requestType" TEXT`,
+  `CREATE TABLE IF NOT EXISTS "QuoteDocument" (
+    "id" TEXT NOT NULL,
+    "quoteId" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "url" TEXT NOT NULL,
+    "size" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "QuoteDocument_pkey" PRIMARY KEY ("id")
+  )`,
+  `CREATE INDEX IF NOT EXISTS "QuoteDocument_quoteId_idx" ON "QuoteDocument"("quoteId")`,
+  `ALTER TABLE "QuoteDocument" ADD CONSTRAINT "QuoteDocument_quoteId_fkey" FOREIGN KEY ("quoteId") REFERENCES "Quote"("id") ON DELETE CASCADE ON UPDATE CASCADE`,
 ]);

@@ -25,6 +25,13 @@ enum QuoteStatus {
   SENT
   WON
   LOST
+  /// Below: additive statuses for longer B2B pipelines (e.g. data-center
+  /// equipment supply) that need more granularity than the five above.
+  /// Existing quotes are unaffected — they simply never use these values.
+  SUPPLIER_REQUEST
+  PROPOSAL_PREP
+  NEGOTIATION
+  CLOSED
 }
 
 enum DealStage {
@@ -349,11 +356,30 @@ model Quote {
   utmMedium     String?
   utmCampaign   String?
   company       String
+  /** БИН/ИИН, when the submitter is a legal entity (e.g. B2B RFQ forms) — optional, never required for the existing cart/product-page quote flow. */
+  bin           String?
   name          String
   phone         String
   email         String?
+  /** Free-text delivery region, when the submitting form collects one (e.g. data-center B2B RFQ) — null for the existing cart flow, which has no region field. */
+  region        String?
+  /**
+   * Comma-joined category labels, for a form that lets the customer tick
+   * several at once (e.g. "Системы охлаждения, Резервное электроснабжение").
+   * Deliberately plain text, not a join table — this is a label snapshot of
+   * what the customer selected, not a catalog relation.
+   */
+  categories    String?
+  /**
+   * Marks which specialized B2B flow this request came from, e.g.
+   * "DATA_CENTER_B2B" — null for the regular cart/product-page/search quote
+   * flow. Purely a label for filtering in the admin list; it changes no
+   * validation or processing.
+   */
+  requestType   String?
   message       String      @db.Text
   status        QuoteStatus @default(NEW)
+  documents     QuoteDocument[]
   userId        String?
   user          User?       @relation(fields: [userId], references: [id])
   customerId    String?
@@ -476,6 +502,23 @@ model OrderDocument {
   position Int               @default(0)
 
   @@index([orderId])
+}
+
+/**
+ * A file the customer attached to a Quote (e.g. an equipment specification
+ * as PDF/XLSX/DOCX on the data-center B2B RFQ form) — uploaded to Vercel
+ * Blob, same storage and shape as ProductDocument/OrderDocument.
+ */
+model QuoteDocument {
+  id        String   @id @default(cuid())
+  quoteId   String
+  quote     Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  title     String
+  url       String
+  size      String?
+  createdAt DateTime @default(now())
+
+  @@index([quoteId])
 }
 
 model QuoteItem {
