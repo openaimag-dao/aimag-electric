@@ -72,9 +72,16 @@ export interface QuoteListRow {
   company: string;
   /** The company this quote was confidently resolved to (via the submitter's account), if any — distinct from the free-text `company` label above. */
   resolvedCompanyName: string | null;
+  bin: string | null;
   name: string;
   phone: string;
   email: string | null;
+  region: string | null;
+  /** Comma-joined category labels, set only by a multi-category B2B form (e.g. data-center RFQ). */
+  categories: string | null;
+  /** e.g. "DATA_CENTER_B2B" — null for the regular cart/product-page quote flow. */
+  requestType: string | null;
+  documents: { id: string; title: string; url: string; size: string | null }[];
   message: string;
   status: string;
   createdAt: string;
@@ -119,6 +126,7 @@ export function QuotesManager({
   const [pending, setPending] = React.useState<string | null>(null);
   const [creatingOrder, setCreatingOrder] = React.useState(false);
   const [reviewOnly, setReviewOnly] = React.useState(false);
+  const [dataCenterOnly, setDataCenterOnly] = React.useState(false);
   const [editingPriceId, setEditingPriceId] = React.useState<string | null>(null);
   const [priceDraft, setPriceDraft] = React.useState("");
   const [savingPrice, setSavingPrice] = React.useState(false);
@@ -205,14 +213,16 @@ export function QuotesManager({
   }
 
   const reviewCount = rows.filter((r) => r.items.some((i) => i.note)).length;
+  const dataCenterCount = rows.filter((r) => r.requestType === "DATA_CENTER_B2B").length;
 
   const filtered = rows
     .filter((r) =>
-      `${r.company} ${r.name} ${r.phone} ${r.email ?? ""} ${r.title ?? ""} ${r.sourcePath ?? ""} ${r.utmSource ?? ""} ${r.utmMedium ?? ""} ${r.utmCampaign ?? ""}`
+      `${r.company} ${r.name} ${r.phone} ${r.email ?? ""} ${r.title ?? ""} ${r.sourcePath ?? ""} ${r.utmSource ?? ""} ${r.utmMedium ?? ""} ${r.utmCampaign ?? ""} ${r.bin ?? ""} ${r.region ?? ""} ${r.categories ?? ""}`
         .toLowerCase()
         .includes(query.toLowerCase().trim())
     )
     .filter((r) => !reviewOnly || r.items.some((i) => i.note))
+    .filter((r) => !dataCenterOnly || r.requestType === "DATA_CENTER_B2B")
     .filter((r) =>
       waitingOnly ? isWaiting(r) : statusFilter === "ALL" || r.status === statusFilter
     )
@@ -355,16 +365,27 @@ export function QuotesManager({
 
       <CampaignSummary rows={rows} />
 
-      {reviewCount > 0 && (
-        <Button
-          variant={reviewOnly ? "signal" : "outline"}
-          size="sm"
-          onClick={() => setReviewOnly((v) => !v)}
-        >
-          <AlertTriangle className="size-4" />
-          {reviewOnly ? "Показать все" : `Требуют проверки (${reviewCount})`}
-        </Button>
-      )}
+      <div className="flex flex-wrap gap-2">
+        {reviewCount > 0 && (
+          <Button
+            variant={reviewOnly ? "signal" : "outline"}
+            size="sm"
+            onClick={() => setReviewOnly((v) => !v)}
+          >
+            <AlertTriangle className="size-4" />
+            {reviewOnly ? "Показать все" : `Требуют проверки (${reviewCount})`}
+          </Button>
+        )}
+        {dataCenterCount > 0 && (
+          <Button
+            variant={dataCenterOnly ? "signal" : "outline"}
+            size="sm"
+            onClick={() => setDataCenterOnly((v) => !v)}
+          >
+            {dataCenterOnly ? "Показать все" : `Дата-центры (${dataCenterCount})`}
+          </Button>
+        )}
+      </div>
 
       <div className="rounded-xl border border-border bg-card">
         <Table>
@@ -389,6 +410,11 @@ export function QuotesManager({
                   >
                     {row.company}
                   </button>
+                  {row.requestType === "DATA_CENTER_B2B" && (
+                    <span className="ml-1.5 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700">
+                      ЦОД
+                    </span>
+                  )}
                   {isWaiting(row) && (
                     <p className="mt-1 text-xs text-amber-700">Новая больше суток</p>
                   )}
@@ -497,10 +523,28 @@ export function QuotesManager({
               <span className="text-muted-foreground">Компания</span>
               <span className="font-medium text-primary">{viewing.company}</span>
             </div>
+            {viewing.bin && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">БИН</span>
+                <span className="text-primary">{viewing.bin}</span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="text-muted-foreground">Контакт</span>
               <span className="text-primary">{viewing.name}</span>
             </div>
+            {viewing.region && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Регион поставки</span>
+                <span className="text-primary">{viewing.region}</span>
+              </div>
+            )}
+            {viewing.categories && (
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">Категории</span>
+                <span className="text-right text-primary">{viewing.categories}</span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="text-muted-foreground">Телефон</span>
               <a href={`tel:${viewing.phone}`} className="text-signal-700">
@@ -716,6 +760,29 @@ export function QuotesManager({
                     </a>
                   </Button>
                 </div>
+              </div>
+            )}
+
+            {viewing.documents.length > 0 && (
+              <div className="pt-2">
+                <div className="mb-1 text-muted-foreground">
+                  Приложенные файлы ({viewing.documents.length})
+                </div>
+                <ul className="grid gap-1.5">
+                  {viewing.documents.map((d) => (
+                    <li key={d.id}>
+                      <a
+                        href={d.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-md border border-border bg-secondary/40 px-2.5 py-1.5 text-xs text-signal-700 hover:underline"
+                      >
+                        <Download className="size-3.5" /> {d.title}
+                        {d.size && <span className="text-muted-foreground">({d.size})</span>}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
 

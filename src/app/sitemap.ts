@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { unstable_cache } from "next/cache";
 
 import { industrialCablePages } from "@/config/industrial-cable-pages";
+import { dataCenterCategories } from "@/config/data-center";
 import { DELIVERY_CITIES } from "@/config/delivery-cities";
 import { siteConfig } from "@/config/site";
 import { productRepository, categoryRepository } from "@/server/repositories";
@@ -33,7 +34,9 @@ const SEO_LANDING_PAGES = [
   "/kabeli-sip",
   "/promyshlennye-kabeli",
   "/kalkulyator-secheniya-kabelya",
+  "/data-center",
   ...industrialCablePages.map(({ slug }) => `/promyshlennye-kabeli/${slug}`),
+  ...dataCenterCategories.map(({ slug }) => `/data-center/${slug}`),
   ...DELIVERY_CITIES.map(({ slug }) => `/dostavka/${slug}`),
 ];
 

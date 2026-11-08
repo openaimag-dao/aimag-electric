@@ -141,7 +141,17 @@ export const userFormSchema = z.object({
 });
 export type UserFormInput = z.infer<typeof userFormSchema>;
 
-export const quoteStatus = z.enum(["NEW", "IN_PROGRESS", "SENT", "WON", "LOST"]);
+export const quoteStatus = z.enum([
+  "NEW",
+  "IN_PROGRESS",
+  "SENT",
+  "WON",
+  "LOST",
+  "SUPPLIER_REQUEST",
+  "PROPOSAL_PREP",
+  "NEGOTIATION",
+  "CLOSED",
+]);
 export type QuoteStatusValue = z.infer<typeof quoteStatus>;
 
 export const orderStatus = z.enum([

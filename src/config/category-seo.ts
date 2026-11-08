@@ -67,6 +67,7 @@ export const categorySeo: Record<string, CategorySeo> = {
       { label: "Изоляторы и арматура ВЛ", href: "/catalog?cat=izolyatory-armatura" },
       { label: "Кабель и провод", href: "/catalog?cat=kabel-provod" },
       { label: "Электромонтаж под ключ", href: "/elektromontazh" },
+      { label: "Оборудование для дата-центров", href: "/data-center/sistemy-elektrosnabzheniya" },
     ],
   },
   "izolyatory-armatura": {
@@ -185,6 +186,7 @@ export const categorySeo: Record<string, CategorySeo> = {
     relatedPages: [
       { label: "Кабели ВВГ / АВВГ", href: "/kabeli-vvg-avvg" },
       { label: "Изоляторы и арматура ВЛ", href: "/catalog?cat=izolyatory-armatura" },
+      { label: "Оборудование для дата-центров", href: "/data-center/kabelnaya-produktsiya" },
     ],
   },
 
@@ -250,6 +252,7 @@ export const categorySeo: Record<string, CategorySeo> = {
       { label: "Кабели ВВГ / АВВГ", href: "/kabeli-vvg-avvg" },
       { label: "Провод СИП", href: "/kabeli-sip" },
       { label: "Кабельная арматура", href: "/catalog?cat=kabelnaya-armatura" },
+      { label: "Оборудование для дата-центров", href: "/data-center/kabelnaya-produktsiya" },
     ],
   },
 
@@ -308,6 +311,7 @@ export const categorySeo: Record<string, CategorySeo> = {
     relatedPages: [
       { label: "Коммутационная аппаратура", href: "/catalog?cat=kommutatsiya" },
       { label: "Щиты и корпуса", href: "/catalog?cat=shchity-korpusa" },
+      { label: "Оборудование для дата-центров", href: "/data-center/sistemy-elektrosnabzheniya" },
     ],
   },
 
@@ -357,6 +361,7 @@ export const categorySeo: Record<string, CategorySeo> = {
     relatedPages: [
       { label: "Автоматические выключатели", href: "/catalog?cat=avtomaty" },
       { label: "Электроустановочные изделия", href: "/catalog?cat=elektroustanovochnye" },
+      { label: "Оборудование для дата-центров", href: "/data-center/rezervnoe-elektrosnabzhenie" },
     ],
   },
 
@@ -494,6 +499,7 @@ export const categorySeo: Record<string, CategorySeo> = {
     relatedPages: [
       { label: "Автоматические выключатели", href: "/catalog?cat=avtomaty" },
       { label: "Коммутационная аппаратура", href: "/catalog?cat=kommutatsiya" },
+      { label: "Оборудование для дата-центров", href: "/data-center/sistemy-elektrosnabzheniya" },
     ],
   },
 
@@ -538,6 +544,7 @@ export const categorySeo: Record<string, CategorySeo> = {
     relatedPages: [
       { label: "КИП (приборы учёта и контроля)", href: "/catalog?cat=kip" },
       { label: "Защита и реле", href: "/catalog?cat=zashchita" },
+      { label: "Оборудование для дата-центров", href: "/data-center/sistemy-elektrosnabzheniya" },
     ],
   },
 
@@ -582,6 +589,7 @@ export const categorySeo: Record<string, CategorySeo> = {
     relatedPages: [
       { label: "Трансформаторы", href: "/catalog?cat=transformatory" },
       { label: "Электроустановочные изделия", href: "/catalog?cat=elektroustanovochnye" },
+      { label: "Оборудование для дата-центров", href: "/data-center/avtomatika-i-monitoring" },
     ],
   },
 
@@ -884,6 +892,7 @@ export const categorySeo: Record<string, CategorySeo> = {
       { label: "Щиты и корпуса", href: "/catalog?cat=shchity-korpusa" },
       { label: "Крепёж", href: "/catalog?cat=krepezh" },
       { label: "Кабель и провод", href: "/catalog?cat=kabel-provod" },
+      { label: "Оборудование для дата-центров", href: "/data-center/sistemy-elektrosnabzheniya" },
     ],
   },
 };
