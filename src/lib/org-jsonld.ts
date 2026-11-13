@@ -32,6 +32,30 @@ export function buildOrganizationJsonLd() {
     },
   };
 
+  // Separate LocalBusiness entity (rather than retyping Organization itself)
+  // for the real Shymkent office/warehouse — openingHoursSpecification and a
+  // place-bound address are schema.org properties of LocalBusiness, not
+  // Organization. Uses only facts already published elsewhere on the site
+  // (siteConfig.contacts): real street address and real working hours.
+  const localBusiness = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: siteConfig.name,
+    url: siteConfig.url,
+    telephone: siteConfig.contacts.phone,
+    email: siteConfig.contacts.email,
+    address: {
+      "@type": "PostalAddress",
+      ...siteConfig.contacts.address,
+    },
+    openingHoursSpecification: {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      opens: "09:00",
+      closes: "18:00",
+    },
+  };
+
   const website = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -48,5 +72,5 @@ export function buildOrganizationJsonLd() {
     },
   };
 
-  return { organization, website };
+  return { organization, website, localBusiness };
 }
