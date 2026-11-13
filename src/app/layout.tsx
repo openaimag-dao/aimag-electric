@@ -93,7 +93,7 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const { organization, website } = buildOrganizationJsonLd();
+  const { organization, website, localBusiness } = buildOrganizationJsonLd();
   const locale = await getLocale();
   const dict = getDictionary(locale);
   const navCategories = await homeService.navCategories();
@@ -107,6 +107,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(website) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusiness) }}
         />
         <SiteAnalytics />
         <Toaster position="top-center" />
