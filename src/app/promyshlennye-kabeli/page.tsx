@@ -5,6 +5,7 @@ import { industrialCables, industrialCableRequest } from "@/config/industrial-ca
 import { industrialCablePages } from "@/config/industrial-cable-pages";
 import { siteConfig } from "@/config/site";
 import { SeoBreadcrumbs } from "@/components/common/seo-breadcrumbs";
+import { buildFaqJsonLd } from "@/lib/faq-jsonld";
 
 const title = "Промышленные кабели — АСБл, КВВГ, КГ, силовые и бронированные";
 const description =
@@ -16,9 +17,34 @@ export const metadata: Metadata = {
   openGraph: { title, description, type: "website", url: `${siteConfig.url}/promyshlennye-kabeli` },
 };
 
+const faq = [
+  {
+    q: "Какие марки промышленных кабелей можно заказать?",
+    a: `Работаем с марками ${industrialCables.map((g) => g.mark).join(", ")}. Для каждой марки доступен подбор по числу жил и сечению.`,
+  },
+  {
+    q: "Как узнать цену и срок поставки?",
+    a: "Цена, доступность, изготовитель, точное исполнение и срок поставки подтверждаются по каждой заявке — укажите марку, сечение и метраж, и менеджер рассчитает предложение.",
+  },
+  {
+    q: "Можно заказать сечение или марку, которых нет в списке?",
+    a: "Да, размеры на странице — стартовая подборка для запроса. Нужное сечение и напряжение определяются проектом, можно запросить другие размеры и марки.",
+  },
+  {
+    q: "Можно заказать кабель с муфтами, документами или монтажом?",
+    a: "Да, укажите это в заявке вместе с метражом по каждой позиции, городом и желаемым сроком — состав комплекта и возможность поставки проверим до согласования заказа.",
+  },
+];
+
 export default function IndustrialCablesPage() {
   return (
     <div className="container py-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(buildFaqJsonLd(faq)).replace(/</g, "\\u003c"),
+        }}
+      />
       <SeoBreadcrumbs
         items={[
           { name: "Главная", href: "/" },
