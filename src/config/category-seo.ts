@@ -836,7 +836,11 @@ export const categorySeo: Record<string, CategorySeo> = {
         a: "Для наружной установки обычно требуется корпус со степенью защиты не ниже IP54–IP55 — уточните условия эксплуатации (навес, открытое пространство, влажность) у менеджера для точного подбора.",
       },
     ],
-    relatedArticles: ["gofra-metallorukav-kabel-kanal", "dyubel-ili-anker-kak-vybrat"],
+    relatedArticles: [
+      "gofra-metallorukav-kabel-kanal",
+      "dyubel-ili-anker-kak-vybrat",
+      "mednaya-ili-alyuminievaya-shina",
+    ],
     relatedPages: [
       { label: "Крепёж", href: "/catalog?cat=krepezh" },
       { label: "Шины и металлопрокат", href: "/catalog?cat=shiny-metall" },
@@ -891,7 +895,7 @@ export const categorySeo: Record<string, CategorySeo> = {
         a: "Поставка возможна мерными длинами по прайсу или под размер заказчика — уточните требуемую длину и количество у менеджера при оформлении заявки.",
       },
     ],
-    relatedArticles: [],
+    relatedArticles: ["mednaya-ili-alyuminievaya-shina"],
     relatedPages: [
       { label: "Щиты и корпуса", href: "/catalog?cat=shchity-korpusa" },
       { label: "Крепёж", href: "/catalog?cat=krepezh" },
