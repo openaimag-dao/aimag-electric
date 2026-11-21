@@ -499,7 +499,7 @@ export const categorySeo: Record<string, CategorySeo> = {
         a: "Нет, оно дополняет защиту: отключает нагрузку при отклонении напряжения за пределы (например, при обрыве нуля), тогда как автомат реагирует на ток перегрузки и КЗ.",
       },
     ],
-    relatedArticles: [],
+    relatedArticles: ["opn-ogranichitel-perenapryazheniya"],
     relatedPages: [
       { label: "Автоматические выключатели", href: "/catalog?cat=avtomaty" },
       { label: "Коммутационная аппаратура", href: "/catalog?cat=kommutatsiya" },
@@ -544,7 +544,7 @@ export const categorySeo: Record<string, CategorySeo> = {
         a: "Ходовые мощности и классы напряжения уточняйте у менеджера — срок поставки для трансформаторов обычно больше, чем для складских позиций, и называется сразу при запросе КП.",
       },
     ],
-    relatedArticles: [],
+    relatedArticles: ["opn-ogranichitel-perenapryazheniya"],
     relatedPages: [
       { label: "КИП (приборы учёта и контроля)", href: "/catalog?cat=kip" },
       { label: "Защита и реле", href: "/catalog?cat=zashchita" },

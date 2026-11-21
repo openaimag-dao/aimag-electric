@@ -31,6 +31,7 @@ export const blogTopics = [
       "uzo-vs-difavtomat",
       "avtomaticheskie-vyklyuchateli-b-c-d",
       "kontaktor-ili-magnitnyy-puskatel",
+      "opn-ogranichitel-perenapryazheniya",
     ],
   },
   {
