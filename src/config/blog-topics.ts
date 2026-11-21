@@ -45,7 +45,11 @@ export const blogTopics = [
     title: "Закупка и монтаж",
     description: "Подготовка спецификации и общего запроса на материалы и работы.",
     catalog: { href: "/elektromontazh", label: "Обсудить электромонтаж под ключ" },
-    slugs: ["komplektaciya-obekta-elektromontazh-pod-klyuch", "zakupki-samruk-kazyna"],
+    slugs: [
+      "komplektaciya-obekta-elektromontazh-pod-klyuch",
+      "zakupki-samruk-kazyna",
+      "emal-pf-115-podgotovka-metalla-i-raskhod",
+    ],
   },
 ];
 
