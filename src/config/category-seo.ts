@@ -361,7 +361,7 @@ export const categorySeo: Record<string, CategorySeo> = {
         a: "Да, реле управления и таймеры — с разным числом переключающих контактов и диапазонами выдержки времени. Точный ассортимент под вашу схему уточняйте у менеджера.",
       },
     ],
-    relatedArticles: ["kontaktor-ili-magnitnyy-puskatel"],
+    relatedArticles: ["kontaktor-ili-magnitnyy-puskatel", "svetosignalnaya-armatura-kak-vybrat"],
     relatedPages: [
       { label: "Автоматические выключатели", href: "/catalog?cat=avtomaty" },
       { label: "Электроустановочные изделия", href: "/catalog?cat=elektroustanovochnye" },
@@ -689,7 +689,7 @@ export const categorySeo: Record<string, CategorySeo> = {
         a: "Да, светильники со встроенным аккумулятором для автономной работы при пропадании основного питания — для путей эвакуации по нормам пожарной безопасности.",
       },
     ],
-    relatedArticles: [],
+    relatedArticles: ["svetosignalnaya-armatura-kak-vybrat"],
     relatedPages: [
       { label: "Электроустановочные изделия", href: "/catalog?cat=elektroustanovochnye" },
       { label: "Автоматические выключатели", href: "/catalog?cat=avtomaty" },

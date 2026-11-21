@@ -36,6 +36,7 @@ export const blogTopics = [
       "mednaya-ili-alyuminievaya-shina",
       "pryamoe-ili-transformatornoe-podklyuchenie-schetchika",
       "kompensatsiya-reaktivnoy-moshchnosti-kondensatory",
+      "svetosignalnaya-armatura-kak-vybrat",
     ],
   },
   {
