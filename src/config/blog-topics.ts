@@ -35,6 +35,7 @@ export const blogTopics = [
       "dyubel-ili-anker-kak-vybrat",
       "mednaya-ili-alyuminievaya-shina",
       "pryamoe-ili-transformatornoe-podklyuchenie-schetchika",
+      "kompensatsiya-reaktivnoy-moshchnosti-kondensatory",
     ],
   },
   {

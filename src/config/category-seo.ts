@@ -547,6 +547,7 @@ export const categorySeo: Record<string, CategorySeo> = {
     relatedArticles: [
       "opn-ogranichitel-perenapryazheniya",
       "pryamoe-ili-transformatornoe-podklyuchenie-schetchika",
+      "kompensatsiya-reaktivnoy-moshchnosti-kondensatory",
     ],
     relatedPages: [
       { label: "КИП (приборы учёта и контроля)", href: "/catalog?cat=kip" },
@@ -640,7 +641,7 @@ export const categorySeo: Record<string, CategorySeo> = {
         a: "Да, оба варианта — под гипсокартон, бетон и открытую проводку.",
       },
     ],
-    relatedArticles: [],
+    relatedArticles: ["kompensatsiya-reaktivnoy-moshchnosti-kondensatory"],
     relatedPages: [
       { label: "Освещение", href: "/catalog?cat=osveshchenie" },
       { label: "Коммутационная аппаратура", href: "/catalog?cat=kommutatsiya" },
