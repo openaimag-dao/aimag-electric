@@ -544,7 +544,10 @@ export const categorySeo: Record<string, CategorySeo> = {
         a: "Ходовые мощности и классы напряжения уточняйте у менеджера — срок поставки для трансформаторов обычно больше, чем для складских позиций, и называется сразу при запросе КП.",
       },
     ],
-    relatedArticles: ["opn-ogranichitel-perenapryazheniya"],
+    relatedArticles: [
+      "opn-ogranichitel-perenapryazheniya",
+      "pryamoe-ili-transformatornoe-podklyuchenie-schetchika",
+    ],
     relatedPages: [
       { label: "КИП (приборы учёта и контроля)", href: "/catalog?cat=kip" },
       { label: "Защита и реле", href: "/catalog?cat=zashchita" },
@@ -589,7 +592,7 @@ export const categorySeo: Record<string, CategorySeo> = {
         a: "Да, часть моделей поддерживает передачу данных для диспетчеризации — уточняйте конкретный функционал по модели у менеджера.",
       },
     ],
-    relatedArticles: [],
+    relatedArticles: ["pryamoe-ili-transformatornoe-podklyuchenie-schetchika"],
     relatedPages: [
       { label: "Трансформаторы", href: "/catalog?cat=transformatory" },
       { label: "Электроустановочные изделия", href: "/catalog?cat=elektroustanovochnye" },
