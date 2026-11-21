@@ -30,6 +30,7 @@ export const blogTopics = [
       "izolyatory-vl-shtyrevye-i-podvesnye",
       "uzo-vs-difavtomat",
       "avtomaticheskie-vyklyuchateli-b-c-d",
+      "kontaktor-ili-magnitnyy-puskatel",
     ],
   },
   {

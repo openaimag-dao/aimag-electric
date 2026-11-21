@@ -307,7 +307,11 @@ export const categorySeo: Record<string, CategorySeo> = {
         a: "Ходовые номиналы 6–63 А по характеристикам B и C держим на складе в Шымкенте; менее ходовые позиции, характеристику D и многополюсные модели — под заказ, срок уточняет менеджер при запросе КП.",
       },
     ],
-    relatedArticles: ["avtomaticheskie-vyklyuchateli-b-c-d", "uzo-vs-difavtomat"],
+    relatedArticles: [
+      "avtomaticheskie-vyklyuchateli-b-c-d",
+      "uzo-vs-difavtomat",
+      "kontaktor-ili-magnitnyy-puskatel",
+    ],
     relatedPages: [
       { label: "Коммутационная аппаратура", href: "/catalog?cat=kommutatsiya" },
       { label: "Щиты и корпуса", href: "/catalog?cat=shchity-korpusa" },
@@ -357,7 +361,7 @@ export const categorySeo: Record<string, CategorySeo> = {
         a: "Да, реле управления и таймеры — с разным числом переключающих контактов и диапазонами выдержки времени. Точный ассортимент под вашу схему уточняйте у менеджера.",
       },
     ],
-    relatedArticles: [],
+    relatedArticles: ["kontaktor-ili-magnitnyy-puskatel"],
     relatedPages: [
       { label: "Автоматические выключатели", href: "/catalog?cat=avtomaty" },
       { label: "Электроустановочные изделия", href: "/catalog?cat=elektroustanovochnye" },
