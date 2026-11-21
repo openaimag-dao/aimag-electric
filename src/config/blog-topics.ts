@@ -34,6 +34,7 @@ export const blogTopics = [
       "opn-ogranichitel-perenapryazheniya",
       "dyubel-ili-anker-kak-vybrat",
       "mednaya-ili-alyuminievaya-shina",
+      "pryamoe-ili-transformatornoe-podklyuchenie-schetchika",
     ],
   },
   {
