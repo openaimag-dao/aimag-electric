@@ -33,6 +33,7 @@ export const blogTopics = [
       "kontaktor-ili-magnitnyy-puskatel",
       "opn-ogranichitel-perenapryazheniya",
       "dyubel-ili-anker-kak-vybrat",
+      "mednaya-ili-alyuminievaya-shina",
     ],
   },
   {
