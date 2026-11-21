@@ -32,6 +32,7 @@ export const blogTopics = [
       "avtomaticheskie-vyklyuchateli-b-c-d",
       "kontaktor-ili-magnitnyy-puskatel",
       "opn-ogranichitel-perenapryazheniya",
+      "dyubel-ili-anker-kak-vybrat",
     ],
   },
   {
