@@ -407,7 +407,7 @@ export const categorySeo: Record<string, CategorySeo> = {
         a: "И то и другое — мелким оптом поштучно и упаковками для объектных закупок.",
       },
     ],
-    relatedArticles: [],
+    relatedArticles: ["emal-pf-115-podgotovka-metalla-i-raskhod"],
     relatedPages: [
       { label: "Кабельная арматура", href: "/catalog?cat=kabelnaya-armatura" },
       { label: "Крепёж", href: "/catalog?cat=krepezh" },
@@ -844,6 +844,7 @@ export const categorySeo: Record<string, CategorySeo> = {
       "gofra-metallorukav-kabel-kanal",
       "dyubel-ili-anker-kak-vybrat",
       "mednaya-ili-alyuminievaya-shina",
+      "emal-pf-115-podgotovka-metalla-i-raskhod",
     ],
     relatedPages: [
       { label: "Крепёж", href: "/catalog?cat=krepezh" },
