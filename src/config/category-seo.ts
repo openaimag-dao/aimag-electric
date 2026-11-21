@@ -734,7 +734,7 @@ export const categorySeo: Record<string, CategorySeo> = {
         a: "Да, стандартные знаки и плакаты по электробезопасности — под нестандартную маркировку уточняйте возможность у менеджера.",
       },
     ],
-    relatedArticles: [],
+    relatedArticles: ["dielektricheskie-perchatki-klassy-i-ispytaniya"],
     relatedPages: [
       { label: "Инструмент и расходники", href: "/catalog?cat=instrument" },
       { label: "Крепёж", href: "/catalog?cat=krepezh" },
