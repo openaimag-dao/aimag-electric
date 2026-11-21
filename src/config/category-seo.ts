@@ -449,7 +449,7 @@ export const categorySeo: Record<string, CategorySeo> = {
         a: "Да, размерный ряд под разные диаметры — от тонкого монтажного провода до силового кабеля большого сечения.",
       },
     ],
-    relatedArticles: [],
+    relatedArticles: ["dyubel-ili-anker-kak-vybrat"],
     relatedPages: [
       { label: "Щиты и корпуса", href: "/catalog?cat=shchity-korpusa" },
       { label: "Инструмент и расходники", href: "/catalog?cat=instrument" },
@@ -836,7 +836,7 @@ export const categorySeo: Record<string, CategorySeo> = {
         a: "Для наружной установки обычно требуется корпус со степенью защиты не ниже IP54–IP55 — уточните условия эксплуатации (навес, открытое пространство, влажность) у менеджера для точного подбора.",
       },
     ],
-    relatedArticles: ["gofra-metallorukav-kabel-kanal"],
+    relatedArticles: ["gofra-metallorukav-kabel-kanal", "dyubel-ili-anker-kak-vybrat"],
     relatedPages: [
       { label: "Крепёж", href: "/catalog?cat=krepezh" },
       { label: "Шины и металлопрокат", href: "/catalog?cat=shiny-metall" },
