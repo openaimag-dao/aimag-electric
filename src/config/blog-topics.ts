@@ -37,6 +37,7 @@ export const blogTopics = [
       "pryamoe-ili-transformatornoe-podklyuchenie-schetchika",
       "kompensatsiya-reaktivnoy-moshchnosti-kondensatory",
       "svetosignalnaya-armatura-kak-vybrat",
+      "dielektricheskie-perchatki-klassy-i-ispytaniya",
     ],
   },
   {
