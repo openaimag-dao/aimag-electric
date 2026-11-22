@@ -14,8 +14,14 @@ function formatDate(iso: string) {
   });
 }
 
+const LATEST_COUNT = 6;
+
 /** Latest articles — positions the company as an engineering authority. */
 export function Articles() {
+  const latestArticles = [...articles]
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, LATEST_COUNT);
+
   return (
     <section className="border-b border-border bg-background py-20 md:py-24">
       <div className="container">
@@ -34,7 +40,7 @@ export function Articles() {
         </div>
 
         <div className="mt-12 grid gap-6 md:grid-cols-3">
-          {articles.map((article) => (
+          {latestArticles.map((article) => (
             <Link
               key={article.slug}
               href={`/blog/${article.slug}`}
