@@ -3,10 +3,10 @@ import type { Dictionary } from "@/i18n/types";
 export const ru: Dictionary = {
   nav: [
     { label: "Каталог", href: "/catalog" },
-    { label: "Оборудование для ЦОД", href: "/data-center" },
+    { label: "Дата-центры", href: "/data-center" },
     { label: "Электромонтаж", href: "/elektromontazh" },
     { label: "Блог", href: "/blog" },
-    { label: "О компании", href: "/o-kompanii" },
+    { label: "Компания", href: "/o-kompanii" },
     { label: "Доставка", href: "/dostavka" },
     { label: "Контакты", href: "/kontakty" },
   ],
