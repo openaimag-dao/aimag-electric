@@ -116,7 +116,7 @@ export function renderQuoteHtml(quote: QuotePdfData): string {
       <div class="brand">${esc(siteConfig.name)}</div>
       <div class="brand-sub">${esc(siteConfig.description)}</div>
       <div class="brand-sub">${esc(siteConfig.contacts.phone)} · ${esc(siteConfig.contacts.email)}</div>
-      <div class="brand-sub">${esc(siteConfig.contacts.city)}</div>
+      <div class="brand-sub">г. ${esc(siteConfig.contacts.address.addressLocality)}, ${esc(siteConfig.contacts.address.streetAddress)}</div>
     </div>
     <div>
       <div class="doc-title">Коммерческое предложение</div>
