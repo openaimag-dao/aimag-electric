@@ -144,6 +144,7 @@ export function DataCenterRequestForm({
     setSelectedCategories([]);
     setSubmitted(true);
     track("data_center_quote_submit");
+    track("generate_lead", { form: "data_center", page_path: window.location.pathname });
     onSuccess?.();
   }
 

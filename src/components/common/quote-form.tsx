@@ -94,6 +94,8 @@ export function QuoteForm({
     reset();
     setSubmitted(true);
     track("quote_submit");
+    // GA4 recommended lead event — imported into Google Ads as the primary conversion.
+    track("generate_lead", { form: "quote", page_path: window.location.pathname });
     onSuccess?.();
   }
 
