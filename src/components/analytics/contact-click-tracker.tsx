@@ -28,7 +28,11 @@ export function ContactClickTracker() {
               : null;
       if (!method) return;
       // Do not send phone numbers, message text, email addresses or URL queries.
-      track("contact_click", { method, page_path: window.location.pathname });
+      const page_path = window.location.pathname;
+      track("contact_click", { method, page_path });
+      // Dedicated per-channel events: GA4 key events / Google Ads conversions and
+      // Metrika goals are matched by event name, so each channel needs its own.
+      track(`${method}_click`, { page_path });
     }
 
     document.addEventListener("click", onClick);
