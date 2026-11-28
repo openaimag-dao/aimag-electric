@@ -15,6 +15,10 @@ export const metadata: Metadata = {
   description:
     "Электротехническое оборудование, кабельная продукция, системы распределения питания и инженерная инфраструктура для дата-центров. Поставки по Казахстану с приоритетом Шымкента, Алматы и Астаны.",
   alternates: { canonical: path },
+  // Temporarily out of nav/sitemap and deindexed — this section is moving to
+  // its own domain; the route stays live (direct links, in-progress quotes)
+  // but shouldn't be crawled/indexed under aimag.kz in the meantime.
+  robots: { index: false, follow: false },
   openGraph: {
     title: "Оборудование для дата-центров — комплексные поставки",
     description:
