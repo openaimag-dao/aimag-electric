@@ -176,7 +176,6 @@ export default function ElectricalInstallationPage() {
           <Link href="/catalog?cat=avtomaty">Автоматические выключатели</Link>
           <Link href="/catalog?cat=osveshchenie">Освещение</Link>
           <Link href="/promyshlennye-kabeli">Промышленные кабели по маркам</Link>
-          <Link href="/data-center">Оборудование для дата-центров</Link>
         </div>
       </div>
 

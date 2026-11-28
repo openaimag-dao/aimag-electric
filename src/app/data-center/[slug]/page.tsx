@@ -30,6 +30,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: category.metaTitle,
     description: category.metaDescription,
     alternates: { canonical: path },
+    // Temporarily out of nav/sitemap and deindexed — this section is moving
+    // to its own domain; see /data-center/page.tsx for the same note.
+    robots: { index: false, follow: false },
     openGraph: {
       title: category.metaTitle,
       description: category.metaDescription,
