@@ -48,7 +48,8 @@ export function Footer() {
             </li>
             <li className="flex items-center gap-2.5">
               <MapPin className="size-4 text-signal" />
-              {siteConfig.contacts.city}
+              г. {siteConfig.contacts.address.addressLocality},{" "}
+              {siteConfig.contacts.address.streetAddress}
             </li>
           </ul>
         </div>
